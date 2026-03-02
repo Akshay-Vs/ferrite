@@ -39,7 +39,7 @@ async function bootstrap() {
 		next();
 	});
 
-	if (process.env.ENABLE_SWAGGER ?? process.env.NODE_ENV !== 'PRODUCTION') {
+	if (process.env.ENABLE_SWAGGER || process.env.NODE_ENV !== 'production') {
 		setupSwagger(app);
 	}
 
@@ -51,7 +51,7 @@ void (async (): Promise<void> => {
 	try {
 		await bootstrap();
 		logger.log(
-			`Server Started in ${process.env.NODE_ENV ?? 'PRODUCTION'} mode`
+			`Server Started in ${process.env.NODE_ENV ?? 'production'} mode`
 		);
 	} catch (error) {
 		logger.error(error);
