@@ -21,7 +21,10 @@ const logger = new NestLogger('Bootstrap');
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
+	app.enableShutdownHooks();
+
 	app.use(helmet());
+
 	app.enableCors({
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 		origin: ORIGIN,
@@ -35,7 +38,9 @@ async function bootstrap() {
 		next();
 	});
 
-	setupSwagger(app);
+	if (process.env.ENABLE_SWAGGER ?? process.env.NODE_ENV !== 'PRODUCTION') {
+		setupSwagger(app);
+	}
 
 	await app.listen(PORT);
 	NestLogger.log(`Application Port: ${PORT}`, '');
