@@ -3,7 +3,10 @@ import postgres from 'postgres';
 import * as schema from './schema';
 
 export const DB = Symbol('DB');
+export const DB_CLIENT = Symbol('DB_CLIENT');
 export const SUBSCRIBER = Symbol('SUBSCRIBER');
+export const SUBSCRIBER_CLIENT = Symbol('SUBSCRIBER_CLIENT');
+export const DB_POOL = Symbol('DB_POOL');
 
 export function createPool(databaseUrl: string) {
 	return postgres(databaseUrl, {
@@ -22,6 +25,7 @@ export function createSubscriber(databaseUrl: string) {
 }
 
 export function createDrizzle(databaseUrl: string) {
-	const pool = createPool(databaseUrl);
-	return drizzle(pool, { schema });
+	const client = createPool(databaseUrl);
+	const db = drizzle(client, { schema });
+	return { db, client };
 }
