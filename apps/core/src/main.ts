@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { registerShutdownHook } from './libs/register-shutdown';
 import { setupSwagger } from './swagger';
 
 const PORT = process.env.PORT ?? 4000;
@@ -21,7 +22,7 @@ const logger = new NestLogger('Bootstrap');
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
-	app.enableShutdownHooks();
+	registerShutdownHook(app);
 
 	app.use(helmet());
 
