@@ -1,8 +1,59 @@
+import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { registerShutdownHook } from './libs/register-shutdown';
+import { setupSwagger } from './swagger';
+
+const PORT = process.env.PORT ?? 4000;
+const VERSION = process.env.VERSION ?? 'v1';
+const ORIGIN = process.env.ORIGIN_URL?.trim()
+	? process.env.ORIGIN_URL.trim().split(/\s+/)
+	: [];
+
+NestLogger.debug(
+	`Using env: ${JSON.stringify({ port: PORT, origin: ORIGIN }, null, 2)}`,
+	'GLOBAL'
+);
+
+const logger = new NestLogger('Bootstrap');
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
-	await app.listen(process.env.PORT ?? 3000);
+
+	registerShutdownHook(app);
+
+	app.use(helmet());
+
+	app.enableCors({
+		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+		origin: ORIGIN,
+		credentials: true,
+	});
+
+	app.setGlobalPrefix(VERSION);
+
+	app.use((req: Request, _res: Response, next: NextFunction) => {
+		logger.debug(`Request: ${req.method} ${req.path} received`);
+		next();
+	});
+
+	if (process.env.ENABLE_SWAGGER || process.env.NODE_ENV !== 'production') {
+		setupSwagger(app);
+	}
+
+	await app.listen(PORT);
+	NestLogger.log(`Application Port: ${PORT}`, '');
 }
-bootstrap();
+
+void (async (): Promise<void> => {
+	try {
+		await bootstrap();
+		logger.log(
+			`Server Started in ${process.env.NODE_ENV ?? 'production'} mode`
+		);
+	} catch (error) {
+		logger.error(error);
+	}
+})();

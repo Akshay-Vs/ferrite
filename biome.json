@@ -69,8 +69,19 @@
 	"overrides": [
 		{
 			"includes": ["apps/core/**"],
+			"javascript": {
+				"parser": {
+					"unsafeParameterDecoratorsEnabled": true
+				}
+			},
 			"linter": {
 				"rules": {
+					"complexity": {
+						"noStaticOnlyClass": "off"
+					},
+					"style": {
+						"useImportType": "off"
+					},
 					"suspicious": {
 						"noExplicitAny": "off"
 					},
