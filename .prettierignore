@@ -1,6 +1,0 @@
-.yarn
-.next
-dist
-node_modules
-.changeset
-.turbo
