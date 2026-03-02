@@ -13,10 +13,10 @@ export class UsersService {
 	}
 
 	async findAll() {
-		return this.usersTable().limit(100);
+		return await this.usersTable().limit(100);
 	}
 
 	async findOne(id: string) {
-		return this.usersTable().where(eq(usersTable.id, id));
+		return await this.usersTable().where(eq(usersTable.id, id));
 	}
 }
