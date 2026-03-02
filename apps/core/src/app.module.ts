@@ -5,6 +5,8 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-error-filter';
+import { DatabaseModule } from './database/db.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
 	imports: [
@@ -27,6 +29,9 @@ import { HttpExceptionFilter } from './common/filters/http-error-filter';
 		ConfigModule.forRoot({
 			isGlobal: true,
 		}),
+
+		DatabaseModule,
+		UsersModule,
 	],
 	controllers: [],
 	providers: [

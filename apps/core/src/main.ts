@@ -1,6 +1,6 @@
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import type { NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger';
@@ -31,9 +31,7 @@ async function bootstrap() {
 	app.setGlobalPrefix(VERSION);
 
 	app.use((req: Request, _res: Response, next: NextFunction) => {
-		logger.debug(
-			`Request: ${req.method} ${new URL(req.url).pathname} received`
-		);
+		logger.debug(`Request: ${req.method} ${req.path} received`);
 		next();
 	});
 
