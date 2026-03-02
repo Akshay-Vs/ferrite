@@ -1,0 +1,16 @@
+{
+	"workspaces": {
+		".": {
+			"entry": ["eslint.config.js", "commitlint.config.js"]
+		},
+		"apps/web": {
+			"entry": ["src/app/**/*.{ts,tsx}", "next.config.*"]
+		},
+		"apps/api": {
+			"entry": ["src/index.ts"]
+		},
+		"packages/utils": {
+			"entry": ["src/index.ts"]
+		}
+	}
+}

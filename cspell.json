@@ -1,0 +1,18 @@
+{
+	"version": "0.2",
+	"language": "en",
+	"words": [
+		"monorepo",
+		"turborepo",
+		"tsconfig",
+		"nextjs",
+		"pnpm",
+		"commitlint",
+		"changesets",
+		"husky",
+		"vitest",
+		"fastify",
+		"typecheck"
+	],
+	"ignorePaths": ["node_modules", "dist", ".next", "pnpm-lock.yaml", "*.lock"]
+}

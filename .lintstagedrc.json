@@ -1,0 +1,8 @@
+{
+	"*": ["bunx secretlint"],
+	"apps/**/*.{js,ts,jsx,tsx}": ["bunx eslint --config eslint.config.js --fix"],
+	"packages/**/*.{js,ts,jsx,tsx}": [
+		"bunx eslint --config eslint.config.js --fix"
+	],
+	"*.json": ["prettier --write"]
+}
