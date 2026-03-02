@@ -31,7 +31,9 @@ async function bootstrap() {
 	app.setGlobalPrefix(VERSION);
 
 	app.use((req: Request, _res: Response, next: NextFunction) => {
-		logger.debug(`Request: ${req.method} ${req.url} received`);
+		logger.debug(
+			`Request: ${req.method} ${new URL(req.url).pathname} received`
+		);
 		next();
 	});
 
