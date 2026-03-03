@@ -1,3 +1,4 @@
+import { CoreModule } from '@core/core.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -5,7 +6,6 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-error-filter';
-import { DatabaseModule } from './database/db.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -30,7 +30,7 @@ import { UsersModule } from './modules/users/users.module';
 			isGlobal: true,
 		}),
 
-		DatabaseModule,
+		CoreModule,
 		UsersModule,
 	],
 	controllers: [],
