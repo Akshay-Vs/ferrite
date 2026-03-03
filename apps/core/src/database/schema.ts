@@ -1,12 +1,7 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-
-export const usersTable = pgTable('users', {
-	id: uuid('id').primaryKey(),
-	name: text('name').notNull(),
-	email: text('email').notNull(),
-	createdAt: timestamp('created_at').notNull().defaultNow(),
-	updatedAt: timestamp('updated_at')
-		.notNull()
-		.defaultNow()
-		.$onUpdate(() => new Date()),
-});
+export * from './schema/auth.schema';
+export * from './schema/enum';
+export * from './schema/payment.schema';
+export * from './schema/preferences.schema';
+export * from './schema/relations';
+export * from './schema/role.schema';
+export * from './schema/user.schema';
