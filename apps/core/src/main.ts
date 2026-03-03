@@ -1,3 +1,4 @@
+import { AppLogger } from '@core/logger/logger.service';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NextFunction, Request, Response } from 'express';
@@ -20,10 +21,13 @@ NestLogger.debug(
 const logger = new NestLogger('Bootstrap');
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule, {
+		bufferLogs: true,
+	});
 
 	registerShutdownHook(app);
 
+	app.useLogger(app.get(AppLogger));
 	app.use(helmet());
 
 	app.enableCors({
