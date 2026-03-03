@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { userAuthProviders, userSessions } from './auth.schema';
+import { userAuthProviders } from './auth.schema';
 import { userPaymentMethods } from './payment.schema';
 import { userNotificationPreferences } from './preferences.schema';
 import {
@@ -18,7 +18,6 @@ import { userAddresses, userPhones, users } from './user.schema';
 export const usersRelations = relations(users, ({ many }) => ({
 	authProviders: many(userAuthProviders),
 	phones: many(userPhones),
-	sessions: many(userSessions),
 	notificationPreferences: many(userNotificationPreferences),
 	paymentMethods: many(userPaymentMethods),
 }));
@@ -42,13 +41,6 @@ export const userAuthProvidersRelations = relations(
 		}),
 	})
 );
-
-export const userSessionsRelations = relations(userSessions, ({ one }) => ({
-	user: one(users, {
-		fields: [userSessions.userId],
-		references: [users.id],
-	}),
-}));
 
 export const userPaymentMethodsRelations = relations(
 	userPaymentMethods,

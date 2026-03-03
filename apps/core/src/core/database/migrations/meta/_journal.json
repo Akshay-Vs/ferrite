@@ -8,6 +8,13 @@
 			"when": 1772553321606,
 			"tag": "0000_broken_jack_flag",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1772560383310,
+			"tag": "0001_redundant_jack_flag",
+			"breakpoints": true
 		}
 	]
 }

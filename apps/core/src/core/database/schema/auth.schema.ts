@@ -1,8 +1,6 @@
 import {
 	index,
-	inet,
 	pgTable,
-	text,
 	timestamp,
 	unique,
 	uuid,
@@ -41,37 +39,5 @@ export const userAuthProviders = pgTable(
 
 		// Fetch all providers linked to a user (for "connected accounts" settings page)
 		index('idx_auth_providers_user_id').on(t.userId),
-	]
-);
-
-// ─────────────────────────────────────────
-// SESSIONS
-// ─────────────────────────────────────────
-
-export const userSessions = pgTable(
-	'user_sessions',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		userId: uuid('user_id')
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
-		deviceType: varchar('device_type', { length: 50 }),
-		ipAddress: inet('ip_address'),
-		userAgent: text('user_agent'),
-		createdAt: timestamp('created_at', { withTimezone: true })
-			.notNull()
-			.defaultNow(),
-		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-	},
-	(t) => [
-		// "Show all active sessions" — used on every authenticated request
-		// and on the security settings page
-		index('idx_sessions_user_id').on(t.userId),
-
-		// Session expiry cleanup job: find and delete expired sessions efficiently
-		index('idx_sessions_expires_at').on(t.expiresAt),
-
-		// Security audit: find all sessions from a suspicious IP address
-		index('idx_sessions_ip_address').on(t.ipAddress),
 	]
 );
