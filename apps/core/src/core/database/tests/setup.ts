@@ -11,7 +11,7 @@ import postgres from 'postgres';
 import type { PsqlDB } from '../db.type';
 import * as schema from '../schema';
 
-let client: ReturnType<typeof postgres>;
+let client: ReturnType<typeof postgres> | undefined;
 let _db: PsqlDB;
 
 /** The Drizzle database instance used by all tests. */
@@ -36,7 +36,16 @@ export async function setupTestDB(): Promise<PsqlDB> {
 		throw new Error('DATABASE_URL is not set.');
 	}
 
-	client = postgres(cleanConnectionUrl(raw), {
+	const cleaned = cleanConnectionUrl(raw);
+
+	const dbName = new URL(cleaned).pathname.replace(/^\//, '');
+	if (!dbName || !/(^test$|_test$|-test$)/i.test(dbName)) {
+		throw new Error(
+			`Refusing to run DB tests against non-test database "${dbName}".`
+		);
+	}
+
+	client = postgres(cleaned, {
 		max: 1,
 		debug: false,
 		onnotice: () => {},
@@ -71,5 +80,7 @@ export async function cleanupTables(): Promise<void> {
  * Close the postgres connection. Call in `afterAll`.
  */
 export async function teardownTestDB(): Promise<void> {
+	if (!client) return;
 	await client.end();
+	client = undefined;
 }
