@@ -26,8 +26,8 @@
 			"@core/*": ["src/core/*"],
 			"@modules/*": ["src/modules/*"],
 			"@common/*": ["src/common/*"],
-			"@database/*": ["src/database/*"],
-			"@auth/*": ["src/auth/*"]
+			"@database/*": ["src/core/database/*"],
+			"@auth/*": ["src/modules/auth/*"]
 		}
 	}
 }
