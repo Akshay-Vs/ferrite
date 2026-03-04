@@ -44,7 +44,6 @@ export const users = pgTable(
 		deletedAt: timestamp('deleted_at', { withTimezone: true }),
 	},
 	(t) => [
-		index('idx_users_email').on(t.email),
 		index('idx_users_is_active').on(t.isActive),
 		index('idx_users_is_banned').on(t.isBanned),
 		index('idx_users_deleted_at')
@@ -77,7 +76,6 @@ export const userPhones = pgTable(
 	(t) => [
 		unique('uq_phone_country').on(t.countryCode, t.phone),
 		index('idx_phones_user_id').on(t.userId),
-		index('idx_phones_lookup').on(t.countryCode, t.phone),
 		uniqueIndex('idx_phones_default')
 			.on(t.userId)
 			.where(sql`is_default = true`),
