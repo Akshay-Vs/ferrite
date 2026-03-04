@@ -13,7 +13,9 @@ export const registerShutdownHook = (app: INestApplication) => {
 			.close()
 			.then(() => console.log('Application closed successfully.'))
 			.catch((e) => console.error('Error closing application:', e))
-			.finally(() => process.exit(1));
+			.finally(() =>
+				process.exit(reason === 'SIGINT' || reason === 'SIGTERM' ? 0 : 1)
+			);
 	};
 
 	app.enableShutdownHooks();
