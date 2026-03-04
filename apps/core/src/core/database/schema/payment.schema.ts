@@ -6,6 +6,7 @@ import {
 	index,
 	pgTable,
 	timestamp,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
@@ -24,7 +25,11 @@ export const userPaymentMethods = pgTable(
 			.notNull()
 			.references(() => users.id, { onDelete: 'cascade' }),
 		provider: paymentProviderEnum('provider').notNull(),
-		token: varchar('token', { length: 255 }).notNull(),
+		// Opaque provider reference (e.g. Stripe pm_xxx) — NOT a raw card token.
+		// Safe to store in plaintext; the provider holds the sensitive material.
+		providerPaymentMethodId: varchar('provider_payment_method_id', {
+			length: 255,
+		}).notNull(),
 		cardLast4: char('card_last4', { length: 4 }),
 		cardBrand: cardBrandEnum('card_brand'),
 		expiresAt: date('expires_at'),
@@ -37,9 +42,8 @@ export const userPaymentMethods = pgTable(
 		// Fetch saved cards at checkout — most frequent read on this table
 		index('idx_payment_methods_user_id').on(t.userId),
 
-		// Partial index: resolve the default card at checkout without
-		// scanning all saved cards — only indexes the one row that matters
-		index('idx_payment_methods_default')
+		// Unique partial: enforces one default payment method per user at the DB level
+		uniqueIndex('uq_payment_methods_one_default_per_user')
 			.on(t.userId)
 			.where(sql`is_default = true`),
 
