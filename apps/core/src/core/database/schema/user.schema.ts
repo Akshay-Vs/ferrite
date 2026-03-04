@@ -78,7 +78,9 @@ export const userPhones = pgTable(
 		unique('uq_phone_country').on(t.countryCode, t.phone),
 		index('idx_phones_user_id').on(t.userId),
 		index('idx_phones_lookup').on(t.countryCode, t.phone),
-		index('idx_phones_default').on(t.userId).where(sql`is_default = true`),
+		uniqueIndex('idx_phones_default')
+			.on(t.userId)
+			.where(sql`is_default = true`),
 	]
 );
 
