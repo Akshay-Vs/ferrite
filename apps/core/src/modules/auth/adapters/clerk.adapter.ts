@@ -29,9 +29,9 @@ export class ClerkAuthAdapter implements IAuthProvider, ISessionProvider {
 		private logger: AppLogger
 	) {}
 
-	private verify(token: string): Promise<ClerkTokenPayload> {
+	private async verify(token: string): Promise<ClerkTokenPayload> {
 		try {
-			return clerkVerifyToken(token, {
+			return await clerkVerifyToken(token, {
 				jwtKey: this.config.get('CLERK_JWT_KEY'),
 			});
 		} catch (e) {
