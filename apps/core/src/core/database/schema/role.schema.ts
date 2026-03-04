@@ -7,6 +7,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
@@ -123,8 +124,8 @@ export const staffMembers = pgTable(
 		index('idx_staff_user_id').on(t.userId),
 		index('idx_staff_role_id').on(t.roleId),
 		index('idx_staff_status').on(t.status),
-		// Partial: only the one owner row — tiny, fast
-		index('idx_staff_owner').on(t.isOwner).where(sql`is_owner = true`),
+		// Unique partial: enforces exactly one owner row at the DB level
+		uniqueIndex('uq_staff_one_owner').on(t.isOwner).where(sql`is_owner = true`),
 	]
 );
 
