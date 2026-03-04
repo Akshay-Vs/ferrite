@@ -7,5 +7,6 @@ import { RequestContextModule } from './request-context/request-context.module';
 @Global()
 @Module({
 	imports: [RequestContextModule, LoggerModule, ConfigModule, DatabaseModule],
+	exports: [RequestContextModule, LoggerModule, ConfigModule, DatabaseModule],
 })
 export class CoreModule {}
