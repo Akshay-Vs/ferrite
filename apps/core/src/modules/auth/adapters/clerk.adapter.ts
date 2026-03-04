@@ -69,9 +69,21 @@ export class ClerkAuthAdapter implements IAuthProvider, ISessionProvider {
 				lastActiveAt: new Date(session.lastActiveAt),
 				expireAt: new Date(session.expireAt),
 			};
-		} catch (e) {
-			this.logger.error(e);
-			throw new Error('Session not found');
+		} catch (e: unknown) {
+			const status =
+				typeof e === 'object' && e !== null && 'status' in e
+					? Number((e as { status?: number }).status)
+					: undefined;
+
+			if (status === 404) {
+				this.logger.error(`Session not found: ${sid}`);
+				throw new Error('Session not found');
+			}
+
+			this.logger.error(
+				`Something went wrong: unable to fetch session: ${sid}`
+			);
+			throw new Error('Unable to fetch session');
 		}
 	}
 }
