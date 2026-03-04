@@ -31,9 +31,8 @@ export class ClerkAuthAdapter implements IAuthProvider, ISessionProvider {
 
 	private async verify(token: string): Promise<ClerkTokenPayload> {
 		try {
-			return await clerkVerifyToken(token, {
-				jwtKey: this.config.get('CLERK_JWT_KEY'),
-			});
+			const jwtKey = this.config.getOrThrow<string>('CLERK_JWT_KEY');
+			return await clerkVerifyToken(token, { jwtKey });
 		} catch (e) {
 			this.logger.error(e);
 			throw new Error('Invalid token');
