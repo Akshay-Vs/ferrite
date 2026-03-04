@@ -58,15 +58,20 @@ export class ClerkAuthAdapter implements IAuthProvider, ISessionProvider {
 	}
 
 	async getSession(sid: string): Promise<AuthSession> {
-		const session = await this.clerk.sessions.getSession(sid);
+		try {
+			const session = await this.clerk.sessions.getSession(sid);
 
-		return {
-			id: session.id,
-			userId: session.userId,
-			createdAt: new Date(session.createdAt),
-			updatedAt: new Date(session.updatedAt),
-			lastActiveAt: new Date(session.lastActiveAt),
-			expireAt: new Date(session.expireAt),
-		};
+			return {
+				id: session.id,
+				userId: session.userId,
+				createdAt: new Date(session.createdAt),
+				updatedAt: new Date(session.updatedAt),
+				lastActiveAt: new Date(session.lastActiveAt),
+				expireAt: new Date(session.expireAt),
+			};
+		} catch (e) {
+			this.logger.error(e);
+			throw new Error('Session not found');
+		}
 	}
 }
