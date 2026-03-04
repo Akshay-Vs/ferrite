@@ -18,6 +18,7 @@ import { userAddresses, userPhones, users } from './user.schema';
 export const usersRelations = relations(users, ({ many }) => ({
 	authProviders: many(userAuthProviders),
 	phones: many(userPhones),
+	addresses: many(userAddresses),
 	notificationPreferences: many(userNotificationPreferences),
 	paymentMethods: many(userPaymentMethods),
 }));
@@ -72,6 +73,7 @@ export const staffPermissionOverridesRelations = relations(
 		staff: one(staffMembers, {
 			fields: [staffPermissionOverrides.staffId],
 			references: [staffMembers.id],
+			relationName: 'staffOverrides',
 		}),
 		permission: one(permissions, {
 			fields: [staffPermissionOverrides.permissionId],
@@ -80,6 +82,7 @@ export const staffPermissionOverridesRelations = relations(
 		overriddenBy: one(staffMembers, {
 			fields: [staffPermissionOverrides.overriddenBy],
 			references: [staffMembers.id],
+			relationName: 'grantedOverrides',
 		}),
 	})
 );
@@ -93,7 +96,12 @@ export const staffMembersRelations = relations(
 			fields: [staffMembers.invitedBy],
 			references: [staffMembers.id],
 		}),
-		permissionOverrides: many(staffPermissionOverrides),
+		permissionOverrides: many(staffPermissionOverrides, {
+			relationName: 'staffOverrides',
+		}),
+		grantedOverrides: many(staffPermissionOverrides, {
+			relationName: 'grantedOverrides',
+		}),
 		grantedRolePermissions: many(rolePermissions),
 	})
 );
