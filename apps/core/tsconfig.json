@@ -21,6 +21,13 @@
 		"forceConsistentCasingInFileNames": true,
 		"noImplicitAny": false,
 		"strictBindCallApply": false,
-		"noFallthroughCasesInSwitch": false
+		"noFallthroughCasesInSwitch": false,
+		"paths": {
+			"@core/*": ["src/core/*"],
+			"@modules/*": ["src/modules/*"],
+			"@common/*": ["src/common/*"],
+			"@database/*": ["src/core/database/*"],
+			"@auth/*": ["src/modules/auth/*"]
+		}
 	}
 }

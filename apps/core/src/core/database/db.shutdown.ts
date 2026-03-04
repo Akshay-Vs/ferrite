@@ -1,19 +1,14 @@
-import {
-	BeforeApplicationShutdown,
-	Inject,
-	Injectable,
-	Logger,
-} from '@nestjs/common';
+import { AppLogger } from '@core/logger/logger.service';
+import { BeforeApplicationShutdown, Inject, Injectable } from '@nestjs/common';
 import type { Sql } from 'postgres';
 import { DB_CLIENT, SUBSCRIBER_CLIENT } from './db.provider';
 
 @Injectable()
 export class DatabaseShutdownService implements BeforeApplicationShutdown {
-	private readonly logger = new Logger(DatabaseShutdownService.name);
-
 	constructor(
 		@Inject(DB_CLIENT) private readonly dbClient: Sql,
-		@Inject(SUBSCRIBER_CLIENT) private readonly subscriberClient: Sql
+		@Inject(SUBSCRIBER_CLIENT) private readonly subscriberClient: Sql,
+		private readonly logger: AppLogger
 	) {}
 
 	async beforeApplicationShutdown() {
