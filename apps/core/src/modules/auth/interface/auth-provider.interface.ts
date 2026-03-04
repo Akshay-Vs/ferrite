@@ -26,11 +26,16 @@ export interface ISessionProvider {
 	getSession(sid: string): Promise<AuthSession>;
 }
 
-// type guard helper
+/**
+ * Type guard to check if a provider implements both IAuthProvider and ISessionProvider
+ * @param provider The provider to check
+ * @returns True if the provider implements both IAuthProvider and ISessionProvider, false otherwise
+ */
 export function isSessionProvider(
 	provider: IAuthProvider
 ): provider is IAuthProvider & ISessionProvider {
-	return 'getSession' in provider;
+	const partialProvider = provider as Partial<ISessionProvider>;
+	return typeof partialProvider.getSession === 'function';
 }
 
 export const AUTH_PROVIDER = Symbol('AUTH_PROVIDER');
