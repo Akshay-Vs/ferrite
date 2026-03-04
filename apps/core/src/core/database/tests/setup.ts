@@ -22,7 +22,7 @@ export { _db as db };
  */
 function cleanConnectionUrl(raw: string): string {
 	const url = new URL(raw);
-	url.search = '';
+	url.searchParams.delete('schema');
 	return url.toString();
 }
 
@@ -53,6 +53,13 @@ export async function cleanupTables(): Promise<void> {
 	await _db.execute(sql`
 		TRUNCATE TABLE
 			user_auth_providers,
+			user_payment_methods,
+			user_notification_preferences,
+			staff_permission_overrides,
+			staff_members,
+			role_permissions,
+			permissions,
+			roles,
 			user_phones,
 			user_addresses,
 			users
