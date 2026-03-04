@@ -8,9 +8,12 @@ export class RequestContextMiddleware implements NestMiddleware {
 	use(req: Request, res: Response, next: NextFunction): void {
 		const rawRequestId = req.header('x-request-id');
 
+		const normalizedRequestId =
+			typeof rawRequestId === 'string' ? rawRequestId.trim() : undefined;
+
 		const requestId =
-			typeof rawRequestId === 'string' && rawRequestId.trim().length > 0
-				? rawRequestId
+			normalizedRequestId && normalizedRequestId.length > 0
+				? normalizedRequestId
 				: randomUUID();
 
 		res.setHeader('x-request-id', requestId);
