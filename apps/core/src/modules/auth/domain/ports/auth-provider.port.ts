@@ -1,0 +1,1 @@
+// interface veryfyToken() verifyWebHook()
