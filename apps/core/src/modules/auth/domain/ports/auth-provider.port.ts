@@ -1,8 +1,7 @@
+import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AuthUser } from '../types/auth-user.type';
 import { RawTokenClaims } from '../types/raw-token-claims.type';
 import { RawWebhookClaims } from '../types/raw-webhook-claims.type';
-import { UserWebhookEvent } from '../types/webhook-event.type';
-import { WebhookPayload } from '../types/webhook-payload.type';
 
 export interface ITokenVerifier {
 	/**
@@ -27,25 +26,25 @@ export interface ITokenTransformer {
 
 export interface IWebhookVerifier {
 	/**
-	 * Verify the webhook signature from the raw HTTP envelope and return the verified claims.
-	 * Must receive the unparsed body buffer — parsing before verification will break signature checks.
+	 * Verify the webhook signature from the HTTP request.
 	 * @param payload - Raw HTTP envelope containing the unparsed body buffer and headers
-	 * @returns Verified raw webhook claims
+	 * @returns RawWebhookClaims if the signature is valid
+	 * @throws {BadRequestException} If the signature is missing or malformed
 	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
 	 */
 	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
 }
 
-export interface IWebhookTransformer {
-	/**
-	 * Map verified raw webhook claims to the application-level WebhookEvent object.
-	 * Pure transformation — no IO, no side effects.
-	 * @param raw - Verified claims returned by IWebhookVerifier
-	 * @returns A provider-agnostic user webhook event
-	 * @throws {Error} If required fields are missing or the event type is unrecognised
-	 */
-	toWebhookEvent(raw: RawWebhookClaims): UserWebhookEvent;
-}
+// export interface IWebhookTransformer {
+//   /**
+//    * Map verified raw webhook claims to the application-level WebhookEvent object.
+//    * Pure transformation — no IO, no side effects.
+//    * @param raw - Verified claims returned by IWebhookVerifier
+//    * @returns A provider-agnostic user webhook event
+//    * @throws {Error} If required fields are missing or the event type is unrecognised
+//    */
+//   toWebhookEvent(raw: RawWebhookClaims): UserWebhookEvent;
+// }
 
 /**
  * Port for JWT verification and transformation.
@@ -67,5 +66,4 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
  */
 export type IAuthAdapter = ITokenVerifier &
 	ITokenTransformer &
-	IWebhookVerifier &
-	IWebhookTransformer;
+	IWebhookVerifier;

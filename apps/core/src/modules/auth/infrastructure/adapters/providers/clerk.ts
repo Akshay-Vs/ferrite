@@ -1,18 +1,11 @@
-import {
-	WebhookEventType as ClerkWebhookEventType,
-	verifyToken as clerkVerifyToken,
-} from '@clerk/backend';
+import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
+import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { IAuthAdapter } from '@modules/auth/domain/ports/auth-provider.port';
 import { AuthProvider } from '@modules/auth/domain/types/auth-providers.enum';
 import { AuthUser } from '@modules/auth/domain/types/auth-user.type';
 import { RawTokenClaims } from '@modules/auth/domain/types/raw-token-claims.type';
 import { RawWebhookClaims } from '@modules/auth/domain/types/raw-webhook-claims.type';
-import {
-	UserWebhookEvent,
-	WebhookEventType,
-} from '@modules/auth/domain/types/webhook-event.type';
-import { WebhookPayload } from '@modules/auth/domain/types/webhook-payload.type';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
@@ -23,15 +16,6 @@ export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
 export class ClerkAdapter implements IAuthAdapter {
 	private readonly webhookSecret: string;
 	private readonly secretKey: string;
-
-	private CLERK_EVENT_MAP = {
-		['user.created' satisfies ClerkWebhookEventType]:
-			WebhookEventType.USER_CREATED,
-		['user.updated' satisfies ClerkWebhookEventType]:
-			WebhookEventType.USER_UPDATED,
-		['user.deleted' satisfies ClerkWebhookEventType]:
-			WebhookEventType.USER_DELETED,
-	} satisfies Partial<Record<ClerkWebhookEventType, WebhookEventType>>;
 
 	constructor(
 		private config: ConfigService,
@@ -71,36 +55,7 @@ export class ClerkAdapter implements IAuthAdapter {
 		}
 	}
 
-	//  IWebhookVerifier
-
-	async verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims> {
-		const wh = new Webhook(this.webhookSecret);
-
-		try {
-			this.logger.debug('Verifying webhook payload');
-
-			const raw = wh.verify(payload.body, {
-				'svix-id': payload.headers['svix-id'],
-				'svix-timestamp': payload.headers['svix-timestamp'],
-				'svix-signature': payload.headers['svix-signature'],
-			}) as Record<string, unknown>;
-
-			const eventType = this.mapEventType(raw.type as ClerkWebhookEventType);
-
-			return {
-				event_id: payload.headers['svix-id'],
-				event_type: eventType,
-				timestamp: Number(payload.headers['svix-timestamp']),
-				data: raw.data as Record<string, unknown>,
-			};
-		} catch {
-			this.logger.error('Invalid webhook signature');
-			throw new UnauthorizedException('Invalid webhook signature');
-		}
-	}
-
 	//  ITokenTransformer
-
 	toAuthUser(claims: RawTokenClaims): AuthUser {
 		return {
 			externalAuthId: claims.sub,
@@ -113,39 +68,54 @@ export class ClerkAdapter implements IAuthAdapter {
 		};
 	}
 
-	//  IWebhookTransformer
+	//  IWebhookVerifier
+	async verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims> {
+		const { body, headers } = payload;
 
-	toWebhookEvent(raw: RawWebhookClaims): UserWebhookEvent {
-		const type = this.mapEventType(raw.event_type);
-		const data = raw.data;
+		const svixId = headers['svix-id'] as string | undefined;
+		const svixTimestamp = headers['svix-timestamp'] as string | undefined;
+		const svixSignature = headers['svix-signature'] as string | undefined;
 
-		return {
-			eventId: raw.event_id,
-			type,
-			timestamp: new Date(raw.timestamp),
-			provider: AuthProvider.CLERK,
-			userId: data.id as string,
-			user: {
-				email: (data.email_addresses as any[])?.[0]?.email_address ?? '',
-				emailVerified:
-					(data.email_addresses as any[])?.[0]?.verification?.status ===
-					'verified',
-				phone: (data.phone_numbers as any[])?.[0]?.phone_number,
-				firstName: data.first_name as string | undefined,
-				lastName: data.last_name as string | undefined,
-				avatarUrl: data.image_url as string | undefined,
-				metadata: (data.public_metadata as Record<string, unknown>) ?? {},
-			},
-		};
-	}
-
-	//  Helpers
-	private mapEventType(raw: ClerkWebhookEventType): WebhookEventType {
-		const eventType = this.CLERK_EVENT_MAP[raw as ClerkWebhookEventType];
-
-		if (!eventType) {
-			throw new Error(`Unrecognised Clerk webhook event type: "${raw}"`);
+		if (!svixId || !svixTimestamp || !svixSignature) {
+			this.logger.error(
+				'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+			);
+			throw new Error(
+				'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+			);
 		}
-		return eventType;
+
+		if (!body?.length) {
+			this.logger.error('Missing request body');
+			throw new Error('Missing request body');
+		}
+
+		const wh = new Webhook(this.webhookSecret);
+
+		try {
+			// raw Buffer — exact bytes Clerk signed
+			const verified = wh.verify(body, {
+				'svix-id': svixId,
+				'svix-timestamp': svixTimestamp,
+				'svix-signature': svixSignature,
+			}) as WebhookEvent;
+
+			this.logger.debug(
+				'Webhook signature verification successful',
+				JSON.stringify(verified, null, 2)
+			);
+
+			return {
+				event_id: svixId,
+				event_type: verified.type,
+				timestamp: Number(svixTimestamp),
+				data: (verified as any).data,
+			};
+		} catch (error) {
+			this.logger.error('Webhook signature verification failed');
+			throw new Error(
+				`Webhook signature verification failed: ${error instanceof Error ? error.message : String(error)}`
+			);
+		}
 	}
 }
