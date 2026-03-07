@@ -27,7 +27,7 @@
 			"@modules/*": ["src/modules/*"],
 			"@common/*": ["src/common/*"],
 			"@database/*": ["src/core/database/*"],
-			"@auth/*": ["src/modules/auth/*"]
+			"@auth/*": ["src/modules/_auth/*"]
 		}
 	}
 }
