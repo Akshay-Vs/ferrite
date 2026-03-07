@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
+import { VerifyWebhookUseCase } from './application/use-cases/verify-webhook.usecase';
 import {
 	AUTH_ADAPTER,
 	TOKEN_AUTH,
@@ -9,9 +10,11 @@ import {
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
+import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 
 const adapterFactory = (f: AuthProviderFactory) => f.getAdapter();
 
+@Global()
 @Module({
 	imports: [ConfigModule],
 	providers: [
@@ -37,10 +40,12 @@ const adapterFactory = (f: AuthProviderFactory) => f.getAdapter();
 
 		// use cases
 		JwtTokenUseCase,
+		VerifyWebhookUseCase,
 
 		// guards
 		AuthGuard,
+		WebhookGuard,
 	],
-	exports: [JwtTokenUseCase, AuthGuard],
+	exports: [JwtTokenUseCase, VerifyWebhookUseCase, AuthGuard, WebhookGuard],
 })
 export class AuthModule {}

@@ -1,6 +1,7 @@
 import { CoreModule } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { AuthGuard } from '@modules/auth/infrastructure/http/guards/auth.guard';
+import { UsersModule } from '@modules/users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -37,9 +38,10 @@ import { HealthModule } from './modules/health/health.module';
 		// Monitoring
 		PrometheusModule.register(),
 
+		AuthModule,
 		CoreModule,
 		HealthModule,
-		AuthModule,
+		UsersModule,
 	],
 	controllers: [],
 	providers: [
