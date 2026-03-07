@@ -55,12 +55,10 @@ export interface IWebhookTransformer {
 export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
 
 /**
- * Port for webhook verification and transformation.
+ * Port for webhook verification.
  * Consumed by: VerifyWebhookUseCase
  * Implemented by: ClerkAdapter, FirebaseAdapter, KindeAdapter
- */ export interface IWebhookAuth
-	extends IWebhookVerifier,
-		IWebhookTransformer {}
+ */ export interface IWebhookAuth extends IWebhookVerifier {}
 
 /**
  * Combined adapter interface that every auth provider adapter must implement.

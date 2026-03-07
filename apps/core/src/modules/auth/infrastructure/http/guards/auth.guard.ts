@@ -1,6 +1,6 @@
 import { Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
-import { VerifyTokenUsecase } from '@modules/auth/application/use-cases/verify-token.usecase';
+import { JwtTokenUsecase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
 	CanActivate,
 	ExecutionContext,
@@ -9,13 +9,14 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_ROUTE } from '../decorators/public-route.decorator';
+import { IS_WEBHOOK_ROUTE } from '../decorators/webhook-route.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(
 		private readonly logger: AppLogger,
 		private readonly reflector: Reflector,
-		private readonly verifyToken: VerifyTokenUsecase
+		private readonly verifyToken: JwtTokenUsecase
 	) {
 		this.logger.setContext(AuthGuard.name);
 	}
@@ -37,8 +38,18 @@ export class AuthGuard implements CanActivate {
 			[context.getHandler(), context.getClass()]
 		);
 
+		const isWebhook = this.reflector.getAllAndOverride<boolean>(
+			IS_WEBHOOK_ROUTE,
+			[context.getHandler(), context.getClass()]
+		);
+
 		if (isPublic) {
 			this.logger.debug('Public endpoint, bypassing auth');
+			return true;
+		}
+
+		if (isWebhook) {
+			this.logger.debug('Webhook endpoint, bypassing JWT auth');
 			return true;
 		}
 
