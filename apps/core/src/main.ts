@@ -1,3 +1,4 @@
+import { OtelInterceptor } from '@common/interceptors/otel.interceptor';
 import { AppLogger } from '@core/logger/logger.service';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -14,7 +15,7 @@ const ORIGIN = process.env.ORIGIN_URL?.trim()
 	: [];
 
 NestLogger.debug(
-	`Using env: ${JSON.stringify({ port: PORT, origin: ORIGIN }, null, 2)}`,
+	`Using: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
 	'GLOBAL'
 );
 
@@ -27,7 +28,7 @@ async function bootstrap() {
 
 	registerShutdownHook(app);
 
-	app.useLogger(app.get(AppLogger));
+	app.useLogger(await app.resolve(AppLogger));
 	app.use(helmet());
 
 	app.enableCors({
@@ -37,6 +38,7 @@ async function bootstrap() {
 	});
 
 	app.setGlobalPrefix(VERSION);
+	app.useGlobalInterceptors(new OtelInterceptor());
 
 	app.use((req: Request, _res: Response, next: NextFunction) => {
 		logger.debug(`Request: ${req.method} ${req.path} received`);
@@ -45,6 +47,15 @@ async function bootstrap() {
 
 	if (process.env.ENABLE_SWAGGER || process.env.NODE_ENV !== 'production') {
 		setupSwagger(app);
+
+		// const tree = SpelunkerModule.explore(app);
+		// const root = SpelunkerModule.graph(tree);
+		// const edges = SpelunkerModule.findGraphEdges(root);
+		// console.log('graph LR');
+		// const mermaidEdges = edges.map(
+		//   ({ from, to }) => `  ${from.module.name}-->${to.module.name}`,
+		// );
+		// console.log(mermaidEdges.join('\n'));
 	}
 
 	await app.listen(PORT);
