@@ -5,7 +5,6 @@ export class Ok<T, E extends Error = Error> {
 	readonly error = undefined;
 
 	constructor(readonly value: T) {}
-
 	isOk(): this is Ok<T, E> {
 		return true;
 	}
@@ -63,7 +62,10 @@ export class Err<T, E extends Error = Error> {
 
 //  Constructors
 
-export const ok = <T, E extends Error = Error>(value: T): Ok<T, E> =>
-	new Ok(value);
+export function ok(): Ok<void>;
+export function ok<T>(value: T): Ok<T>;
+export function ok<T>(value?: T): Ok<T | undefined> {
+	return new Ok(value);
+}
 export const err = <T, E extends Error = Error>(error: E): Err<T, E> =>
 	new Err(error);
