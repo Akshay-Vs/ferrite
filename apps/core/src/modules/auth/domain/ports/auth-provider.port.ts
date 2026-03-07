@@ -1,57 +1,73 @@
-export interface AuthUser {
-	sid: string;
-	externalAuthId: string;
-	role: string | null;
-	metadata: Record<string, unknown>;
-	provider: string;
+import { AuthUser } from '../types/auth-user.type';
+import { RawTokenClaims } from '../types/raw-token-claims.type';
+import { RawWebhookClaims } from '../types/raw-webhook-claims.type';
+import { UserWebhookEvent } from '../types/webhook-event.type';
+import { WebhookPayload } from '../types/webhook-payload.type';
+
+export interface ITokenVerifier {
+	/**
+	 * Cryptographically verify the JWT signature and return the verified claims.
+	 * @param token - The raw JWT string from the Authorization header
+	 * @returns Verified and decoded token claims
+	 * @throws {UnauthorizedException} If the signature is invalid or the token is expired
+	 */
+	verifyJWT(token: string): Promise<RawTokenClaims>;
 }
 
-export interface AuthSession {
-	id: string;
-	userId: string;
-	createdAt: Date;
-	updatedAt: Date;
-	lastActiveAt: Date;
-	expireAt: Date;
+export interface ITokenTransformer {
+	/**
+	 * Map verified raw token claims to the application-level AuthUser object.
+	 * Pure transformation — no IO, no side effects.
+	 * @param claims - Verified claims returned by ITokenVerifier
+	 * @returns A provider-agnostic AuthUser
+	 * @throws {Error} If required claims are missing or malformed
+	 */
+	toAuthUser(claims: RawTokenClaims): AuthUser;
 }
 
-export interface WebHookPayload {
-	sid: string;
-	metadata?: Record<string, unknown>;
+export interface IWebhookVerifier {
+	/**
+	 * Verify the webhook signature from the raw HTTP envelope and return the verified claims.
+	 * Must receive the unparsed body buffer — parsing before verification will break signature checks.
+	 * @param payload - Raw HTTP envelope containing the unparsed body buffer and headers
+	 * @returns Verified raw webhook claims
+	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
+	 */
+	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
 }
 
-export interface WebHookEvent {
-	eventType: 'user.created' | 'user.updated' | 'user.deleted';
-	user: {
-		email: string;
-		fullName: string;
-		avatarUrl: string;
-		role: string;
-	};
-}
-
-// base interface for all providers
-export interface IAuthProvider {
-	verifyToken(token: string): Promise<AuthUser>;
-	revokeToken(token: string): Promise<void>;
-	verifyWebhook(payload: WebHookPayload): Promise<WebHookEvent>;
-}
-
-// for providers that support sessions
-export interface ISessionProvider {
-	getSession(sid: string): Promise<AuthSession>;
+export interface IWebhookTransformer {
+	/**
+	 * Map verified raw webhook claims to the application-level WebhookEvent object.
+	 * Pure transformation — no IO, no side effects.
+	 * @param raw - Verified claims returned by IWebhookVerifier
+	 * @returns A provider-agnostic user webhook event
+	 * @throws {Error} If required fields are missing or the event type is unrecognised
+	 */
+	toWebhookEvent(raw: RawWebhookClaims): UserWebhookEvent;
 }
 
 /**
- * Type guard to check if a provider implements both IAuthProvider and ISessionProvider
- * @param provider The provider to check
- * @returns True if the provider implements both IAuthProvider and ISessionProvider, false otherwise
+ * Port for JWT verification and transformation.
+ * Consumed by: VerifyJWTUseCase
+ * Implemented by: ClerkAdapter, FirebaseAdapter, KindeAdapter
  */
-export function isSessionProvider(
-	provider: IAuthProvider
-): provider is IAuthProvider & ISessionProvider {
-	const partialProvider = provider as Partial<ISessionProvider>;
-	return typeof partialProvider.getSession === 'function';
-}
+export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
 
-export const AUTH_PROVIDER = Symbol('AUTH_PROVIDER');
+/**
+ * Port for webhook verification and transformation.
+ * Consumed by: VerifyWebhookUseCase
+ * Implemented by: ClerkAdapter, FirebaseAdapter, KindeAdapter
+ */ export interface IWebhookAuth
+	extends IWebhookVerifier,
+		IWebhookTransformer {}
+
+/**
+ * Combined adapter interface that every auth provider adapter must implement.
+ * Use granular port interfaces (ITokenAuth, IWebhookAuth etc.) for
+ * Auth use case dependencies — never inject IAuthAdapter directly.
+ */
+export type IAuthAdapter = ITokenVerifier &
+	ITokenTransformer &
+	IWebhookVerifier &
+	IWebhookTransformer;
