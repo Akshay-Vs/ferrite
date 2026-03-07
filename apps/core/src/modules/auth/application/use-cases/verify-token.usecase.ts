@@ -1,25 +1,30 @@
+import { err, ok, Result } from '@common/interfaces/result.interface';
+import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
-import {
-	AUTH_PROVIDER,
-	AuthUser,
-	type IAuthProvider,
-} from '@modules/auth/domain/ports/auth-provider.port';
+import { type ITokenAuth } from '@modules/auth/domain/ports/auth-provider.port';
+import { TOKEN_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
+import { AuthUser } from '@modules/auth/domain/types/auth-user.type';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
-export class VerifyTokenUsecase {
+export class VerifyTokenUsecase implements IUseCase<string, AuthUser, Error> {
 	constructor(
-		@Inject(AUTH_PROVIDER) private authProvider: IAuthProvider,
-		private logger: AppLogger
-	) {}
+		@Inject(TOKEN_AUTH) private readonly tokenAuth: ITokenAuth,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(VerifyTokenUsecase.name);
+	}
 
-	async execute(token: string): Promise<AuthUser> {
+	async execute(token: string): Promise<Result<AuthUser, Error>> {
 		try {
-			const user = await this.authProvider.verifyToken(token);
-			return user;
-		} catch (e) {
-			this.logger.error(e);
-			throw new Error('Unable to verify token');
+			this.logger.debug('Verifying JWT token');
+			const claims = await this.tokenAuth.verifyJWT(token);
+
+			this.logger.debug('Successfully verified JWT token');
+			return ok(this.tokenAuth.toAuthUser(claims));
+		} catch (error) {
+			this.logger.error('Failed to verify JWT token');
+			return err(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 }
