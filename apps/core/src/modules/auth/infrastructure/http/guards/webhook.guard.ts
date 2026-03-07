@@ -1,3 +1,4 @@
+import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
@@ -35,7 +36,12 @@ export class WebhookGuard implements CanActivate {
 
 		const request: Request = context.switchToHttp().getRequest();
 
-		const event = await this.verifyWebhook.execute(request);
+		const payload: WebhookPayload = {
+			body: request.body,
+			headers: request.headers,
+		};
+
+		const event = await this.verifyWebhook.execute(payload);
 
 		if (event.isErr()) {
 			this.logger.error('Failed to verify webhook');

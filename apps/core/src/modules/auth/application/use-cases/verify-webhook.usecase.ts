@@ -1,10 +1,10 @@
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
+import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { type IWebhookAuth } from '@modules/auth/domain/ports/auth-provider.port';
 import { WEBHOOK_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
 import { Inject, Injectable } from '@nestjs/common';
-import { Request } from 'express';
 
 /**
  *  Verifies the webhook signature and transforms the raw claims into a UserWebhookEvent.
@@ -12,7 +12,7 @@ import { Request } from 'express';
  *  @returns A Result containing either a UserWebhookEvent or an error
  */
 @Injectable()
-export class VerifyWebhookUseCase implements IUseCase<Request, void> {
+export class VerifyWebhookUseCase implements IUseCase<WebhookPayload, void> {
 	constructor(
 		@Inject(WEBHOOK_AUTH) private readonly webhookAuth: IWebhookAuth,
 		private logger: AppLogger
@@ -20,7 +20,7 @@ export class VerifyWebhookUseCase implements IUseCase<Request, void> {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(payload: Request): Promise<Result<void>> {
+	async execute(payload: WebhookPayload): Promise<Result<void>> {
 		try {
 			await this.webhookAuth.verifyWebhook(payload);
 			return ok();
