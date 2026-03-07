@@ -20,9 +20,10 @@ export interface CorrelationContext {
 	userId?: string;
 }
 
-@Injectable({ scope: Scope.DEFAULT })
+@Injectable({ scope: Scope.TRANSIENT })
 export class AppLogger implements LoggerService {
 	private readonly logger: Logger;
+	private context?: string;
 
 	constructor(private readonly config: ConfigService) {
 		const isDev = this.config.get<string>('NODE_ENV') !== 'production';
@@ -68,6 +69,14 @@ export class AppLogger implements LoggerService {
 		);
 	}
 
+	/**
+	 * Set the context (usually the class name) for all subsequent log calls.
+	 * Call once in the constructor of each consuming class.
+	 */
+	setContext(context: string): void {
+		this.context = context;
+	}
+
 	// Correlation
 	// Single place to extend when you add OTel, session IDs, tenant IDs, etc.
 
@@ -86,7 +95,14 @@ export class AppLogger implements LoggerService {
 		message: string,
 		fields: LogFields = {}
 	): void {
-		this.logger[level]({ ...fields, ...this.getCorrelationContext() }, message);
+		this.logger[level](
+			{
+				...fields,
+				context: fields.context ?? this.context,
+				...this.getCorrelationContext(),
+			},
+			message
+		);
 	}
 
 	// LoggerService interface
