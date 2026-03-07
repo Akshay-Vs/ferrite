@@ -1,6 +1,6 @@
 import { Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
-import { JwtTokenUsecase } from '@modules/auth/application/use-cases/jwt-token.usecase';
+import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
 	CanActivate,
 	ExecutionContext,
@@ -16,7 +16,7 @@ export class AuthGuard implements CanActivate {
 	constructor(
 		private readonly logger: AppLogger,
 		private readonly reflector: Reflector,
-		private readonly verifyToken: JwtTokenUsecase
+		private readonly verifyToken: JwtTokenUseCase
 	) {
 		this.logger.setContext(AuthGuard.name);
 	}
