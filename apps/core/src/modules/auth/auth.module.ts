@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { VerifyTokenUsecase } from './application/use-cases/verify-token.usecase';
+import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
 import {
 	AUTH_ADAPTER,
 	TOKEN_AUTH,
@@ -36,11 +36,11 @@ const adapterFactory = (f: AuthProviderFactory) => f.getAdapter();
 		},
 
 		// use cases
-		VerifyTokenUsecase,
+		JwtTokenUseCase,
 
 		// guards
 		AuthGuard,
 	],
-	exports: [VerifyTokenUsecase, AuthGuard],
+	exports: [JwtTokenUseCase, AuthGuard],
 })
 export class AuthModule {}
