@@ -63,13 +63,11 @@ export class AuthGuard implements CanActivate {
 		const authUser = await this.verifyToken.execute(token);
 
 		if (authUser.isErr()) {
-			this.logger.error('Failed to verify token');
-			throw new UnauthorizedException(authUser.error.message);
+			this.logger.error(`Failed to verify token: ${authUser.error.message}`);
+			throw new UnauthorizedException('Invalid or expired token');
 		}
 
-		this.logger.debug(
-			`Request ${request.path} authorized as ${authUser.value.email}`
-		);
+		this.logger.debug(`Request ${request.path} authorized`);
 
 		(request as AuthenticatedRequest).authUser = authUser.value;
 		return true;
