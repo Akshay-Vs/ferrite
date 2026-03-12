@@ -1,51 +1,39 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
 import { VerifyWebhookUseCase } from './application/use-cases/verify-webhook.usecase';
-import {
-	AUTH_ADAPTER,
-	TOKEN_AUTH,
-	WEBHOOK_AUTH,
-} from './domain/ports/auth-provider.tokens';
+import { TOKEN_AUTH, WEBHOOK_AUTH } from './domain/ports/auth-provider.tokens';
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
 import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 
-const adapterFactory = (f: AuthProviderFactory) => f.getAdapter();
-
-@Global()
 @Module({
 	imports: [ConfigModule],
 	providers: [
 		ClerkAdapter,
+		// KindeAdapter,
+
 		AuthProviderFactory,
 
-		// PORT bindings
-		{
-			provide: AUTH_ADAPTER,
-			useFactory: adapterFactory,
-			inject: [AuthProviderFactory],
-		},
 		{
 			provide: TOKEN_AUTH,
-			useFactory: adapterFactory,
+			useFactory: (f: AuthProviderFactory) => f.getAdapter(),
 			inject: [AuthProviderFactory],
 		},
 		{
 			provide: WEBHOOK_AUTH,
-			useFactory: adapterFactory,
-			inject: [AuthProviderFactory],
+			useExisting: TOKEN_AUTH,
 		},
 
-		// use cases
 		JwtTokenUseCase,
 		VerifyWebhookUseCase,
 
-		// guards
 		AuthGuard,
 		WebhookGuard,
 	],
-	exports: [JwtTokenUseCase, VerifyWebhookUseCase, AuthGuard, WebhookGuard],
+
+	// export guards
+	exports: [AuthGuard, WebhookGuard],
 })
 export class AuthModule {}

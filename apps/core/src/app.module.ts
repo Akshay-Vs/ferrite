@@ -11,6 +11,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-error-filter';
 import { HealthModule } from './modules/health/health.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
 @Global()
 @Module({
@@ -42,6 +43,7 @@ import { HealthModule } from './modules/health/health.module';
 		CoreModule,
 		HealthModule,
 		UsersModule,
+		WebhooksModule,
 	],
 	controllers: [],
 	providers: [
