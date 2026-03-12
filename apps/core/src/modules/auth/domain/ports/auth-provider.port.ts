@@ -1,7 +1,5 @@
 import { WebhookPayload } from '@common/types/webhook-payload.type';
-import { AuthUser } from '../types/auth-user.type';
-import { RawTokenClaims } from '../types/raw-token-claims.type';
-import { RawWebhookClaims } from '../types/raw-webhook-claims.type';
+import { AuthUser, RawTokenClaims, RawWebhookClaims } from '../schemas';
 
 export interface ITokenVerifier {
 	/**
@@ -35,17 +33,6 @@ export interface IWebhookVerifier {
 	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
 }
 
-// export interface IWebhookTransformer {
-//   /**
-//    * Map verified raw webhook claims to the application-level WebhookEvent object.
-//    * Pure transformation — no IO, no side effects.
-//    * @param raw - Verified claims returned by IWebhookVerifier
-//    * @returns A provider-agnostic user webhook event
-//    * @throws {Error} If required fields are missing or the event type is unrecognised
-//    */
-//   toWebhookEvent(raw: RawWebhookClaims): UserWebhookEvent;
-// }
-
 /**
  * Port for JWT verification and transformation.
  * Consumed by: VerifyJWTUseCase
@@ -54,16 +41,10 @@ export interface IWebhookVerifier {
 export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
 
 /**
- * Port for webhook verification.
+ * Composed port for webhook verification.
+ * Mirrors ITokenAuth naming convention for consistency.
+ * Extend this if webhook transformation is added in future.
  * Consumed by: VerifyWebhookUseCase
- * Implemented by: ClerkAdapter, FirebaseAdapter, KindeAdapter
- */ export interface IWebhookAuth extends IWebhookVerifier {}
-
-/**
- * Combined adapter interface that every auth provider adapter must implement.
- * Use granular port interfaces (ITokenAuth, IWebhookAuth etc.) for
- * Auth use case dependencies — never inject IAuthAdapter directly.
+ * Implemented by: ClerkAdapter, KindeAdapter etc
  */
-export type IAuthAdapter = ITokenVerifier &
-	ITokenTransformer &
-	IWebhookVerifier;
+export interface IWebhookAuth extends IWebhookVerifier {}

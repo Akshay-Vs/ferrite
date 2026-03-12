@@ -1,9 +1,9 @@
+import { AuthUser } from '@auth/domain/schemas';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITokenAuth } from '@modules/auth/domain/ports/auth-provider.port';
 import { TOKEN_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
-import { AuthUser } from '@modules/auth/domain/types/auth-user.type';
 import { Inject, Injectable } from '@nestjs/common';
 
 /**

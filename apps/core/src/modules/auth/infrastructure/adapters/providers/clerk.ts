@@ -1,11 +1,16 @@
+import {
+	AuthUser,
+	authProvidersEnum,
+	RawTokenClaims,
+	RawWebhookClaims,
+} from '@auth/domain/schemas';
 import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
 import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
-import { IAuthAdapter } from '@modules/auth/domain/ports/auth-provider.port';
-import { AuthProvider } from '@modules/auth/domain/types/auth-providers.enum';
-import { AuthUser } from '@modules/auth/domain/types/auth-user.type';
-import { RawTokenClaims } from '@modules/auth/domain/types/raw-token-claims.type';
-import { RawWebhookClaims } from '@modules/auth/domain/types/raw-webhook-claims.type';
+import {
+	ITokenAuth,
+	IWebhookAuth,
+} from '@modules/auth/domain/ports/auth-provider.port';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
@@ -13,7 +18,7 @@ import { Webhook } from 'svix';
 export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
 
 @Injectable()
-export class ClerkAdapter implements IAuthAdapter {
+export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	private readonly webhookSecret: string;
 	private readonly secretKey: string;
 
@@ -64,7 +69,7 @@ export class ClerkAdapter implements IAuthAdapter {
 			fullName: claims.full_name,
 			role: (claims.metadata?.role as string) ?? null,
 			metadata: claims.metadata ?? {},
-			provider: AuthProvider.CLERK,
+			provider: authProvidersEnum.clerk,
 		};
 	}
 
@@ -106,8 +111,8 @@ export class ClerkAdapter implements IAuthAdapter {
 			);
 
 			return {
-				event_id: svixId,
-				event_type: verified.type,
+				eventId: svixId,
+				eventType: verified.type,
 				timestamp: Number(svixTimestamp),
 				data: (verified as any).data,
 			};
