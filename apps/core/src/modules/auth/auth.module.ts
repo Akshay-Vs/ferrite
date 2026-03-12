@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
 import { VerifyWebhookUseCase } from './application/use-cases/verify-webhook.usecase';
 import { TOKEN_AUTH, WEBHOOK_AUTH } from './domain/ports/auth-provider.tokens';
@@ -8,6 +9,7 @@ import { ClerkAdapter } from './infrastructure/adapters/providers/clerk';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
 import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 
+@Global()
 @Module({
 	imports: [ConfigModule],
 	providers: [
@@ -25,6 +27,10 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 			provide: WEBHOOK_AUTH,
 			useExisting: TOKEN_AUTH,
 		},
+		{
+			provide: APP_GUARD,
+			useClass: AuthGuard, // ← resolved from AuthModule
+		},
 
 		JwtTokenUseCase,
 		VerifyWebhookUseCase,
@@ -34,6 +40,13 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 	],
 
 	// export guards
-	exports: [AuthGuard, WebhookGuard],
+	exports: [
+		AuthGuard,
+		WebhookGuard,
+
+		//? Nest
+		// JwtTokenUseCase,
+		// VerifyWebhookUseCase
+	],
 })
 export class AuthModule {}

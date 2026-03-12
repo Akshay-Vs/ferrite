@@ -1,9 +1,8 @@
 import { CoreModule } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
-import { AuthGuard } from '@modules/auth/infrastructure/http/guards/auth.guard';
 import { UsersModule } from '@modules/users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -13,60 +12,42 @@ import { HttpExceptionFilter } from './common/filters/http-error-filter';
 import { HealthModule } from './modules/health/health.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
-@Global()
 @Module({
 	imports: [
-		// Config
-		ConfigModule.forRoot({
-			isGlobal: true,
-		}),
-
-		CacheModule.register({
-			ttl: 60000, // 60 sec
-			isGlobal: true,
-		}),
-
-		// Throttler
+		ConfigModule.forRoot({ isGlobal: true }),
+		CacheModule.register({ ttl: 60000, isGlobal: true }),
 		ThrottlerModule.forRoot({
-			throttlers: [
-				{
-					ttl: 60000, // 60 sec
-					limit: 100,
-				},
-			],
+			throttlers: [{ ttl: 60000, limit: 100 }],
 		}),
-
-		// Monitoring
 		PrometheusModule.register(),
-
-		AuthModule,
+		AuthModule, // ← provides AuthGuard, WebhookGuard, use cases
 		CoreModule,
 		HealthModule,
 		UsersModule,
 		WebhooksModule,
 	],
-	controllers: [],
 	providers: [
-		{
-			provide: APP_GUARD,
-			useClass: AuthGuard,
-		},
+		// Guards
 		{
 			provide: APP_GUARD,
 			useClass: ThrottlerGuard,
 		},
+		// Pipes
 		{
 			provide: APP_PIPE,
 			useClass: ZodValidationPipe,
 		},
+		// Interceptors
 		{
 			provide: APP_INTERCEPTOR,
 			useClass: ZodSerializerInterceptor,
 		},
+		// Filters
 		{
 			provide: APP_FILTER,
 			useClass: HttpExceptionFilter,
 		},
 	],
+	// no exports — AppModule is the root, nothing imports it
 })
 export class AppModule {}
