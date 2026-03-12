@@ -1,4 +1,4 @@
-import { Request } from '@common/types/request';
+import { AuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
@@ -71,7 +71,7 @@ export class AuthGuard implements CanActivate {
 			`Request ${request.path} authorized as ${authUser.value.email}`
 		);
 
-		request.authUser = authUser.value;
+		(request as AuthenticatedRequest).authUser = authUser.value;
 		return true;
 	}
 }
