@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import pino, { Logger } from 'pino';
 import pretty from 'pino-pretty';
 
-export type LogLevel = 'info' | 'warn' | 'error' | 'debug';
+export type LogLevel = 'info' | 'warn' | 'error' | 'debug' | 'trace';
 
 export interface LogFields {
 	context?: string;
@@ -124,7 +124,7 @@ export class AppLogger implements LoggerService {
 	}
 
 	verbose(message: string, context?: string): void {
-		this.logger.trace({ context, ...this.getCorrelationContext() }, message);
+		this.write('trace', message, { context });
 	}
 
 	// Extended helpers
