@@ -22,6 +22,12 @@ import type {
 // ── Users ────────────────────────────────
 let emailCounter = 0;
 
+/**
+ * Builds a NewUser object with a generated unique email and optional field overrides.
+ *
+ * @param overrides - Partial fields to merge into the generated user object; any provided fields replace the defaults.
+ * @returns The created NewUser. The `email` defaults to a generated value like `test-<counter>-<timestamp>@example.com` unless `overrides.email` is provided. This function increments a module-scoped counter used to make generated emails unique.
+ */
 export function createTestUser(overrides: Partial<NewUser> = {}): NewUser {
 	emailCounter += 1;
 	return {
@@ -32,6 +38,16 @@ export function createTestUser(overrides: Partial<NewUser> = {}): NewUser {
 
 // ── Phones ───────────────────────────────
 let phoneCounter = 0;
+/**
+ * Builds a minimal NewUserPhone object for tests with a generated phone number and sensible defaults.
+ *
+ * The `overrides` object is shallow-merged into the result to replace default fields. This function also
+ * increments an internal phone counter to produce a unique phone number for each call.
+ *
+ * @param userId - The ID of the user to associate with the phone record
+ * @param overrides - Partial fields to override the defaults on the generated NewUserPhone
+ * @returns A NewUserPhone object containing `userId`, a generated `phone`, `countryCode`, and any overridden fields
+ */
 export function createTestPhone(
 	userId: string,
 	overrides: Partial<NewUserPhone> = {}

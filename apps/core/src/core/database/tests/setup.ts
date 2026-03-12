@@ -27,8 +27,15 @@ function cleanConnectionUrl(raw: string): string {
 }
 
 /**
- * Call once in `beforeAll`.
- * Creates the postgres client + drizzle instance.
+ * Initialize the test Postgres client and Drizzle DB instance for tests.
+ *
+ * Reads the DATABASE_URL environment variable, validates that the database
+ * name matches a test pattern (ends with `test`, `_test`, or `-test`, case-insensitive),
+ * then creates and stores the Postgres client and Drizzle `PsqlDB` instance.
+ *
+ * @returns The initialized Drizzle `PsqlDB` instance.
+ * @throws If `DATABASE_URL` is not set.
+ * @throws If the database name does not match an expected test-pattern.
  */
 export async function setupTestDB(): Promise<PsqlDB> {
 	const raw = process.env.DATABASE_URL;
@@ -77,7 +84,9 @@ export async function cleanupTables(): Promise<void> {
 }
 
 /**
- * Close the postgres connection. Call in `afterAll`.
+ * Closes the test Postgres client connection and clears the internal client reference.
+ *
+ * Does nothing if no client is initialized.
  */
 export async function teardownTestDB(): Promise<void> {
 	if (!client) return;

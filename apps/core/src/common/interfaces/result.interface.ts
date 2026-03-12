@@ -64,6 +64,12 @@ export class Err<T, E extends Error = Error> {
 
 export function ok(): Ok<void>;
 export function ok<T>(value: T): Ok<T>;
+/**
+ * Creates an Ok wrapper containing the given value or `undefined` when no value is provided.
+ *
+ * @param value - The value to wrap; if omitted, the result holds `undefined`.
+ * @returns An `Ok` instance containing `value`, or `Ok(undefined)` when no value is supplied.
+ */
 export function ok<T>(value?: T): Ok<T | undefined> {
 	return new Ok(value);
 }

@@ -21,6 +21,13 @@ NestLogger.debug(
 
 const logger = new NestLogger('Bootstrap');
 
+/**
+ * Create, configure, and start the NestJS application.
+ *
+ * Configures shutdown hooks, application logger, security middleware, CORS, global route prefix,
+ * and a global OpenTelemetry interceptor; registers a request-logging middleware; conditionally
+ * sets up Swagger; starts the HTTP server on the configured port and logs the active port.
+ */
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule, {
 		bufferLogs: true,
