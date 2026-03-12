@@ -9,7 +9,9 @@ export class DatabaseShutdownService implements BeforeApplicationShutdown {
 		@Inject(DB_CLIENT) private readonly dbClient: Sql,
 		@Inject(SUBSCRIBER_CLIENT) private readonly subscriberClient: Sql,
 		private readonly logger: AppLogger
-	) {}
+	) {
+		this.logger.setContext(DatabaseShutdownService.name);
+	}
 
 	async beforeApplicationShutdown() {
 		this.logger.log('Closing database connections…');

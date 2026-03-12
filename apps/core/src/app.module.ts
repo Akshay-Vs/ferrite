@@ -1,15 +1,26 @@
 import { CoreModule } from '@core/core.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { AuthGuard } from '@modules/auth/infrastructure/http/guards/auth.guard';
+import { UsersModule } from '@modules/users/users.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-error-filter';
-import { UsersModule } from './modules/users/users.module';
+import { HealthModule } from './modules/health/health.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
+@Global()
 @Module({
 	imports: [
+		// Config
+		ConfigModule.forRoot({
+			isGlobal: true,
+		}),
+
 		CacheModule.register({
 			ttl: 60000, // 60 sec
 			isGlobal: true,
@@ -20,21 +31,26 @@ import { UsersModule } from './modules/users/users.module';
 			throttlers: [
 				{
 					ttl: 60000, // 60 sec
-					limit: 10,
+					limit: 100,
 				},
 			],
 		}),
 
-		// Config
-		ConfigModule.forRoot({
-			isGlobal: true,
-		}),
+		// Monitoring
+		PrometheusModule.register(),
 
+		AuthModule,
 		CoreModule,
+		HealthModule,
 		UsersModule,
+		WebhooksModule,
 	],
 	controllers: [],
 	providers: [
+		{
+			provide: APP_GUARD,
+			useClass: AuthGuard,
+		},
 		{
 			provide: APP_GUARD,
 			useClass: ThrottlerGuard,
