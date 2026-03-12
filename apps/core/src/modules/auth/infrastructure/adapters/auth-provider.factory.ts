@@ -9,12 +9,23 @@ import { ClerkAdapter } from './providers/clerk';
 
 type AuthAdapterInstance = ITokenAuth & IWebhookAuth;
 
+/**
+ * Factory class responsible for resolving and providing the appropriate
+ * authentication provider adapter based on the application configuration.
+ */
 @Injectable()
 export class AuthProviderFactory {
 	private readonly logger = new Logger(AuthProviderFactory.name);
 	private readonly adapter: AuthAdapterInstance;
 	private readonly adapters: Record<AuthProvider, AuthAdapterInstance>;
 
+	/**
+	 * Initializes the AuthProviderFactory.
+	 * Registers available adapters and resolves the active one based on the configuration.
+	 *
+	 * @param config - The application configuration service.
+	 * @param clerk - The Clerk authentication adapter.
+	 */
 	constructor(
 		private readonly config: ConfigService,
 		private readonly clerk: ClerkAdapter
@@ -27,10 +38,22 @@ export class AuthProviderFactory {
 		this.adapter = this.resolve();
 	}
 
+	/**
+	 * Returns the currently active authentication adapter instance.
+	 *
+	 * @returns The resolved AuthAdapterInstance.
+	 */
 	getAdapter(): AuthAdapterInstance {
 		return this.adapter;
 	}
 
+	/**
+	 * Resolves the authentication adapter based on the 'AUTH_PROVIDER' configuration value.
+	 * Validates the provider before returning its corresponding adapter.
+	 *
+	 * @returns The resolved AuthAdapterInstance.
+	 * @throws Error if the 'AUTH_PROVIDER' configuration is missing or invalid.
+	 */
 	private resolve(): AuthAdapterInstance {
 		const provider = this.config.get<AuthProvider>('AUTH_PROVIDER');
 		this.assertValidProvider(provider);
@@ -39,6 +62,12 @@ export class AuthProviderFactory {
 		return adapter;
 	}
 
+	/**
+	 * Asserts that the provided value is a valid authentication provider.
+	 *
+	 * @param provider - The provider value to validate.
+	 * @throws Error if the provider is not set or is not a valid AuthProvider.
+	 */
 	private assertValidProvider(
 		provider: unknown
 	): asserts provider is AuthProvider {
@@ -57,6 +86,11 @@ export class AuthProviderFactory {
 		}
 	}
 
+	/**
+	 * Retrieves the list of valid authentication providers based on registered adapters.
+	 *
+	 * @returns An array of explicitly registered AuthProvider keys.
+	 */
 	private validProviders(): AuthProvider[] {
 		return Object.keys(this.adapters) as AuthProvider[];
 	}
