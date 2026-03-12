@@ -31,11 +31,12 @@ export function createTestUser(overrides: Partial<NewUser> = {}): NewUser {
 }
 
 // ── Phones ───────────────────────────────
-const phoneCounter = 0;
+let phoneCounter = 0;
 export function createTestPhone(
 	userId: string,
 	overrides: Partial<NewUserPhone> = {}
 ): NewUserPhone {
+	phoneCounter = (phoneCounter + 1) % 10_000_000;
 	return {
 		userId,
 		phone: `555${String(phoneCounter).padStart(7, '0')}`,
