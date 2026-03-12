@@ -23,11 +23,16 @@
 		"strictBindCallApply": false,
 		"noFallthroughCasesInSwitch": false,
 		"paths": {
+			// modules
+			"@auth/*": ["src/modules/auth/*"],
+			"@health/*": ["src/modules/health/*"],
+			"@users/*": ["src/modules/users/*"],
+			"@webhooks/*": ["src/modules/webhooks/*"],
+			// shared
 			"@core/*": ["src/core/*"],
 			"@modules/*": ["src/modules/*"],
 			"@common/*": ["src/common/*"],
-			"@database/*": ["src/core/database/*"],
-			"@auth/*": ["src/modules/_auth/*"]
+			"@database/*": ["src/core/database/*"]
 		}
 	}
 }
