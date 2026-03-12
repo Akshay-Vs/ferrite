@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 import { authProvidersSchema } from './auth-providers.zodschema';
 
 export const authUserSchema = z.object({
-	externalAuthId: z.uuid(),
+	externalAuthId: z.string(),
 	provider: authProvidersSchema,
 	email: z.string(),
 	emailVerified: z.boolean(),

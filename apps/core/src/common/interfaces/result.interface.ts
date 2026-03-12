@@ -52,7 +52,7 @@ export class Err<T, E extends Error = Error> {
 	}
 
 	unwrap(): never {
-		throw new Error(`Called unwrap() on Err: ${this.error.message}`);
+		throw this.error;
 	}
 
 	unwrapOr(fallback: T): T {

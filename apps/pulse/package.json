@@ -9,6 +9,7 @@
 		"lint": "biome check --fix ."
 	},
 	"dependencies": {
+		"@clerk/nextjs": "^7.0.4",
 		"@types/lint-staged": "^14.0.0",
 		"lint-staged": "^16.3.1",
 		"next": "16.1.6",

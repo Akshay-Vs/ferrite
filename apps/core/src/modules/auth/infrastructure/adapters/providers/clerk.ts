@@ -4,6 +4,7 @@ import {
 	RawTokenClaims,
 	RawWebhookClaims,
 } from '@auth/domain/schemas';
+import { rawWebhookClaimsSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
 import { WebhookPayload } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
@@ -11,7 +12,11 @@ import {
 	ITokenAuth,
 	IWebhookAuth,
 } from '@modules/auth/domain/ports/auth-provider.port';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
 
@@ -19,7 +24,6 @@ export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
 
 @Injectable()
 export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
-	private readonly webhookSecret: string;
 	private readonly secretKey: string;
 
 	constructor(
@@ -28,9 +32,6 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	) {
 		this.logger.setContext(ClerkAdapter.name);
 		this.secretKey = this.config.getOrThrow<string>('AUTH_CLERK_SECRET_KEY');
-		this.webhookSecret = this.config.getOrThrow<string>(
-			'AUTH_CLERK_WEBHOOK_SECRET'
-		);
 	}
 
 	//  ITokenVerifier
@@ -73,8 +74,17 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 		};
 	}
 
+	//IWebhookParser
+	zodParse(claims: RawWebhookClaims): any {
+		return rawWebhookClaimsSchema.parse(claims);
+	}
+
 	//  IWebhookVerifier
 	async verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims> {
+		const webhookSecret = this.config.getOrThrow<string>(
+			'AUTH_CLERK_WEBHOOK_SECRET'
+		);
+
 		const { body, headers } = payload;
 
 		const svixId = headers['svix-id'] as string | undefined;
@@ -92,10 +102,10 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 		if (!body?.length) {
 			this.logger.error('Missing request body');
-			throw new Error('Missing request body');
+			throw new BadRequestException('Missing request body');
 		}
 
-		const wh = new Webhook(this.webhookSecret);
+		const wh = new Webhook(webhookSecret);
 
 		try {
 			// raw Buffer — exact bytes Clerk signed
@@ -106,8 +116,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 			}) as WebhookEvent;
 
 			this.logger.debug(
-				'Webhook signature verification successful',
-				JSON.stringify(verified, null, 2)
+				`Webhook signature verification successful: svixId=${svixId} eventType=${verified.type}`
 			);
 
 			return {

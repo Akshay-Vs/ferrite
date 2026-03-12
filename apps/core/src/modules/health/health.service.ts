@@ -1,3 +1,4 @@
+import { AuthUser } from '@auth/index';
 import { AppLogger } from '@core/logger/logger.service';
 import { Injectable } from '@nestjs/common';
 
@@ -7,8 +8,11 @@ export class HealthService {
 		this.logger.setContext(HealthService.name);
 	}
 
-	hello() {
+	hello(user: AuthUser) {
 		this.logger.log('request received Hello');
-		return 'Hello';
+		return {
+			user,
+			message: `Hello ${user.fullName} from Ferrite Core!`,
+		};
 	}
 }

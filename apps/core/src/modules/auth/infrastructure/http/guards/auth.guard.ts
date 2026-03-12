@@ -1,4 +1,4 @@
-import { Request } from '@common/types/request';
+import { AuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
@@ -63,15 +63,13 @@ export class AuthGuard implements CanActivate {
 		const authUser = await this.verifyToken.execute(token);
 
 		if (authUser.isErr()) {
-			this.logger.error('Failed to verify token');
-			throw new UnauthorizedException(authUser.error.message);
+			this.logger.error(`Failed to verify token: ${authUser.error.message}`);
+			throw new UnauthorizedException('Invalid or expired token');
 		}
 
-		this.logger.debug(
-			`Request ${request.path} authorized as ${authUser.value.email}`
-		);
+		this.logger.debug(`Request ${request.path} authorized`);
 
-		request.authUser = authUser.value;
+		(request as AuthenticatedRequest).authUser = authUser.value;
 		return true;
 	}
 }
