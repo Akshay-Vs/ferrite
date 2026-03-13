@@ -1,0 +1,106 @@
+services:
+  # core:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/core/Dockerfile
+  #   env_file:
+  #     - ./apps/core/.env
+  #   ports:
+  #     - "4000:4000"
+  #   restart: unless-stopped
+  #   networks:
+  #     - observability
+
+  # ─── Database ─────────────────────────────────────────────────────────────
+  postgres:
+      image: postgres:18-alpine
+      env_file:
+        - apps/core/.env
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+  # ─── OpenTelemetry Collector ───────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./monitoring/open-telemetry/config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Collector metrics (self-telemetry)
+    depends_on:
+      - jaeger
+      - prometheus
+      - loki
+    networks:
+      - observability
+
+  # ─── Traces → Jaeger ──────────────────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # Jaeger UI
+    networks:
+      - observability
+
+  # ─── Metrics → Prometheus ─────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/open-telemetry/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"    # Prometheus UI
+    networks:
+      - observability
+
+  # ─── Logs → Loki ──────────────────────────────────────────────────────────
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./monitoring/open-telemetry/loki.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - observability
+
+  # ─── Visualisation → Grafana ──────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - ./monitoring/open-telemetry/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3200:3000"    # Grafana UI
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
+    networks:
+      - observability
+
+volumes:
+  prometheus-data:
+  loki-data:
+  grafana-data:
+  postgres_data:
+
+networks:
+  observability:
+    driver: bridge
