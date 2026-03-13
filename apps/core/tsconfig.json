@@ -13,7 +13,6 @@
 		"target": "ES2023",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"baseUrl": "./",
 		"incremental": true,
 		"skipLibCheck": true,
 		"typeRoots": ["./node_modules/@types"],
@@ -24,15 +23,15 @@
 		"noFallthroughCasesInSwitch": false,
 		"paths": {
 			// modules
-			"@auth/*": ["src/modules/auth/*"],
-			"@health/*": ["src/modules/health/*"],
-			"@users/*": ["src/modules/users/*"],
-			"@webhooks/*": ["src/modules/webhooks/*"],
+			"@auth/*": ["./src/modules/auth/*"],
+			"@health/*": ["./src/modules/health/*"],
+			"@users/*": ["./src/modules/users/*"],
+			"@webhooks/*": ["./src/modules/webhooks/*"],
 			// shared
-			"@core/*": ["src/core/*"],
-			"@modules/*": ["src/modules/*"],
-			"@common/*": ["src/common/*"],
-			"@database/*": ["src/core/database/*"]
+			"@core/*": ["./src/core/*"],
+			"@modules/*": ["./src/modules/*"],
+			"@common/*": ["./src/common/*"],
+			"@database/*": ["./src/core/database/*"]
 		}
 	}
 }
