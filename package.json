@@ -18,7 +18,7 @@
 		"secretlint": "^11.3.1",
 		"syncpack": "^14.2.0",
 		"turbo": "^2.8.14",
-		"typescript": "^5.9.3"
+		"typescript": "^5"
 	},
 	"engines": {
 		"node": ">=24.14.0",
