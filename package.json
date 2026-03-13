@@ -1,6 +1,7 @@
 {
 	"name": "@ferrite/root",
 	"devDependencies": {
+		"@nestjs/cli": "^11.0.0",
 		"@biomejs/biome": "2.4.4",
 		"@changesets/cli": "^2.29.8",
 		"@commitlint/cli": "^20.4.2",
@@ -43,7 +44,10 @@
 	},
 	"type": "module",
 	"workspaces": [
-		"packages/*",
-		"packages/**/*"
-	]
+		"packages/**/*",
+		"apps/*"
+	],
+	"dependencies": {
+		"express": "^5.2.1"
+	}
 }
