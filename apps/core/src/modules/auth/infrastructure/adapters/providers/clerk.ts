@@ -7,6 +7,7 @@ import {
 import { rawWebhookClaimsSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
 import { WebhookPayload } from '@common/types/webhook-payload.type';
+import { withSpan } from '@common/utils/tracing.util';
 import { AppLogger } from '@core/logger/logger.service';
 import {
 	ITokenAuth,
@@ -36,29 +37,37 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 	//  ITokenVerifier
 	async verifyJWT(token: string): Promise<RawTokenClaims> {
-		try {
-			this.logger.debug('Verifying JWT token');
-			const claims = await clerkVerifyToken(token, {
-				secretKey: this.secretKey,
-			});
+		return withSpan('adapters.clerk.verifyJWT', async (span) => {
+			try {
+				this.logger.debug('Verifying JWT token');
 
-			if (!claims.email) {
-				throw new Error('Invalid token claims');
+				span.setAttributes({
+					'adapter.name': 'ClerkAdapter',
+					'adapter.method': 'verifyJWT',
+				});
+
+				const claims = await clerkVerifyToken(token, {
+					secretKey: this.secretKey,
+				});
+
+				if (!claims.email) {
+					throw new Error('Invalid token claims');
+				}
+
+				return {
+					sub: claims.sub,
+					email: claims.email as string,
+					email_verified: (claims.email_verified as boolean) ?? false,
+					full_name: claims.full_name as string | undefined,
+					metadata: (claims.public_metadata as Record<string, unknown>) ?? {},
+					iat: claims.iat,
+					exp: claims.exp,
+				};
+			} catch {
+				this.logger.error('Invalid or expired token');
+				throw new UnauthorizedException('Invalid or expired token');
 			}
-
-			return {
-				sub: claims.sub,
-				email: claims.email as string,
-				email_verified: (claims.email_verified as boolean) ?? false,
-				full_name: claims.full_name as string | undefined,
-				metadata: (claims.public_metadata as Record<string, unknown>) ?? {},
-				iat: claims.iat,
-				exp: claims.exp,
-			};
-		} catch {
-			this.logger.error('Invalid or expired token');
-			throw new UnauthorizedException('Invalid or expired token');
-		}
+		});
 	}
 
 	//  ITokenTransformer
@@ -81,55 +90,62 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 	//  IWebhookVerifier
 	async verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims> {
-		const webhookSecret = this.config.getOrThrow<string>(
-			'AUTH_CLERK_WEBHOOK_SECRET'
-		);
+		return withSpan('adapters.clerk.verifyWebhook', async (span) => {
+			span.setAttributes({
+				'adapter.name': 'ClerkAdapter',
+				'adapter.method': 'verifyWebhook',
+			});
 
-		const { body, headers } = payload;
-
-		const svixId = headers['svix-id'] as string | undefined;
-		const svixTimestamp = headers['svix-timestamp'] as string | undefined;
-		const svixSignature = headers['svix-signature'] as string | undefined;
-
-		if (!svixId || !svixTimestamp || !svixSignature) {
-			this.logger.error(
-				'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
-			);
-			throw new Error(
-				'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
-			);
-		}
-
-		if (!body?.length) {
-			this.logger.error('Missing request body');
-			throw new BadRequestException('Missing request body');
-		}
-
-		const wh = new Webhook(webhookSecret);
-
-		try {
-			// raw Buffer — exact bytes Clerk signed
-			const verified = wh.verify(body, {
-				'svix-id': svixId,
-				'svix-timestamp': svixTimestamp,
-				'svix-signature': svixSignature,
-			}) as WebhookEvent;
-
-			this.logger.debug(
-				`Webhook signature verification successful: svixId=${svixId} eventType=${verified.type}`
+			const webhookSecret = this.config.getOrThrow<string>(
+				'AUTH_CLERK_WEBHOOK_SECRET'
 			);
 
-			return {
-				eventId: svixId,
-				eventType: verified.type,
-				timestamp: Number(svixTimestamp),
-				data: (verified as any).data,
-			};
-		} catch (error) {
-			this.logger.error('Webhook signature verification failed');
-			throw new Error(
-				`Webhook signature verification failed: ${error instanceof Error ? error.message : String(error)}`
-			);
-		}
+			const { body, headers } = payload;
+
+			const svixId = headers['svix-id'] as string | undefined;
+			const svixTimestamp = headers['svix-timestamp'] as string | undefined;
+			const svixSignature = headers['svix-signature'] as string | undefined;
+
+			if (!svixId || !svixTimestamp || !svixSignature) {
+				this.logger.error(
+					'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+				);
+				throw new Error(
+					'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+				);
+			}
+
+			if (!body?.length) {
+				this.logger.error('Missing request body');
+				throw new BadRequestException('Missing request body');
+			}
+
+			const wh = new Webhook(webhookSecret);
+
+			try {
+				// raw Buffer — exact bytes Clerk signed
+				const verified = wh.verify(body, {
+					'svix-id': svixId,
+					'svix-timestamp': svixTimestamp,
+					'svix-signature': svixSignature,
+				}) as WebhookEvent;
+
+				this.logger.debug(
+					`Webhook signature verification successful: svixId=${svixId} eventType=${verified.type}`
+				);
+
+				return {
+					eventId: svixId,
+					eventType: verified.type,
+					timestamp: Number(svixTimestamp),
+					data: (verified as any).data,
+				};
+			} catch (error) {
+				this.logger.error('Webhook signature verification failed');
+				throw new Error(
+					`Webhook signature verification failed: ${error instanceof Error ? error.message : String(error)}`
+				);
+			}
+		});
 	}
 }

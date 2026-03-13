@@ -1,4 +1,5 @@
 import { WebhookPayload } from '@common/types/webhook-payload.type';
+import { withSpan } from '@common/utils/tracing.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
@@ -22,34 +23,41 @@ export class WebhookGuard implements CanActivate {
 	}
 
 	async canActivate(context: any): Promise<boolean> {
-		const isWebhook = this.reflector.getAllAndOverride<boolean>(
-			IS_WEBHOOK_ROUTE,
-			[context.getHandler(), context.getClass()]
-		);
-
-		if (!isWebhook) {
-			this.logger.debug('Webhook route must be decorated with @WebhookRoute');
-			throw new ForbiddenException(
-				'Invalid webhook route: must be decorated with @WebhookRoute'
+		return withSpan('guards.webhook.canActivate', async (span) => {
+			const isWebhook = this.reflector.getAllAndOverride<boolean>(
+				IS_WEBHOOK_ROUTE,
+				[context.getHandler(), context.getClass()]
 			);
-		}
 
-		const request: Request = context.switchToHttp().getRequest();
+			if (!isWebhook) {
+				this.logger.debug('Webhook route must be decorated with @WebhookRoute');
+				throw new ForbiddenException(
+					'Invalid webhook route: must be decorated with @WebhookRoute'
+				);
+			}
 
-		const payload: WebhookPayload = {
-			body: request.body,
-			headers: request.headers,
-		};
+			const request: Request = context.switchToHttp().getRequest();
 
-		const event = await this.verifyWebhook.execute(payload);
+			const payload: WebhookPayload = {
+				body: request.body,
+				headers: request.headers,
+			};
 
-		if (event.isErr()) {
-			this.logger.error('Failed to verify webhook');
-			throw new UnauthorizedException(event.error.message);
-		}
+			const event = await this.verifyWebhook.execute(payload);
 
-		this.logger.debug('Successfully verified webhook');
+			if (event.isErr()) {
+				this.logger.error('Failed to verify webhook');
+				throw new UnauthorizedException(event.error.message);
+			}
 
-		return true;
+			this.logger.debug('Successfully verified webhook');
+
+			span.setAttributes({
+				'guard.name': 'WebhookGuard',
+				'http.route': request.route?.path ?? 'unknown',
+			});
+
+			return true;
+		});
 	}
 }
