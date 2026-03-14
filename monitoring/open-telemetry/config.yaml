@@ -24,30 +24,40 @@ exporters:
     endpoint: jaeger:4317
     tls:
       insecure: true
-
   prometheusremotewrite:
     endpoint: http://prometheus:9090/api/v1/write
-
   otlphttp/loki:
     endpoint: http://loki:3100/otlp
     tls:
       insecure: true
-
   debug:
-    verbosity: basic   # prints to collector stdout — useful while developing
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
 
 service:
+  extensions: [health_check, pprof]
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 0.0.0.0
+                port: 8888
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, batch, resource]
       exporters: [otlp/jaeger, debug]
-
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch, resource]
       exporters: [prometheusremotewrite, debug]
-
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch, resource]
