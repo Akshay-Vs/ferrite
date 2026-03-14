@@ -46,8 +46,8 @@ export class WebhookGuard implements CanActivate {
 			const event = await this.verifyWebhook.execute(payload);
 
 			if (event.isErr()) {
-				this.logger.error('Failed to verify webhook');
-				throw new UnauthorizedException(event.error.message);
+				this.logger.error(`Failed to verify webhook: ${event.error.message}`);
+				throw new UnauthorizedException('Invalid webhook signature');
 			}
 
 			this.logger.debug('Successfully verified webhook');
