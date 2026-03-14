@@ -40,9 +40,9 @@ datasources:
         spanEndTimeShift: '1m'
         queries:
           - name: 'Request rate'
-            query: 'rate(http_server_duration_milliseconds_count{$$__tags}[5m])'
+            query: 'rate(http.server.request.duration{$$__tags}[5m])'
           - name: 'Error rate'
-            query: 'rate(http_server_duration_milliseconds_count{$$__tags, http_status_code=~"5.."}[5m])'
+            query: 'rate(http.server.request.duration{$$__tags, http_status_code=~"5.."}[5m])'
       traceQuery:
         timeShiftEnabled: true
         spanStartTimeShift: '-1m'
