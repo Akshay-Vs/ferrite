@@ -18,7 +18,7 @@ export class VerifyWebhookUseCase
 {
 	constructor(
 		@Inject(WEBHOOK_AUTH) private readonly webhookAuth: IWebhookAuth,
-		private logger: AppLogger
+		private readonly logger: AppLogger
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
@@ -26,8 +26,7 @@ export class VerifyWebhookUseCase
 	async execute(payload: WebhookPayload): Promise<Result<RawWebhookClaims>> {
 		try {
 			const claims = await this.webhookAuth.verifyWebhook(payload);
-			const parsedClaims = this.webhookAuth.zodParse(claims);
-			return ok(parsedClaims);
+			return ok(claims);
 		} catch (error) {
 			this.logger.error('Failed to verify webhook');
 			return err(error instanceof Error ? error : new Error(String(error)));

@@ -33,16 +33,6 @@ export interface IWebhookVerifier {
 	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
 }
 
-export interface IWebhookParser {
-	/**
-	 * Parse the raw webhook claims into a more structured object using Zod.
-	 * Pure validation — no IO, no side effects.
-	 * @param claims - Raw webhook claims returned by IWebhookVerifier
-	 * @returns A parsed and validated webhook event
-	 */
-	zodParse(claims: RawWebhookClaims): any;
-}
-
 /**
  * Port for JWT verification and transformation.
  * Consumed by: VerifyJWTUseCase
@@ -57,4 +47,4 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
  * Consumed by: VerifyWebhookUseCase
  * Implemented by: ClerkAdapter, KindeAdapter etc
  */
-export interface IWebhookAuth extends IWebhookVerifier, IWebhookParser {}
+export interface IWebhookAuth extends IWebhookVerifier {}
