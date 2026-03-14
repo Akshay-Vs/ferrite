@@ -52,13 +52,13 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, resource, batch]
       exporters: [otlp/jaeger, debug]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, resource, batch]
       exporters: [prometheusremotewrite, debug]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch, resource]
+      processors: [memory_limiter, resource, batch]
       exporters: [otlphttp/loki, debug]
