@@ -125,7 +125,13 @@ class LokiTransport implements OnModuleDestroy {
 					`[LokiTransport] push failed ${res.status}: ${body}\n`
 				);
 				// Re-queue entries so they are not silently dropped.
-				this.batch.unshift(...entries);
+				if (this.batch.length + entries.length <= this.MAX_BATCH_SIZE) {
+					this.batch.unshift(...entries);
+				} else {
+					process.stderr.write(
+						`[LokiTransport] dropping ${entries.length} entries (buffer full)\n`
+					);
+				}
 			}
 		} catch (err) {
 			process.stderr.write(
