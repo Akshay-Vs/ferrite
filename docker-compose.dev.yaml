@@ -59,6 +59,9 @@ services:
     volumes:
       - ./monitoring/open-telemetry/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
     ports:
       - "9090:9090"    # Prometheus UI
     networks:
@@ -66,7 +69,8 @@ services:
 
   # ─── Logs → Loki ──────────────────────────────────────────────────────────
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.3.2
+    user: "0"
     command: -config.file=/etc/loki/config.yaml
     volumes:
       - ./monitoring/open-telemetry/loki.yaml:/etc/loki/config.yaml:ro
