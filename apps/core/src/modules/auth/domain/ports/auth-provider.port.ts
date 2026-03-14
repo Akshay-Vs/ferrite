@@ -1,5 +1,5 @@
-import { WebhookPayload } from '@common/types/webhook-payload.type';
-import { AuthUser, RawTokenClaims, RawWebhookClaims } from '../schemas';
+import { RawWebhookRequest } from '@common/types/webhook-payload.type';
+import { AuthUser, RawTokenClaims, WebhookPayload } from '../schemas';
 
 export interface ITokenVerifier {
 	/**
@@ -30,7 +30,7 @@ export interface IWebhookVerifier {
 	 * @throws {BadRequestException} If the signature is missing or malformed
 	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
 	 */
-	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
+	verifyWebhook(payload: RawWebhookRequest): Promise<WebhookPayload>;
 }
 
 /**

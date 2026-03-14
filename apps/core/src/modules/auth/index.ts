@@ -17,8 +17,8 @@ export {
 	rawTokenClaimsSchema,
 } from './domain/schemas/token-claims.zodschema';
 export {
-	type RawWebhookClaims,
-	rawWebhookClaimsSchema,
+	type WebhookPayload,
+	webhookPayloadSchema,
 } from './domain/schemas/webhook-claims.zodschema';
 export { PublicRoute } from './infrastructure/http/decorators/public-route.decorator';
 export { WebhookRoute } from './infrastructure/http/decorators/webhook-route.decorator';

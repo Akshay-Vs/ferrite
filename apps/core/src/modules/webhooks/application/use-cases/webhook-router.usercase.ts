@@ -1,4 +1,4 @@
-import { RawWebhookClaims } from '@auth/index';
+import { WebhookPayload } from '@auth/index';
 import { ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
@@ -8,9 +8,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { UserSyncProducer } from '@webhooks/infrastructure/queue/user-sync.producer';
 
 @Injectable()
-export class WebhookRouterUsecase
-	implements IUseCase<RawWebhookClaims, boolean>
-{
+export class WebhookRouterUsecase implements IUseCase<WebhookPayload, boolean> {
 	constructor(
 		private readonly logger: AppLogger,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
@@ -18,7 +16,7 @@ export class WebhookRouterUsecase
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
-	async execute(payload: RawWebhookClaims): Promise<Result<boolean, Error>> {
+	async execute(payload: WebhookPayload): Promise<Result<boolean, Error>> {
 		return this.tracer.withSpan(
 			'webhook-router.execute',
 			async () => {

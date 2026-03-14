@@ -2,11 +2,11 @@ import {
 	AuthUser,
 	authProvidersEnum,
 	RawTokenClaims,
-	RawWebhookClaims,
+	WebhookPayload,
 } from '@auth/domain/schemas';
-import { rawWebhookClaimsSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
+import { webhookPayloadSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
-import { WebhookPayload } from '@common/types/webhook-payload.type';
+import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
@@ -87,12 +87,12 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	}
 
 	//IWebhookParser
-	private zodParse(claims: RawWebhookClaims): any {
-		return rawWebhookClaimsSchema.parse(claims);
+	private zodParse(claims: WebhookPayload): any {
+		return webhookPayloadSchema.parse(claims);
 	}
 
 	//  IWebhookVerifier
-	async verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims> {
+	async verifyWebhook(payload: RawWebhookRequest): Promise<WebhookPayload> {
 		return this.tracer.withSpan(
 			'adapters.clerk.verifyWebhook',
 			async (span) => {
@@ -145,7 +145,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 					const parsed = this.zodParse({
 						eventId: svixId,
-						eventType: verified.type as RawWebhookClaims['eventType'],
+						eventType: verified.type,
 						timestamp: Number(svixTimestamp),
 						data: (verified as any).data,
 					});

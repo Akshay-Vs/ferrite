@@ -1,5 +1,5 @@
 import { WebhookRequest } from '@common/types/request';
-import { WebhookPayload } from '@common/types/webhook-payload.type';
+import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
@@ -49,19 +49,19 @@ export class WebhookGuard implements CanActivate {
 				'http.route': request.route?.path ?? 'unknown',
 			});
 
-			const payload: WebhookPayload = {
+			const webhookRequest: RawWebhookRequest = {
 				body: request.body,
 				headers: request.headers,
 			};
 
-			const claims = await this.verifyWebhook.execute(payload);
+			const payload = await this.verifyWebhook.execute(webhookRequest);
 
-			if (claims.isErr()) {
-				this.logger.error(`Failed to verify webhook: ${claims.error.message}`);
+			if (payload.isErr()) {
+				this.logger.error(`Failed to verify webhook: ${payload.error.message}`);
 				throw new UnauthorizedException('Invalid webhook signature');
 			}
 
-			request.rawClaims = claims.value;
+			request.webhookPayload = payload.value;
 
 			this.logger.debug('Successfully verified webhook');
 

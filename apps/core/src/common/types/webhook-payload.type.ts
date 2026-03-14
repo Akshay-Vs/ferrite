@@ -5,7 +5,7 @@ import { IncomingHttpHeaders } from 'node:http';
  * Must contain the unparsed body buffer — required for signature verification.
  * Parsing the body before verification will break HMAC signature checks.
  */
-export interface WebhookPayload {
+export interface RawWebhookRequest {
 	/**
 	 * Unparsed raw request body as a Buffer.
 	 * Requires rawBody: true in NestJS bootstrap (main.ts):

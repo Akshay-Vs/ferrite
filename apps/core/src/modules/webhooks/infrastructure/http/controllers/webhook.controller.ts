@@ -1,4 +1,4 @@
-import { type RawWebhookClaims, WebhookGuard, WebhookRoute } from '@auth/index';
+import { WebhookGuard, type WebhookPayload, WebhookRoute } from '@auth/index';
 import {
 	Controller,
 	HttpCode,
@@ -17,7 +17,7 @@ export class WebhookController {
 
 	@Post()
 	@HttpCode(HttpStatus.OK)
-	async createWebhook(@WebhookEvent() event: RawWebhookClaims) {
+	async createWebhook(@WebhookEvent() event: WebhookPayload) {
 		return this.webhookRouterUsecase.execute(event);
 	}
 }
