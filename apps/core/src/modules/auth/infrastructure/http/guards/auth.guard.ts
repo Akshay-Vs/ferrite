@@ -35,6 +35,11 @@ export class AuthGuard implements CanActivate {
 
 			const request: Request = context.switchToHttp().getRequest();
 
+			span.setAttributes({
+				'guard.name': 'AuthGuard',
+				'http.route': request.route?.path ?? 'unknown',
+			});
+
 			const isPublic = this.reflector.getAllAndOverride<boolean>(
 				IS_PUBLIC_ROUTE,
 				[context.getHandler(), context.getClass()]
@@ -72,11 +77,6 @@ export class AuthGuard implements CanActivate {
 			this.logger.debug(`Request ${request.path} authorized`);
 
 			(request as AuthenticatedRequest).authUser = authUser.value;
-
-			span.setAttributes({
-				'guard.name': 'AuthGuard',
-				'http.route': request.route?.path ?? 'unknown',
-			});
 			return true;
 		});
 	}

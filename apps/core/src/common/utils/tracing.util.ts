@@ -1,4 +1,4 @@
-import { Span, SpanStatusCode, trace } from '@opentelemetry/api';
+import { Attributes, Span, SpanStatusCode, trace } from '@opentelemetry/api';
 
 const tracer = trace.getTracer('nestjs-app');
 
@@ -9,7 +9,7 @@ const tracer = trace.getTracer('nestjs-app');
 export async function withSpan<T>(
 	name: string,
 	fn: (span: Span) => Promise<T>,
-	attributes?: Record<string, string>
+	attributes?: Attributes
 ): Promise<T> {
 	return tracer.startActiveSpan(name, async (span) => {
 		try {

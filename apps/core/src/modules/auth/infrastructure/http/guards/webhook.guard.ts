@@ -24,6 +24,10 @@ export class WebhookGuard implements CanActivate {
 
 	async canActivate(context: any): Promise<boolean> {
 		return withSpan('guards.webhook.canActivate', async (span) => {
+			span.setAttributes({
+				'guard.name': 'WebhookGuard',
+			});
+
 			const isWebhook = this.reflector.getAllAndOverride<boolean>(
 				IS_WEBHOOK_ROUTE,
 				[context.getHandler(), context.getClass()]
@@ -38,6 +42,10 @@ export class WebhookGuard implements CanActivate {
 
 			const request: Request = context.switchToHttp().getRequest();
 
+			span.setAttributes({
+				'http.route': request.route?.path ?? 'unknown',
+			});
+
 			const payload: WebhookPayload = {
 				body: request.body,
 				headers: request.headers,
@@ -51,11 +59,6 @@ export class WebhookGuard implements CanActivate {
 			}
 
 			this.logger.debug('Successfully verified webhook');
-
-			span.setAttributes({
-				'guard.name': 'WebhookGuard',
-				'http.route': request.route?.path ?? 'unknown',
-			});
 
 			return true;
 		});
