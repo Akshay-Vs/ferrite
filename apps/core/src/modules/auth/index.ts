@@ -20,6 +20,7 @@ export {
 	type RawWebhookClaims,
 	rawWebhookClaimsSchema,
 } from './domain/schemas/webhook-claims.zodschema';
-
+export { PublicRoute } from './infrastructure/http/decorators/public-route.decorator';
+export { WebhookRoute } from './infrastructure/http/decorators/webhook-route.decorator';
 export { AuthGuard } from './infrastructure/http/guards/auth.guard';
 export { WebhookGuard } from './infrastructure/http/guards/webhook.guard';

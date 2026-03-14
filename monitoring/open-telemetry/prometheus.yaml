@@ -6,3 +6,20 @@ scrape_configs:
   - job_name: 'otel-collector'
     static_configs:
       - targets: ['otel-collector:8888']
+
+  - job_name: postgres
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: "pg_.*"
+        action: keep
+
+  - job_name: redis
+    static_configs:
+      - targets: ["redis_exporter:9121"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: "([^:]+)(:[0-9]+)?"
+        replacement: "$1"

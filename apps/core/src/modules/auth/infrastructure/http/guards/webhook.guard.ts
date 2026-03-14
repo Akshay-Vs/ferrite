@@ -1,15 +1,17 @@
+import { WebhookRequest } from '@common/types/request';
 import { WebhookPayload } from '@common/types/webhook-payload.type';
-import { withSpan } from '@common/utils/tracing.util';
 import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
 	CanActivate,
 	ForbiddenException,
+	Inject,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
 import { IS_WEBHOOK_ROUTE } from '../decorators/webhook-route.decorator';
 
 @Injectable()
@@ -17,13 +19,14 @@ export class WebhookGuard implements CanActivate {
 	constructor(
 		private readonly logger: AppLogger,
 		private readonly reflector: Reflector,
-		private readonly verifyWebhook: VerifyWebhookUseCase
+		private readonly verifyWebhook: VerifyWebhookUseCase,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
 
 	async canActivate(context: any): Promise<boolean> {
-		return withSpan('guards.webhook.canActivate', async (span) => {
+		return this.tracer.withSpan('guards.webhook.canActivate', async (span) => {
 			span.setAttributes({
 				'guard.name': 'WebhookGuard',
 			});
@@ -40,7 +43,7 @@ export class WebhookGuard implements CanActivate {
 				);
 			}
 
-			const request: Request = context.switchToHttp().getRequest();
+			const request: WebhookRequest = context.switchToHttp().getRequest();
 
 			span.setAttributes({
 				'http.route': request.route?.path ?? 'unknown',
@@ -51,12 +54,14 @@ export class WebhookGuard implements CanActivate {
 				headers: request.headers,
 			};
 
-			const event = await this.verifyWebhook.execute(payload);
+			const claims = await this.verifyWebhook.execute(payload);
 
-			if (event.isErr()) {
-				this.logger.error(`Failed to verify webhook: ${event.error.message}`);
+			if (claims.isErr()) {
+				this.logger.error(`Failed to verify webhook: ${claims.error.message}`);
 				throw new UnauthorizedException('Invalid webhook signature');
 			}
+
+			request.rawClaims = claims.value;
 
 			this.logger.debug('Successfully verified webhook');
 
