@@ -44,9 +44,9 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 		AuthGuard,
 		WebhookGuard,
 
-		//? Nest
-		// JwtTokenUseCase,
-		// VerifyWebhookUseCase
+		//? Resolved from AuthModule
+		JwtTokenUseCase,
+		VerifyWebhookUseCase,
 	],
 })
 export class AuthModule {}
