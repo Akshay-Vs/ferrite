@@ -51,7 +51,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 				});
 
 				if (!claims.email) {
-					throw new Error('Invalid token claims');
+					throw new UnauthorizedException('Invalid or expired token');
 				}
 
 				return {
@@ -110,7 +110,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 				this.logger.error(
 					'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
 				);
-				throw new Error(
+				throw new BadRequestException(
 					'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
 				);
 			}
@@ -142,8 +142,8 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 				};
 			} catch (error) {
 				this.logger.error('Webhook signature verification failed');
-				throw new Error(
-					`Webhook signature verification failed: ${error instanceof Error ? error.message : String(error)}`
+				throw new UnauthorizedException(
+					'Webhook signature verification failed'
 				);
 			}
 		});

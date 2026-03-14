@@ -58,6 +58,7 @@ class LokiTransport implements OnModuleDestroy {
 	private readonly batch: [string, string][] = [];
 
 	private readonly BATCH_SIZE = 100;
+	private readonly MAX_BATCH_SIZE = 1024;
 	private readonly FLUSH_INTERVAL_MS = 2_000;
 	private flushTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -131,7 +132,13 @@ class LokiTransport implements OnModuleDestroy {
 				`[LokiTransport] network error: ${(err as Error).message}\n`
 			);
 			// Re-queue on network error as well.
-			this.batch.unshift(...entries);
+			if (this.batch.length + entries.length <= this.MAX_BATCH_SIZE) {
+				this.batch.unshift(...entries);
+			} else {
+				process.stderr.write(
+					`[LokiTransport] dropping ${entries.length} entries (buffer full)\n`
+				);
+			}
 		}
 	}
 }
