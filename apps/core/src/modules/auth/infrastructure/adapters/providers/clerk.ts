@@ -102,9 +102,12 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 			const { body, headers } = payload;
 
-			const svixId = headers['svix-id'] as string | undefined;
-			const svixTimestamp = headers['svix-timestamp'] as string | undefined;
-			const svixSignature = headers['svix-signature'] as string | undefined;
+			const normalizeHeader = (value: unknown): string | null =>
+				typeof value === 'string' && value.trim().length > 0 ? value : null;
+
+			const svixId = normalizeHeader(headers['svix-id']);
+			const svixTimestamp = normalizeHeader(headers['svix-timestamp']);
+			const svixSignature = normalizeHeader(headers['svix-signature']);
 
 			if (!svixId || !svixTimestamp || !svixSignature) {
 				this.logger.error(
@@ -114,7 +117,6 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 					'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
 				);
 			}
-
 			if (!body?.length) {
 				this.logger.error('Missing request body');
 				throw new BadRequestException('Missing request body');
