@@ -1,32 +1,25 @@
 import { requestContext } from '@core/request-context/request-context';
-import { Injectable, LoggerService, Scope } from '@nestjs/common';
+import {
+	Injectable,
+	LoggerService,
+	OnModuleDestroy,
+	Scope,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { trace } from '@opentelemetry/api';
 import pino, { Logger } from 'pino';
 import pretty from 'pino-pretty';
 
-/** Standard log levels supported by AppLogger, mapped to Pino's level system. */
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug' | 'trace';
 
-/**
- * Arbitrary structured fields attached to a log entry.
- * The `context` key is reserved for the class/module name label.
- */
 export interface LogFields {
 	context?: string;
 	[key: string]: unknown;
 }
 
 /**
- * Per-request correlation fields automatically injected into every log line.
- *
- * - `requestId`  — unique ID for the inbound HTTP request (from AsyncLocalStorage)
- * - `userId`     — authenticated user ID when available (from AsyncLocalStorage)
- * - `traceId`    — OTel W3C trace ID; links this log to a Jaeger trace
- * - `spanId`     — OTel span ID; identifies the exact span within the trace
- *
- * Extend this interface to propagate additional cross-cutting fields such as
- * `tenantId` or `sessionId` without modifying individual call sites.
+ * Extend this interface to add more correlation fields over time.
+ * e.g. tenantId, sessionId, etc.
  */
 export interface CorrelationContext {
 	requestId?: string;
@@ -35,25 +28,130 @@ export interface CorrelationContext {
 	spanId?: string;
 }
 
-@Injectable({ scope: Scope.TRANSIENT })
-export class AppLogger implements LoggerService {
-	private readonly logger: Logger;
+// ── Loki HTTP transport ────────────────────────────────────────────────────
 
-	/**
-	 * The module/class label stamped on every log line produced by this instance.
-	 * Set once via `setContext()` in the consuming class constructor.
-	 */
+interface LokiStream {
+	stream: Record<string, string>;
+	values: [string, string][];
+}
+
+interface LokiPushPayload {
+	streams: LokiStream[];
+}
+
+/**
+ * Minimal, self-contained Loki push client.
+ *
+ * Batches log entries and flushes them either when the batch reaches
+ * BATCH_SIZE or when the FLUSH_INTERVAL_MS timer fires — whichever
+ * comes first.  On process shutdown, call flush() to drain the buffer.
+ *
+ * Label cardinality rules (Loki hard requirement):
+ *   - All label values MUST be plain strings.
+ *   - Keep the label set small and low-cardinality (app + env only).
+ *   - Per-entry fields (level, requestId, traceId …) go in the log line
+ *     body as structured JSON, NOT as stream labels.
+ */
+class LokiTransport implements OnModuleDestroy {
+	private readonly lokiUrl: string;
+	private readonly staticLabels: Record<string, string>;
+	private readonly batch: [string, string][] = [];
+
+	private readonly BATCH_SIZE = 100;
+	private readonly FLUSH_INTERVAL_MS = 2_000;
+	private flushTimer: ReturnType<typeof setInterval> | null = null;
+
+	constructor(lokiUrl: string, staticLabels: Record<string, string>) {
+		this.lokiUrl = `${lokiUrl}/loki/api/v1/push`;
+		// Guarantee every label value is a plain string — Loki will reject
+		// anything that serialises to a non-string JSON value.
+		this.staticLabels = Object.fromEntries(
+			Object.entries(staticLabels).map(([k, v]) => [k, String(v)])
+		);
+		this.flushTimer = setInterval(
+			() => void this.flush(),
+			this.FLUSH_INTERVAL_MS
+		);
+		// Allow Node to exit without waiting for the timer.
+		this.flushTimer.unref?.();
+	}
+
+	/** Called by NestJS lifecycle when the module is torn down. */
+	onModuleDestroy(): void {
+		if (this.flushTimer) {
+			clearInterval(this.flushTimer);
+			this.flushTimer = null;
+		}
+		void this.flush();
+	}
+
+	push(line: string): void {
+		// Loki timestamp must be a nanosecond-precision Unix epoch string.
+		const tsNs = String(Date.now() * 1_000_000);
+		this.batch.push([tsNs, line]);
+		if (this.batch.length >= this.BATCH_SIZE) {
+			void this.flush();
+		}
+	}
+
+	async flush(): Promise<void> {
+		if (this.batch.length === 0) return;
+
+		// Drain the batch atomically so a concurrent flush doesn't double-send.
+		const entries = this.batch.splice(0, this.batch.length);
+
+		const payload: LokiPushPayload = {
+			streams: [
+				{
+					stream: this.staticLabels,
+					values: entries,
+				},
+			],
+		};
+
+		try {
+			const res = await fetch(this.lokiUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload),
+			});
+
+			if (!res.ok) {
+				const body = await res.text().catch(() => '<unreadable>');
+				// Write to stderr directly — do NOT use the logger here to avoid
+				// infinite recursion.
+				process.stderr.write(
+					`[LokiTransport] push failed ${res.status}: ${body}\n`
+				);
+				// Re-queue entries so they are not silently dropped.
+				this.batch.unshift(...entries);
+			}
+		} catch (err) {
+			process.stderr.write(
+				`[LokiTransport] network error: ${(err as Error).message}\n`
+			);
+			// Re-queue on network error as well.
+			this.batch.unshift(...entries);
+		}
+	}
+}
+
+// ── Logger service ─────────────────────────────────────────────────────────
+
+@Injectable({ scope: Scope.TRANSIENT })
+export class AppLogger implements LoggerService, OnModuleDestroy {
+	private readonly logger: Logger;
+	private readonly lokiTransport: LokiTransport | null = null;
 	private context?: string;
 
 	constructor(private readonly config: ConfigService) {
-		const isDev = this.config.get<string>('NODE_ENV') !== 'production';
+		const lokiUrl = this.config.get<string>('LOKI_URL');
+		const appName = this.config.get<string>('APP_NAME') ?? 'app';
+		const appVersion = this.config.get<string>('APP_VERSION');
+		const nodeEnv = this.config.get<string>('NODE_ENV') ?? 'development';
 
-		/**
-		 * Development stream: colorized, single-line output.
-		 * Suppresses noisy internal fields (pid, hostname, ids) and formats
-		 * context, requestId, and a shortened traceId suffix inline.
-		 */
-		const prettyStream = pretty({
+		// ── TTY stream (colorised, human-readable) ──────────────────────────
+		const ttyStream = pretty({
 			colorize: true,
 			sync: true,
 			translateTime: '❯ HH:MM:ss ❯❯❯ ',
@@ -62,11 +160,10 @@ export class AppLogger implements LoggerService {
 			messageFormat: (log, messageKey) => {
 				const context = log.context ? `\x1b[33m [${log.context}] \x1b[0m` : '';
 				const requestId = log.requestId
-					? `\x1b[90m(${log.requestId})\x1b[0m`
+					? `\x1b[90m(req:${log.requestId})\x1b[0m`
 					: '';
-				// Show only the last 8 chars of the traceId for readability
 				const traceId = log.traceId
-					? `\x1b[36m[trace:${String(log.traceId).slice(-8)}]\x1b[0m`
+					? `\x1b[36m(trace:${String(log.traceId).slice(-8)})\x1b[0m`
 					: '';
 				const msg = log[messageKey];
 				return [context, msg, requestId, traceId].filter(Boolean).join('  ');
@@ -76,50 +173,28 @@ export class AppLogger implements LoggerService {
 			},
 		});
 
-		/**
-		 * Production transport: fan-out to two targets.
-		 *
-		 * 1. `pino-opentelemetry-transport` — serializes log records as OTLP and
-		 *    sends them to the OTel collector (→ Loki). Resource attributes are
-		 *    attached here so Loki can index and filter by service identity.
-		 *
-		 * 2. `pino/file` (fd 1 = stdout) — emits raw JSON for container log
-		 *    collectors (e.g. Fluent Bit, Datadog agent, k8s logging).
-		 */
-		const transport = isDev
-			? prettyStream
-			: pino.transport({
-					targets: [
-						{
-							target: 'pino-opentelemetry-transport',
-							options: {
-								resourceAttributes: {
-									'service.name':
-										this.config.get<string>('SERVICE_NAME') ?? 'nestjs-app',
-									'service.version': this.config.get<string>('APP_VERSION'),
-									'deployment.environment': this.config.get<string>('NODE_ENV'),
-								},
-							},
-						},
-						{
-							target: 'pino/file',
-							options: { destination: 1 },
-						},
-					],
-				});
+		// ── Loki transport (direct HTTP, no pino-loki) ──────────────────────
+		if (lokiUrl) {
+			this.lokiTransport = new LokiTransport(lokiUrl, {
+				app: appName,
+				env: nodeEnv,
+			});
+		}
 
+		// ── Pino writes to TTY only; Loki is handled by LokiTransport ───────
 		this.logger = pino(
 			{
-				level: this.config.get<string>('LOG_LEVEL') ?? 'info',
+				level: config.get<string>('LOG_LEVEL') ?? 'info',
 				base: {
-					env: this.config.get<string>('NODE_ENV'),
-					version: this.config.get<string>('APP_VERSION'),
+					env: nodeEnv,
+					version: appVersion,
+				},
+				formatters: {
+					level(label) {
+						return { level: label };
+					},
 				},
 				timestamp: pino.stdTimeFunctions.isoTime,
-				/**
-				 * Redact sensitive fields before they reach any transport.
-				 * Paths use dot-notation and glob patterns supported by `fast-redact`.
-				 */
 				redact: {
 					paths: [
 						'req.headers.authorization',
@@ -131,125 +206,111 @@ export class AppLogger implements LoggerService {
 					censor: '[REDACTED]',
 				},
 			},
-			transport
+			ttyStream
 		);
 	}
 
+	onModuleDestroy(): void {
+		this.lokiTransport?.onModuleDestroy();
+	}
+
 	/**
-	 * Binds a context label (typically the class name) to this logger instance.
-	 * Should be called once in the constructor of the consuming class.
-	 *
-	 * @example
-	 * constructor(private readonly logger: AppLogger) {
-	 *   this.logger.setContext(UserService.name);
-	 * }
+	 * Set the context (usually the class name) for all subsequent log calls.
+	 * Call once in the constructor of each consuming class.
 	 */
 	setContext(context: string): void {
 		this.context = context;
 	}
 
-	// ── Correlation ───────────────────────────────────────────────────────────
+	// ── Correlation ────────────────────────────────────────────────────────
 
-	/**
-	 * Assembles the correlation context for the current execution frame.
-	 *
-	 * Sources:
-	 * - `requestId` / `userId` — read from the AsyncLocalStorage request store
-	 *   populated by the request-context middleware.
-	 * - `traceId` / `spanId` — read from the currently active OTel span, if any.
-	 *   These fields enable Grafana's trace↔log correlation: a log line with a
-	 *   `traceId` can be linked to the corresponding Jaeger trace in one click.
-	 *
-	 * Extend this method (or the `CorrelationContext` interface) to propagate
-	 * additional cross-cutting identifiers such as `tenantId` or `sessionId`.
-	 */
 	protected getCorrelationContext(): CorrelationContext {
 		const store = requestContext.getStore();
-		const spanContext = trace.getActiveSpan()?.spanContext();
+
+		const activeSpan = trace.getActiveSpan();
+		const spanContext = activeSpan?.spanContext();
+		const isValidSpan = spanContext && trace.isSpanContextValid(spanContext);
 
 		return {
 			...(store?.requestId && { requestId: store.requestId }),
 			...(store?.userId && { userId: store.userId }),
-			...(spanContext?.traceId && { traceId: spanContext.traceId }),
-			...(spanContext?.spanId && { spanId: spanContext.spanId }),
+			...(isValidSpan && {
+				traceId: spanContext!.traceId,
+				spanId: spanContext!.spanId,
+			}),
 		};
 	}
 
-	// ── Core write ────────────────────────────────────────────────────────────
+	// ── Core write ─────────────────────────────────────────────────────────
 
-	/**
-	 * Internal write primitive. Merges caller-supplied fields with the current
-	 * correlation context and delegates to the underlying Pino logger.
-	 * All public logging methods funnel through here.
-	 */
 	private write(
 		level: LogLevel,
 		message: string,
 		fields: LogFields = {}
 	): void {
-		this.logger[level](
-			{
-				...fields,
-				context: fields.context ?? this.context,
-				...this.getCorrelationContext(),
-			},
-			message
-		);
+		const merged = {
+			...fields,
+			context: fields.context ?? this.context ?? '',
+			...this.getCorrelationContext(),
+		};
+
+		// Write to TTY via pino.
+		this.logger[level](merged, message);
+
+		// Write to Loki via direct HTTP transport.
+		// Serialise the full structured log line as JSON — identical shape to
+		// what pino would emit, so Grafana queries work the same way.
+		if (this.lokiTransport) {
+			const line = JSON.stringify({
+				level,
+				msg: message,
+				time: new Date().toISOString(),
+				...merged,
+			});
+			this.lokiTransport.push(line);
+		}
 	}
 
-	// ── LoggerService interface ───────────────────────────────────────────────
+	// ── LoggerService interface ────────────────────────────────────────────
 
-	/** Logs an informational message. Satisfies the NestJS `LoggerService` interface. */
 	log(message: string, context?: string): void {
 		this.write('info', message, { context });
 	}
 
-	/** Logs an error with an optional stack trace. Satisfies the NestJS `LoggerService` interface. */
 	error(message: string, trace?: string, context?: string): void {
 		this.write('error', message, { context, trace });
 	}
 
-	/** Logs a warning. Satisfies the NestJS `LoggerService` interface. */
 	warn(message: string, context?: string): void {
 		this.write('warn', message, { context });
 	}
 
-	/** Logs a debug message. Satisfies the NestJS `LoggerService` interface. */
 	debug(message: string, context?: string): void {
 		this.write('debug', message, { context });
 	}
 
-	/** Logs a verbose/trace message. Satisfies the NestJS `LoggerService` interface. */
 	verbose(message: string, context?: string): void {
 		this.write('trace', message, { context });
 	}
 
-	// ── Extended helpers ──────────────────────────────────────────────────────
+	// ── Extended helpers ───────────────────────────────────────────────────
 
 	/**
-	 * Logs a message with arbitrary structured fields attached.
-	 * Prefer this over `log()` when you need rich domain context that should be
-	 * queryable in Loki (e.g. `orderId`, `amount`, `customerId`).
+	 * Log with arbitrary structured fields.
+	 * Prefer this over log() when you need rich domain context.
 	 *
 	 * @example
-	 * this.logger.structured('info', 'Order placed', { orderId, amount, customerId });
+	 * this.logger.structured('info', 'Order placed', { orderId, amount });
 	 */
 	structured(level: LogLevel, message: string, fields: LogFields): void {
 		this.write(level, message, fields);
 	}
 
 	/**
-	 * Wraps an async operation, logging its completion time and outcome.
-	 * Emits an `info` log on success and an `error` log on failure, both
-	 * including a `durationMs` field for latency tracking in Grafana.
-	 * The original error is always re-thrown so callers retain full control.
-	 *
-	 * @param label  — a dot-namespaced identifier for the operation, e.g. `db.findUser`
-	 * @param fn     — the async operation to execute and measure
-	 * @param context — optional context override for this measurement log
+	 * Measure and log execution time of any async operation.
 	 *
 	 * @example
-	 * const user = await this.logger.measure('db.findUser', () => this.repo.findById(id));
+	 * const user = await this.logger.measure('db.findUser', () => repo.findById(id));
 	 */
 	async measure<T>(
 		label: string,
