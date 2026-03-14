@@ -1,4 +1,5 @@
 import { WebhookPayload } from '@common/types/webhook-payload.type';
+import { withSpan } from '@common/utils/tracing.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
@@ -22,34 +23,44 @@ export class WebhookGuard implements CanActivate {
 	}
 
 	async canActivate(context: any): Promise<boolean> {
-		const isWebhook = this.reflector.getAllAndOverride<boolean>(
-			IS_WEBHOOK_ROUTE,
-			[context.getHandler(), context.getClass()]
-		);
+		return withSpan('guards.webhook.canActivate', async (span) => {
+			span.setAttributes({
+				'guard.name': 'WebhookGuard',
+			});
 
-		if (!isWebhook) {
-			this.logger.debug('Webhook route must be decorated with @WebhookRoute');
-			throw new ForbiddenException(
-				'Invalid webhook route: must be decorated with @WebhookRoute'
+			const isWebhook = this.reflector.getAllAndOverride<boolean>(
+				IS_WEBHOOK_ROUTE,
+				[context.getHandler(), context.getClass()]
 			);
-		}
 
-		const request: Request = context.switchToHttp().getRequest();
+			if (!isWebhook) {
+				this.logger.debug('Webhook route must be decorated with @WebhookRoute');
+				throw new ForbiddenException(
+					'Invalid webhook route: must be decorated with @WebhookRoute'
+				);
+			}
 
-		const payload: WebhookPayload = {
-			body: request.body,
-			headers: request.headers,
-		};
+			const request: Request = context.switchToHttp().getRequest();
 
-		const event = await this.verifyWebhook.execute(payload);
+			span.setAttributes({
+				'http.route': request.route?.path ?? 'unknown',
+			});
 
-		if (event.isErr()) {
-			this.logger.error('Failed to verify webhook');
-			throw new UnauthorizedException(event.error.message);
-		}
+			const payload: WebhookPayload = {
+				body: request.body,
+				headers: request.headers,
+			};
 
-		this.logger.debug('Successfully verified webhook');
+			const event = await this.verifyWebhook.execute(payload);
 
-		return true;
+			if (event.isErr()) {
+				this.logger.error(`Failed to verify webhook: ${event.error.message}`);
+				throw new UnauthorizedException('Invalid webhook signature');
+			}
+
+			this.logger.debug('Successfully verified webhook');
+
+			return true;
+		});
 	}
 }

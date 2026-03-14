@@ -1,0 +1,60 @@
+# Dependencies
+node_modules
+npm-debug.log
+pnpm-debug.log
+yarn-error.log
+
+# Build outputs
+dist
+build
+.next
+out
+
+# Cache directories
+.turbo
+.nx/cache
+.eslintcache
+
+# Testing
+coverage
+*.test.ts
+*.spec.ts
+test
+__tests__
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.github
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Documentation
+*.md
+!README.md
+docs
+
+# CI/CD
+.gitlab-ci.yml
+.travis.yml
+azure-pipelines.yml
+
+# Misc
+*.log
+tmp
+.token
+temp

@@ -1,0 +1,9 @@
+# otel/grafana/provisioning/dashboards/dashboards.yaml
+apiVersion: 1
+
+providers:
+  - name: default
+    folder: ""
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards

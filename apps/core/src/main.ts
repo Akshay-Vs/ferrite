@@ -1,4 +1,3 @@
-import { OtelInterceptor } from '@common/interceptors/otel.interceptor';
 import { AppLogger } from '@core/logger/logger.service';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -6,6 +5,7 @@ import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { otelSDK } from './instrumentation';
 import { registerShutdownHook } from './libs/register-shutdown';
 import { setupSwagger } from './swagger';
 
@@ -30,6 +30,8 @@ const logger = new NestLogger('Bootstrap');
  * sets up Swagger; starts the HTTP server on the configured port and logs the active port.
  */
 async function bootstrap() {
+	otelSDK.start();
+
 	const app = await NestFactory.create(AppModule, {
 		bufferLogs: true,
 		rawBody: true,
@@ -50,7 +52,6 @@ async function bootstrap() {
 	});
 
 	app.setGlobalPrefix(VERSION);
-	app.useGlobalInterceptors(new OtelInterceptor());
 
 	app.use((req: Request, _res: Response, next: NextFunction) => {
 		logger.debug(`Request: ${req.method} ${req.path} received`);

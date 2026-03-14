@@ -1,4 +1,5 @@
 import { INestApplication } from '@nestjs/common';
+import { otelSDK } from '../instrumentation';
 
 export const registerShutdownHook = (app: INestApplication) => {
 	let isShuttingDown = false;
@@ -9,12 +10,22 @@ export const registerShutdownHook = (app: INestApplication) => {
 
 		console.error(`Shutting down due to ${reason}:`, err);
 
+		// Close open telemetry resources
+
 		app
 			.close()
 			.then(() => console.log('Application closed successfully.'))
 			.catch((e) => console.error('Error closing application:', e))
 			.finally(() =>
-				process.exit(reason === 'SIGINT' || reason === 'SIGTERM' ? 0 : 1)
+				otelSDK
+					.shutdown()
+					.then(() =>
+						console.log('OpenTelemetry resources shut down successfully.')
+					)
+					.catch((e) => console.error('Error shutting down:', e))
+					.finally(() =>
+						process.exit(reason === 'SIGINT' || reason === 'SIGTERM' ? 0 : 1)
+					)
 			);
 	};
 
