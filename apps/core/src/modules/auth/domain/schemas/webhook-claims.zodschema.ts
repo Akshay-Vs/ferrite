@@ -1,10 +1,8 @@
-import { z } from 'zod/v4';
+import {
+	type WebhookEnvelope,
+	webhookEnvelopeSchema,
+} from '@common/schemas/webhook-envelope.zodschema';
 
-export const webhookPayloadSchema = z.object({
-	eventId: z.string(),
-	eventType: z.string(),
-	timestamp: z.number(),
-	data: z.record(z.string(), z.unknown()),
-});
-
-export type WebhookPayload = z.infer<typeof webhookPayloadSchema>;
+// Alias for backwards compatibility
+export { webhookEnvelopeSchema as webhookPayloadSchema };
+export type { WebhookEnvelope as WebhookPayload };
