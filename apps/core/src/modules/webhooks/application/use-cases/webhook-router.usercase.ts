@@ -22,6 +22,7 @@ export class WebhookRouterUsecase implements IUseCase<WebhookPayload, boolean> {
 			async () => {
 				const { eventType } = payload;
 
+				const traceCarrier: Record<string, string> = {};
 				if (eventType.startsWith('user.')) {
 					this.logger.debug(`Enqueueing user event ${eventType}`);
 					await this.userSync.enqueue(payload, eventType);
