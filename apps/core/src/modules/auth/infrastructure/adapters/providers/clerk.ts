@@ -144,6 +144,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 					);
 
 					const parsed = this.zodParse({
+						provider: authProvidersEnum.clerk,
 						eventId: svixId,
 						eventType: verified.type,
 						timestamp: Number(svixTimestamp),
