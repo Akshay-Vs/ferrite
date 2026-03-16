@@ -9,7 +9,7 @@ import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
 	ITokenAuth,
 	IWebhookAuth,

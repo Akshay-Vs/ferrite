@@ -4,7 +4,7 @@ import { webhookEnvelopeSchema } from '@common/schemas/webhook-envelope.zodschem
 import { AppLogger } from '@core/logger/logger.service';
 import { BaseConsumer } from '@core/queue/base.consumer';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Processor } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { type Context, context, propagation } from '@opentelemetry/api';
@@ -25,7 +25,7 @@ import {
 	userSyncEventSchema,
 } from '@users/domain/schemas/user-sync-event.zodschema';
 import { Job } from 'bullmq';
-import { USER_SYNC_QUEUE } from './queue.constrains';
+import { USER_SYNC_QUEUE } from './queue.constraints';
 
 @Processor(USER_SYNC_QUEUE)
 export class UserSyncWorker extends BaseConsumer<WebhookPayload> {

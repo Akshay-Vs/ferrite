@@ -2,7 +2,7 @@ import { WebhookRequest } from '@common/types/request';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
 	CanActivate,

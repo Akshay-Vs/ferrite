@@ -4,7 +4,7 @@ import { ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserSyncProducer } from '@webhooks/infrastructure/queue/user-sync.producer';
 

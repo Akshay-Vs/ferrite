@@ -1,7 +1,7 @@
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
 import type { ICreateUserUseCase } from '@users/domain/ports/use-cases.port';

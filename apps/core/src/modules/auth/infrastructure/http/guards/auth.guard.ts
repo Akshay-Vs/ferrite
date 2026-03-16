@@ -1,7 +1,7 @@
 import { AuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
 	CanActivate,

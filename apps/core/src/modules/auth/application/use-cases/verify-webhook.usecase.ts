@@ -10,7 +10,7 @@ import { Inject, Injectable } from '@nestjs/common';
 /**
  *  Verifies the webhook signature and transforms the raw claims into a UserWebhookEvent.
  *  @param payload - The raw HTTP envelope containing the unparsed body buffer and headers
- *  @returns A Result containing either a UserWebhookEvent or an error
+ *  @returns A Result containing either a WebhookPayload or an error
  */
 @Injectable()
 export class VerifyWebhookUseCase

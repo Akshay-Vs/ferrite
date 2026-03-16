@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { OTEL_TRACER } from './tracer.constrain';
+import { OTEL_TRACER } from './tracer.constraint';
 import { TracerService } from './tracer.service';
 
 @Global()

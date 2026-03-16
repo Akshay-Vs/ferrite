@@ -17,7 +17,7 @@ import { WEBHOOK_MAPPER_REGISTRY } from './domain/ports/webhook-mapper.registry.
 import { WebhookMapperRegistry } from './infrastructure/adapters/webhook-mapper-registry.adapter';
 import { ClerkWebhookMapper } from './infrastructure/persistance/mappers/clerk-webhook.mapper';
 import { DrizzleUserRepository } from './infrastructure/persistance/repositories/drizzle-user.repository';
-import { USER_SYNC_QUEUE } from './infrastructure/queue/queue.constrains';
+import { USER_SYNC_QUEUE } from './infrastructure/queue/queue.constraints';
 import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 
 @Module({

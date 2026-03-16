@@ -27,7 +27,7 @@ export class WebhookMapperRegistry implements IWebhookMapperRegistry {
 	resolve(provider: AuthProvider): IWebhookMapper {
 		this.assertValidProvider(provider);
 		const mapper = this.mappers.get(provider)!;
-		this.logger.log(`Webhook mapper resolved: ${provider}`);
+		this.logger.debug(`Webhook mapper resolved: ${provider}`);
 		return mapper;
 	}
 

@@ -5,7 +5,7 @@ import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders } from '@core/database/schema/auth.schema';
 import { users } from '@core/database/schema/user.schema';
 import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
