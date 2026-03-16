@@ -12,6 +12,15 @@ export class WebhookMapperRegistry implements IWebhookMapperRegistry {
 	private readonly mappers: Map<AuthProvider, IWebhookMapper>;
 
 	constructor(@Inject(WEBHOOK_MAPPER) mappers: IWebhookMapper[]) {
+		const seen = new Set<AuthProvider>();
+		for (const mapper of mappers) {
+			if (seen.has(mapper.provider)) {
+				throw new Error(
+					`Duplicate webhook mapper registered for provider: "${mapper.provider}"`
+				);
+			}
+			seen.add(mapper.provider);
+		}
 		this.mappers = new Map(mappers.map((m) => [m.provider, m]));
 	}
 
