@@ -16,16 +16,20 @@ import {
 	type IUpdateUserUseCase,
 	UPDATE_USER_UC,
 } from '@users/domain/ports/use-cases.port';
+import {
+	type IWebhookMapperRegistry,
+	WEBHOOK_MAPPER_REGISTRY,
+} from '@users/domain/ports/webhook-mapper.registry.port';
 import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 import { Job } from 'bullmq';
-import { WebhookMapperFactory } from '../adapters/webhook-mapper-factory.adapter';
 import { USER_SYNC_QUEUE } from './queue.constrains';
 
 @Processor(USER_SYNC_QUEUE)
 export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 	constructor(
 		private readonly logger: AppLogger,
-		private readonly mapperFactory: WebhookMapperFactory,
+		@Inject(WEBHOOK_MAPPER_REGISTRY)
+		private readonly registry: IWebhookMapperRegistry,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(CREATE_USER_UC) private readonly createUser: ICreateUserUseCase,
 		@Inject(UPDATE_USER_UC) private readonly updateUser: IUpdateUserUseCase,
@@ -40,7 +44,7 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 		const payload = webhookEnvelopeSchema.parse(job.data);
 
 		// Map Clerk payload → standard event
-		const mapper = this.mapperFactory.resolve(job.data.provider);
+		const mapper = this.registry.resolve(job.data.provider);
 		const event = mapper.map(payload);
 
 		if (!event) throw new Error('Unknown event type');
@@ -67,8 +71,9 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 
 					// Dispatch to use-case
 					let result: Result<void, Error>;
+					const eventType = userSyncEvent.eventType;
 
-					switch (userSyncEvent.eventType) {
+					switch (eventType) {
 						case 'user.created':
 							result = await this.createUser.execute(userSyncEvent);
 							break;
@@ -78,6 +83,9 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 						case 'user.deleted':
 							result = await this.deleteUser.execute(userSyncEvent);
 							break;
+						default: {
+							throw new Error(`Unhandled event type: ${eventType}`);
+						}
 					}
 
 					// Handle result
