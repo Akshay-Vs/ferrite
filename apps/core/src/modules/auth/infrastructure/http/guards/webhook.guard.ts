@@ -6,6 +6,7 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
 import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify-webhook.usecase';
 import {
 	CanActivate,
+	ExecutionContext,
 	ForbiddenException,
 	Inject,
 	Injectable,
@@ -25,7 +26,7 @@ export class WebhookGuard implements CanActivate {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async canActivate(context: any): Promise<boolean> {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
 		return this.tracer.withSpan('guards.webhook.canActivate', async (span) => {
 			span.setAttributes({
 				'guard.name': 'WebhookGuard',
@@ -50,7 +51,7 @@ export class WebhookGuard implements CanActivate {
 			});
 
 			const webhookRequest: RawWebhookRequest = {
-				body: request.body,
+				body: request.rawBody,
 				headers: request.headers,
 			};
 

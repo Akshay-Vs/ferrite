@@ -133,7 +133,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 				try {
 					// raw Buffer — exact bytes Clerk signed
-					const verified = wh.verify(JSON.stringify(body), {
+					const verified = wh.verify(body, {
 						'svix-id': svixId,
 						'svix-timestamp': svixTimestamp,
 						'svix-signature': svixSignature,
