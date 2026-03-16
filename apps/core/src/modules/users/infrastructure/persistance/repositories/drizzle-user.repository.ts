@@ -101,7 +101,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
 	async softDeleteByExternalAuthId(
 		externalAuthId: string,
-		provider: string
+		provider: AuthProvider
 	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
@@ -142,7 +142,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
 	async findUserIdByExternalAuthId(
 		externalAuthId: string,
-		provider: string
+		provider: AuthProvider
 	): Promise<string | null> {
 		return traceDbOp(
 			this.tracer,
