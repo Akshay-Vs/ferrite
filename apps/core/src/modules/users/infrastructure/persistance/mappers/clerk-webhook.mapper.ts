@@ -1,6 +1,6 @@
 import { WebhookPayload } from '@auth/index';
 import { AppLogger } from '@core/logger/logger.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { IWebhookMapper } from '@users/domain/ports/webhook-mapper.port';
 import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 
@@ -82,22 +82,39 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 			| Array<{ id: string; email_address: string }>
 			| undefined;
 		const primaryId = data.primary_email_address_id as string | undefined;
-		if (!addresses?.length) return '';
+
+		if (!addresses?.length) {
+			this.logger.error('No email addresses found');
+			throw new BadRequestException('No email addresses found');
+		}
+
 		const primary = primaryId
 			? addresses.find((a) => a.id === primaryId)
 			: addresses[0];
-		return primary?.email_address ?? addresses[0].email_address;
+
+		const email = primary?.email_address ?? addresses[0]?.email_address;
+
+		if (!email) {
+			this.logger.error('No email addresses found');
+			throw new BadRequestException('No email addresses found');
+		}
+
+		return primary?.email_address ?? addresses[0]?.email_address ?? null;
 	}
 
 	private extractEmailVerified(data: Record<string, unknown>): boolean {
 		const addresses = data.email_addresses as
 			| Array<{ id: string; verification?: { status: string } }>
 			| undefined;
+
 		const primaryId = data.primary_email_address_id as string | undefined;
+
 		if (!addresses?.length) return false;
+
 		const primary = primaryId
 			? addresses.find((a) => a.id === primaryId)
 			: addresses[0];
+
 		return primary?.verification?.status === 'verified';
 	}
 
@@ -105,11 +122,15 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 		const phones = data.phone_numbers as
 			| Array<{ id: string; phone_number: string }>
 			| undefined;
+
 		const primaryId = data.primary_phone_number_id as string | undefined;
+
 		if (!phones?.length) return null;
+
 		const primary = primaryId
 			? phones.find((p) => p.id === primaryId)
 			: phones[0];
+
 		return primary?.phone_number ?? null;
 	}
 
@@ -117,11 +138,15 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 		const phones = data.phone_numbers as
 			| Array<{ id: string; verification?: { status: string } }>
 			| undefined;
+
 		const primaryId = data.primary_phone_number_id as string | undefined;
+
 		if (!phones?.length) return false;
+
 		const primary = primaryId
 			? phones.find((p) => p.id === primaryId)
 			: phones[0];
+
 		return primary?.verification?.status === 'verified';
 	}
 
@@ -134,8 +159,11 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 		const accounts = data.external_accounts as
 			| Array<{ provider: string }>
 			| undefined;
+
 		if (!accounts?.length) return null;
+
 		const raw = accounts[0].provider; // e.g. 'oauth_google'
+
 		return raw?.replace(/^oauth_/, '') ?? null;
 	}
 }
