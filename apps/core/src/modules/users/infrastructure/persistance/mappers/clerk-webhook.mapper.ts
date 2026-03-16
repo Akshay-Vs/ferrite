@@ -1,4 +1,5 @@
 import { WebhookPayload } from '@auth/index';
+import { AppLogger } from '@core/logger/logger.service';
 import { Injectable } from '@nestjs/common';
 import { IWebhookMapper } from '@users/domain/ports/webhook-mapper.port';
 import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
@@ -7,10 +8,16 @@ import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 export class ClerkWebhookMapper implements IWebhookMapper {
 	readonly provider = 'clerk';
 
+	constructor(private readonly logger: AppLogger) {}
+
 	map(payload: WebhookPayload): UserSyncEvent | null {
 		const { eventType, data } = payload;
 		const externalAuthId = data.id as string;
 		const provider = 'clerk';
+
+		this.logger.log(
+			`Mapping Clerk webhook event ${eventType} to UserSyncEvent`
+		);
 
 		switch (eventType) {
 			case 'user.created':
@@ -38,7 +45,7 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 
 			case 'user.updated':
 				return {
-					eventType: 'user.created', // ← FIX
+					eventType: 'user.updated',
 					externalAuthId,
 					provider,
 					oauthProvider: this.extractOauthProvider(data),
@@ -60,7 +67,11 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 				};
 
 			case 'user.deleted':
-				return null;
+				return {
+					eventType: 'user.deleted',
+					externalAuthId,
+					provider,
+				};
 			default:
 				return null;
 		}
