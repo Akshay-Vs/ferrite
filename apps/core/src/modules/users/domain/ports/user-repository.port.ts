@@ -1,3 +1,4 @@
+import { AuthProvider } from '@auth/index';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
 import { UserUpdatedEvent } from '../schemas/user-updated.zodschema';
 
@@ -28,7 +29,7 @@ export interface IUserRepository {
 	 */
 	softDeleteByExternalAuthId(
 		externalAuthId: string,
-		provider: string
+		provider: AuthProvider
 	): Promise<boolean>;
 
 	/**
@@ -36,6 +37,6 @@ export interface IUserRepository {
 	 */
 	findUserIdByExternalAuthId(
 		externalAuthId: string,
-		provider: string
+		provider: AuthProvider
 	): Promise<string | null>;
 }
