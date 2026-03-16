@@ -72,9 +72,7 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 				'user-sync-worker.handle',
 				async () => {
 					const userSyncEvent = this.transformEvent(job);
-					this.logger.log(
-						`Processing ${userSyncEvent.eventType} for externalAuthId=${userSyncEvent.externalAuthId}`
-					);
+					this.logger.log(`Processing ${userSyncEvent.eventType}`);
 
 					// Dispatch to use-case
 					let result: Result<void, Error>;
@@ -102,10 +100,6 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 						);
 						throw result.error;
 					}
-
-					this.logger.log(
-						`Successfully processed ${userSyncEvent.eventType} for externalAuthId=${userSyncEvent.externalAuthId}`
-					);
 				},
 				{
 					'user-sync-worker.job.id': job.id ?? 'unknown',

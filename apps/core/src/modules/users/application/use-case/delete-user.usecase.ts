@@ -24,27 +24,19 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 	async execute(
 		input: UserDeletedEvent
 	): Promise<Result<void, UserNotFoundError>> {
-		return this.tracer.withSpan(
-			'use-case.delete-user',
-			async () => {
-				const deleted = await this.repo.softDeleteByExternalAuthId(
-					input.externalAuthId,
-					input.provider
-				);
+		return this.tracer.withSpan('use-case.delete-user', async () => {
+			const deleted = await this.repo.softDeleteByExternalAuthId(
+				input.externalAuthId,
+				input.provider
+			);
 
-				if (!deleted) {
-					this.logger.debug(
-						`User already deleted or not found (no-op): externalAuthId=${input.externalAuthId}`
-					);
-					return ok();
-				}
-
-				this.logger.log(
-					`User soft-deleted: externalAuthId=${input.externalAuthId}`
-				);
+			if (!deleted) {
+				this.logger.debug(`User already deleted or not found (no-op)`);
 				return ok();
-			},
-			{ 'use-case.externalAuthId': input.externalAuthId }
-		);
+			}
+
+			this.logger.log(`User soft-deleted`);
+			return ok();
+		});
 	}
 }
