@@ -1,6 +1,6 @@
 import { context, propagation } from '@opentelemetry/api';
 import { Queue } from 'bullmq';
-import { DEFAULT_JOB_OPTIONS } from './queue.constrains';
+import { DEFAULT_JOB_OPTIONS } from './queue.constraints';
 
 export abstract class BaseProducer<T> {
 	protected abstract readonly queue: Queue;
