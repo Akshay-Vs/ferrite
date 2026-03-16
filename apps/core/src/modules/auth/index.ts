@@ -9,6 +9,11 @@ export {
 	WEBHOOK_AUTH,
 } from './domain/ports/auth-provider.tokens';
 export {
+	type AuthProvider,
+	authProvidersEnum,
+	authProvidersSchema,
+} from './domain/schemas/auth-providers.zodschema';
+export {
 	type AuthUser,
 	authUserSchema,
 } from './domain/schemas/auth-user.zodschema';
@@ -17,9 +22,11 @@ export {
 	rawTokenClaimsSchema,
 } from './domain/schemas/token-claims.zodschema';
 export {
-	type RawWebhookClaims,
-	rawWebhookClaimsSchema,
+	type WebhookPayload,
+	webhookPayloadSchema,
 } from './domain/schemas/webhook-claims.zodschema';
 
+export { PublicRoute } from './infrastructure/http/decorators/public-route.decorator';
+export { WebhookRoute } from './infrastructure/http/decorators/webhook-route.decorator';
 export { AuthGuard } from './infrastructure/http/guards/auth.guard';
 export { WebhookGuard } from './infrastructure/http/guards/webhook.guard';

@@ -1,41 +1,77 @@
 services:
-  # core:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/core/Dockerfile
-  #   env_file:
-  #     - ./apps/core/.env
-  #   ports:
-  #     - "4000:4000"
-  #   restart: unless-stopped
-  #   networks:
-  #     - observability
-
-  # ─── Database ─────────────────────────────────────────────────────────────
   postgres:
-      image: postgres:18-alpine
-      env_file:
-        - apps/core/.env
-      ports:
-        - "5432:5432"
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+    image: postgres:18-alpine
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - observability
 
-  # ─── OpenTelemetry Collector ───────────────────────────────────────────────
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+    ports:
+      - "127.0.0.1:9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - observability
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    command:  redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$${REDIS_PASSWORD}\" ping | grep -qx PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - observability
+
+  redis_exporter:
+    image: oliver006/redis_exporter:alpine
+    container_name: redis_exporter
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_EXPORTER_PORT:-9121}:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - observability
+
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel/config.yaml"]
     volumes:
       - ./monitoring/open-telemetry/config.yaml:/etc/otel/config.yaml:ro
     ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "8888:8888"   # Collector metrics (self-telemetry)
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+      - "127.0.0.1:8888:8888"
     depends_on:
       - jaeger
       - prometheus
@@ -43,17 +79,15 @@ services:
     networks:
       - observability
 
-  # ─── Traces → Jaeger ──────────────────────────────────────────────────────
   jaeger:
     image: jaegertracing/all-in-one:latest
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
-      - "16686:16686"  # Jaeger UI
+      - "127.0.0.1:16686:16686"
     networks:
       - observability
 
-  # ─── Metrics → Prometheus ─────────────────────────────────────────────────
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -63,11 +97,10 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.enable-remote-write-receiver'
     ports:
-      - "9090:9090"    # Prometheus UI
+      - "127.0.0.1:9090:9090"
     networks:
       - observability
 
-  # ─── Logs → Loki ──────────────────────────────────────────────────────────
   loki:
     image: grafana/loki:3.3.2
     user: "0"
@@ -76,11 +109,10 @@ services:
       - ./monitoring/open-telemetry/loki.yaml:/etc/loki/config.yaml:ro
       - loki-data:/loki
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     networks:
       - observability
 
-  # ─── Visualisation → Grafana ──────────────────────────────────────────────
   grafana:
     image: grafana/grafana:latest
     environment:
@@ -91,7 +123,7 @@ services:
       - ./monitoring/open-telemetry/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
     ports:
-      - "3200:3000"    # Grafana UI
+      - "3200:3000"
     depends_on:
       - prometheus
       - loki
@@ -104,6 +136,7 @@ volumes:
   loki-data:
   grafana-data:
   postgres_data:
+  redis_data:
 
 networks:
   observability:

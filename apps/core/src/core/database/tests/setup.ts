@@ -8,11 +8,11 @@
 import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import type { PsqlDB } from '../db.type';
+import type { TDatabase } from '../db.type';
 import * as schema from '../schema';
 
 let client: ReturnType<typeof postgres> | undefined;
-let _db: PsqlDB;
+let _db: TDatabase;
 
 /** The Drizzle database instance used by all tests. */
 export { _db as db };
@@ -37,7 +37,7 @@ function cleanConnectionUrl(raw: string): string {
  * @throws If `DATABASE_URL` is not set.
  * @throws If the database name does not match an expected test-pattern.
  */
-export async function setupTestDB(): Promise<PsqlDB> {
+export async function setupTestDB(): Promise<TDatabase> {
 	const raw = process.env.DATABASE_URL;
 	if (!raw) {
 		throw new Error('DATABASE_URL is not set.');

@@ -48,6 +48,5 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 			useClass: HttpExceptionFilter,
 		},
 	],
-	// no exports — AppModule is the root, nothing imports it
 })
 export class AppModule {}

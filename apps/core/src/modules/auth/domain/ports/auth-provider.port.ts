@@ -1,5 +1,5 @@
-import { WebhookPayload } from '@common/types/webhook-payload.type';
-import { AuthUser, RawTokenClaims, RawWebhookClaims } from '../schemas';
+import { RawWebhookRequest } from '@common/types/webhook-payload.type';
+import { AuthUser, RawTokenClaims, WebhookPayload } from '../schemas';
 
 export interface ITokenVerifier {
 	/**
@@ -26,21 +26,11 @@ export interface IWebhookVerifier {
 	/**
 	 * Verify the webhook signature from the HTTP request.
 	 * @param payload - Raw HTTP envelope containing the unparsed body buffer and headers
-	 * @returns RawWebhookClaims if the signature is valid
+	 * @returns WebhookPayload if the signature is valid
 	 * @throws {BadRequestException} If the signature is missing or malformed
 	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
 	 */
-	verifyWebhook(payload: WebhookPayload): Promise<RawWebhookClaims>;
-}
-
-export interface IWebhookParser {
-	/**
-	 * Parse the raw webhook claims into a more structured object using Zod.
-	 * Pure validation — no IO, no side effects.
-	 * @param claims - Raw webhook claims returned by IWebhookVerifier
-	 * @returns A parsed and validated webhook event
-	 */
-	zodParse(claims: RawWebhookClaims): any;
+	verifyWebhook(payload: RawWebhookRequest): Promise<WebhookPayload>;
 }
 
 /**
@@ -57,4 +47,4 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
  * Consumed by: VerifyWebhookUseCase
  * Implemented by: ClerkAdapter, KindeAdapter etc
  */
-export interface IWebhookAuth extends IWebhookVerifier, IWebhookParser {}
+export interface IWebhookAuth extends IWebhookVerifier {}

@@ -1,10 +1,12 @@
 import { AuthenticatedRequest, Request } from '@common/types/request';
-import { withSpan } from '@common/utils/tracing.util';
 import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
 import {
 	CanActivate,
 	ExecutionContext,
+	Inject,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -17,7 +19,8 @@ export class AuthGuard implements CanActivate {
 	constructor(
 		private readonly logger: AppLogger,
 		private readonly reflector: Reflector,
-		private readonly verifyToken: JwtTokenUseCase
+		private readonly verifyToken: JwtTokenUseCase,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.logger.setContext(AuthGuard.name);
 	}
@@ -30,7 +33,7 @@ export class AuthGuard implements CanActivate {
 	}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
-		return withSpan('guards.auth.canActivate', async (span) => {
+		return this.tracer.withSpan('guards.auth.canActivate', async (span) => {
 			this.logger.debug('AuthGuard.canActivate');
 
 			const request: Request = context.switchToHttp().getRequest();

@@ -22,6 +22,20 @@
 			"when": 1772614590879,
 			"tag": "0002_swift_amphibian",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1773603850715,
+			"tag": "0003_conscious_madelyne_pryor",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1773665787932,
+			"tag": "0004_absurd_phantom_reporter",
+			"breakpoints": true
 		}
 	]
 }
