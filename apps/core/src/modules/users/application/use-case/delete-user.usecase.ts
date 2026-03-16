@@ -1,4 +1,4 @@
-import { err, ok, Result } from '@common/interfaces/result.interface';
+import { ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
@@ -33,10 +33,10 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 				);
 
 				if (!deleted) {
-					this.logger.warn(
-						`User not found for externalAuthId=${input.externalAuthId}`
+					this.logger.debug(
+						`User already deleted or not found (no-op): externalAuthId=${input.externalAuthId}`
 					);
-					return err(new UserNotFoundError(input.externalAuthId));
+					return ok();
 				}
 
 				this.logger.log(
