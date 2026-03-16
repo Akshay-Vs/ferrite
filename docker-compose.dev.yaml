@@ -123,7 +123,7 @@ services:
       - ./monitoring/open-telemetry/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
     ports:
-      - "3200:3000"
+      - "127.0.0.1:3200:3000"
     depends_on:
       - prometheus
       - loki
