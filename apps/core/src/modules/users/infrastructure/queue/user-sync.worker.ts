@@ -20,7 +20,10 @@ import {
 	type IWebhookMapperRegistry,
 	WEBHOOK_MAPPER_REGISTRY,
 } from '@users/domain/ports/webhook-mapper.registry.port';
-import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
+import {
+	UserSyncEvent,
+	userSyncEventSchema,
+} from '@users/domain/schemas/user-sync-event.zodschema';
 import { Job } from 'bullmq';
 import { USER_SYNC_QUEUE } from './queue.constrains';
 
@@ -43,13 +46,18 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 		// Validate raw envelope
 		const payload = webhookEnvelopeSchema.parse(job.data);
 
-		// Map Clerk payload → standard event
+		// Map external payload to standard event candidate
 		const mapper = this.registry.resolve(job.data.provider);
-		const event = mapper.map(payload);
+		const mapped = mapper.map(payload);
 
-		if (!event) throw new Error('Unknown event type');
+		if (!mapped) {
+			throw new Error('Unknown event type');
+		}
 
-		return event;
+		// Re-validate and normalize mapper output
+		const validatedEvent = userSyncEventSchema.parse(mapped);
+
+		return validatedEvent;
 	}
 
 	private getTraceContext(job: Job<WebhookPayload>): Context {
@@ -64,7 +72,6 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 				'user-sync-worker.handle',
 				async () => {
 					const userSyncEvent = this.transformEvent(job);
-
 					this.logger.log(
 						`Processing ${userSyncEvent.eventType} for externalAuthId=${userSyncEvent.externalAuthId}`
 					);
