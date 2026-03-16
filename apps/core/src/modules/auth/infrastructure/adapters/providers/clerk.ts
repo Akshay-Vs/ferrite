@@ -124,7 +124,6 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 					);
 				}
 				if (!body) {
-					console.log('trigger');
 					this.logger.error('Missing request body');
 					throw new BadRequestException('Missing request body');
 				}
@@ -150,12 +149,20 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 					);
 				}
 
+				const parsedTimestamp = Number(svixTimestamp);
+				if (Number.isNaN(parsedTimestamp)) {
+					this.logger.error(
+						'Invalid svix-timestamp header: not a valid number'
+					);
+					throw new BadRequestException('Invalid svix-timestamp header');
+				}
+
 				try {
 					const parsed = this.zodParse({
 						provider: authProvidersEnum.clerk,
 						eventId: svixId,
 						eventType: verified.type,
-						timestamp: Number(svixTimestamp),
+						timestamp: parsedTimestamp,
 						data: (verified as any).data,
 					});
 
