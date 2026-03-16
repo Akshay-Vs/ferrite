@@ -1,4 +1,5 @@
 import { WebhookPayload } from '@auth/index';
+import { userEventsSchema } from '@common/events/user-events.zodschema';
 import { ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
@@ -22,8 +23,7 @@ export class WebhookRouterUsecase implements IUseCase<WebhookPayload, boolean> {
 			async () => {
 				const { eventType } = payload;
 
-				const traceCarrier: Record<string, string> = {};
-				if (eventType.startsWith('user.')) {
+				if (userEventsSchema.safeParse(eventType).success) {
 					this.logger.debug(`Enqueueing user event ${eventType}`);
 					await this.userSync.enqueue(payload, eventType);
 				} else {
