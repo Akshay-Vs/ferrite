@@ -131,9 +131,10 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 				const wh = new Webhook(webhookSecret);
 
+				let verified: WebhookEvent;
 				try {
 					// raw Buffer — exact bytes Clerk signed
-					const verified = wh.verify(body, {
+					verified = wh.verify(body, {
 						'svix-id': svixId,
 						'svix-timestamp': svixTimestamp,
 						'svix-signature': svixSignature,
@@ -142,7 +143,14 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 					this.logger.debug(
 						`Webhook signature verification successful: svixId=${svixId} eventType=${verified.type}`
 					);
+				} catch (error) {
+					this.logger.error(`Webhook signature verification failed: ${error}`);
+					throw new UnauthorizedException(
+						'Webhook signature verification failed'
+					);
+				}
 
+				try {
 					const parsed = this.zodParse({
 						provider: authProvidersEnum.clerk,
 						eventId: svixId,
@@ -153,9 +161,11 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 
 					return parsed;
 				} catch (error) {
-					this.logger.error(`Webhook signature verification failed: ${error}`);
-					throw new UnauthorizedException(
-						'Webhook signature verification failed'
+					this.logger.error(
+						`Webhook payload schema validation failed: ${error}`
+					);
+					throw new BadRequestException(
+						'Webhook payload failed schema validation'
 					);
 				}
 			}
