@@ -5,7 +5,7 @@ import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constrain';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserSyncProducer } from '@webhooks/infrastructure/queue/user-sync.producer';
 
 @Injectable()
@@ -23,14 +23,13 @@ export class WebhookRouterUsecase implements IUseCase<WebhookPayload, boolean> {
 			async () => {
 				const { eventType } = payload;
 
-				if (userEventsSchema.safeParse(eventType).success) {
-					this.logger.debug(`Enqueueing user event ${eventType}`);
-					await this.userSync.enqueue(payload, eventType);
-				} else {
-					this.logger.debug(`Unknown event ${eventType}`);
-					throw new BadRequestException('Unknown event type');
+				if (!userEventsSchema.safeParse(eventType).success) {
+					this.logger.debug(`Ignoring unsupported event ${eventType}`);
+					return ok(false);
 				}
 
+				this.logger.debug(`Enqueueing user event ${eventType}`);
+				await this.userSync.enqueue(payload, eventType);
 				return ok(true);
 			},
 			{

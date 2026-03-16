@@ -4,6 +4,7 @@ import {
 	HttpCode,
 	HttpStatus,
 	Post,
+	ServiceUnavailableException,
 	UseGuards,
 } from '@nestjs/common';
 import { WebhookRouterUsecase } from '@webhooks/application/use-cases/webhook-router.usercase';
@@ -18,6 +19,10 @@ export class WebhookController {
 	@Post()
 	@HttpCode(HttpStatus.OK)
 	async createWebhook(@WebhookEvent() event: WebhookPayload) {
-		return this.webhookRouterUsecase.execute(event);
+		const ok = await this.webhookRouterUsecase.execute(event);
+		if (!ok) {
+			throw new ServiceUnavailableException('Webhook routing failed');
+		}
+		return { accepted: true };
 	}
 }
