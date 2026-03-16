@@ -7,9 +7,7 @@ import { TracerService } from './tracer.service';
 	providers: [
 		{
 			provide: OTEL_TRACER,
-			useFactory: () => {
-				return new TracerService();
-			},
+			useExisting: TracerService,
 		},
 		TracerService,
 	],
