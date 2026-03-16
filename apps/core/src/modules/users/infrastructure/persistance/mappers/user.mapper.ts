@@ -14,7 +14,7 @@ export class UserMapper {
 			lastName: event.lastName,
 			avatarUrl: event.avatarUrl,
 			isActive: true,
-			isBanned: false,
+			isBanned: event.banned,
 		};
 	}
 
@@ -27,6 +27,7 @@ export class UserMapper {
 		if (event.firstName !== undefined) update.firstName = event.firstName;
 		if (event.lastName !== undefined) update.lastName = event.lastName;
 		if (event.avatarUrl !== undefined) update.avatarUrl = event.avatarUrl;
+		if (event.banned !== undefined) update.isBanned = event.banned;
 
 		update.updatedAt = new Date();
 

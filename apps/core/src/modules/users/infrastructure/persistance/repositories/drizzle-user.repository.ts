@@ -53,8 +53,6 @@ export class DrizzleUserRepository implements IUserRepository {
 								externalAuthId: event.externalAuthId,
 								oauthProvider: event.oauthProvider,
 								twoFactorEnabled: event.twoFactorEnabled,
-								banned: event.banned,
-								locked: event.locked,
 							})
 					);
 
