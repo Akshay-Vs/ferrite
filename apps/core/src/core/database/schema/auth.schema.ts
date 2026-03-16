@@ -24,8 +24,6 @@ export const userAuthProviders = pgTable(
 		provider: authProviderEnum('provider').notNull(),
 		oauthProvider: varchar('oauth_provider', { length: 255 }),
 		twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
-		banned: boolean('banned').notNull().default(false),
-		locked: boolean('locked').notNull().default(false),
 		externalAuthId: varchar('external_auth_id', { length: 255 }).notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true })
 			.notNull()
