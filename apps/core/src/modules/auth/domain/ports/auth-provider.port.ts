@@ -26,7 +26,7 @@ export interface IWebhookVerifier {
 	/**
 	 * Verify the webhook signature from the HTTP request.
 	 * @param payload - Raw HTTP envelope containing the unparsed body buffer and headers
-	 * @returns RawWebhookClaims if the signature is valid
+	 * @returns WebhookPayload if the signature is valid
 	 * @throws {BadRequestException} If the signature is missing or malformed
 	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
 	 */
