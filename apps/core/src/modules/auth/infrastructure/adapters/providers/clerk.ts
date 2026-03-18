@@ -35,8 +35,8 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 		private readonly config: ConfigService,
 		private readonly logger: AppLogger,
 
-		@Inject(OTEL_TRACER) private tracer: ITracer,
-		@Inject(GENERATE_USER_ID) private generateUserId: GenerateUserId
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		@Inject(GENERATE_USER_ID) private readonly generateUserId: GenerateUserId
 	) {
 		this.logger.setContext(ClerkAdapter.name);
 		this.secretKey = this.config.getOrThrow<string>('AUTH_CLERK_SECRET_KEY');
