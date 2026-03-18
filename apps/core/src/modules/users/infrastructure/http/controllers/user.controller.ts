@@ -4,13 +4,12 @@ import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
 	Inject,
 	NotFoundException,
-	Param,
-	ParseUUIDPipe,
 	Patch,
 	UseGuards,
 } from '@nestjs/common';
@@ -18,10 +17,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import {
+	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
-	GET_USER_PROFILE_UC,
+	type IDeleteUserUseCase,
 	type IGetOwnProfileUseCase,
-	type IGetUserProfileUseCase,
 	type IUpdateOwnProfileUseCase,
 	UPDATE_OWN_PROFILE_UC,
 } from '@users/domain/ports/use-cases.port';
@@ -29,8 +28,8 @@ import {
 import { UpdateProfileInputDTO } from '@users/domain/schemas';
 
 import {
+	DeleteOwnProfileDocs,
 	GetOwnProfileDocs,
-	GetUserProfileByIdDocs,
 	UpdateOwnProfileDocs,
 } from './user.swaggerdocs';
 
@@ -40,12 +39,15 @@ import {
 @UseGuards(AuthGuard)
 export class UserController {
 	constructor(
-		@Inject(GET_USER_PROFILE_UC)
-		private readonly getUserProfileUseCase: IGetUserProfileUseCase,
 		@Inject(GET_OWN_PROFILE_UC)
 		private readonly getOwnProfileUseCase: IGetOwnProfileUseCase,
+
 		@Inject(UPDATE_OWN_PROFILE_UC)
 		private readonly updateOwnProfileUseCase: IUpdateOwnProfileUseCase,
+
+		@Inject(DELETE_USER_UC)
+		private readonly deleteUserUseCase: IDeleteUserUseCase,
+
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
@@ -61,7 +63,7 @@ export class UserController {
 		});
 	}
 
-	@Patch('me')
+	@Patch()
 	@HttpCode(HttpStatus.OK)
 	@UpdateOwnProfileDocs()
 	async updateOwnProfile(
@@ -76,15 +78,16 @@ export class UserController {
 			if (result.isErr()) {
 				throw new NotFoundException(result.error.message);
 			}
-			return { updated: true };
+			return result.value;
 		});
 	}
 
-	@Get(':id')
-	@GetUserProfileByIdDocs()
-	async getUserProfileById(@Param('id', ParseUUIDPipe) id: string) {
-		return this.tracer.withSpan('http.get-user-profile-by-id', async () => {
-			const result = await this.getUserProfileUseCase.execute(id);
+	@Delete()
+	@HttpCode(HttpStatus.OK)
+	@DeleteOwnProfileDocs()
+	async deleteOwnProfile(@AuthUserParam() authUser: AuthUser) {
+		return this.tracer.withSpan('http.delete-own-profile', async () => {
+			const result = await this.deleteUserUseCase.execute(authUser);
 			if (result.isErr()) {
 				throw new NotFoundException(result.error.message);
 			}

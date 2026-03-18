@@ -11,6 +11,8 @@ import {
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
+import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
+import { UserMapper } from '@users/infrastructure/persistance/mappers/user.mapper';
 
 @Injectable()
 export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
@@ -25,14 +27,18 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 	async execute(input: {
 		authUser: AuthUser;
 		data: UpdateProfileInput;
-	}): Promise<Result<void, UserNotFoundError>> {
+	}): Promise<Result<UserProfileFull, UserNotFoundError>> {
 		return this.tracer.withSpan(
 			'use-case.update-own-profile',
 			async () => {
-				const userId = await this.repo.findUserIdByExternalAuthId(
-					input.authUser.externalAuthId,
-					input.authUser.provider
-				);
+				const user = await this.repo.findById(input.authUser.id);
+
+				if (!user) {
+					this.logger.warn(`User row missing for id=${input.authUser.id}`);
+					return err(new UserNotFoundError(input.authUser.id));
+				}
+
+				const userId = user.id;
 
 				if (!userId) {
 					this.logger.warn(
@@ -43,7 +49,9 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 
 				if (Object.keys(input.data).length === 0) {
 					this.logger.debug('No fields to update, skipping write');
-					return ok();
+					const existingUser = await this.repo.findById(userId);
+					if (!existingUser) return err(new UserNotFoundError(userId));
+					return ok(UserMapper.toUserProfile(existingUser));
 				}
 
 				const outboxEvent = {
@@ -53,19 +61,19 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					payload: { ...input.data },
 				};
 
-				const updated = await this.repo.updateProfileById(
+				const updatedProfile = await this.repo.updateProfileById(
 					userId,
 					input.data,
 					outboxEvent
 				);
 
-				if (!updated) {
+				if (!updatedProfile) {
 					this.logger.warn(`User update failed, not found: id=${userId}`);
 					return err(new UserNotFoundError(userId));
 				}
 
 				this.logger.log(`Own profile updated: id=${userId}`);
-				return ok();
+				return ok(updatedProfile);
 			},
 			{ 'use-case.externalAuthId': input.authUser.externalAuthId }
 		);

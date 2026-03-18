@@ -1,4 +1,4 @@
-import type { TDatabase } from '@core/database/db.type';
+import type { DrizzleTransaction } from '@core/database/db.type';
 import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
 
 export const OUTBOX_REPOSITORY = Symbol('OUTBOX_REPOSITORY');
@@ -18,7 +18,7 @@ export interface IOutboxRepository {
 	 * @returns The generated outbox event id.
 	 */
 	insert(
-		tx: Parameters<Parameters<TDatabase['transaction']>[0]>[0],
+		tx: DrizzleTransaction,
 		entry: Omit<NewOutboxEvent, 'id' | 'createdAt'>
 	): Promise<string>;
 }

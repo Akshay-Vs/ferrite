@@ -4,7 +4,6 @@ import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
-import { UserDeletedEvent } from '../schemas/user-deleted.zodschema';
 import type {
 	UserProfileBase,
 	UserProfileFull,
@@ -15,7 +14,6 @@ export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
 export const UPDATE_USER_UC = Symbol('UPDATE_USER_UC');
 export const DELETE_USER_UC = Symbol('DELETE_USER_UC');
 
-export const GET_USER_PROFILE_UC = Symbol('GET_USER_PROFILE_UC');
 export const GET_OWN_PROFILE_UC = Symbol('GET_OWN_PROFILE_UC');
 export const UPDATE_OWN_PROFILE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 
@@ -29,11 +27,7 @@ export type IUpdateUserUseCase = IUseCase<
 	void,
 	UserNotFoundError
 >;
-export type IDeleteUserUseCase = IUseCase<
-	UserDeletedEvent,
-	void,
-	UserNotFoundError
->;
+export type IDeleteUserUseCase = IUseCase<AuthUser, void, UserNotFoundError>;
 
 export type IGetUserProfileUseCase = IUseCase<
 	string,
@@ -47,6 +41,6 @@ export type IGetOwnProfileUseCase = IUseCase<
 >;
 export type IUpdateOwnProfileUseCase = IUseCase<
 	{ authUser: AuthUser; data: UpdateProfileInput },
-	void,
+	UserProfileFull,
 	UserNotFoundError
 >;

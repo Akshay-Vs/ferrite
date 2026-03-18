@@ -1,6 +1,8 @@
 import { WebhookPayload } from '@auth/index';
+import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
+import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { IWebhookMapper } from '@users/domain/ports/webhook-mapper.port';
 import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 
@@ -8,12 +10,16 @@ import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 export class ClerkWebhookMapper implements IWebhookMapper {
 	readonly provider = 'clerk';
 
-	constructor(private readonly logger: AppLogger) {}
+	constructor(
+		@Inject(GENERATE_USER_ID) private readonly generateUserId: GenerateUserId,
+		private readonly logger: AppLogger
+	) {}
 
 	map(payload: WebhookPayload): UserSyncEvent | null {
 		const { eventType, data } = payload;
 		const externalAuthId = data.id as string;
 		const provider = 'clerk';
+		const id = this.generateUserId(externalAuthId);
 
 		this.logger.log(
 			`Mapping Clerk webhook event ${eventType} to UserSyncEvent`
@@ -23,6 +29,7 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 			case 'user.created':
 				return {
 					eventType: 'user.created',
+					id,
 					externalAuthId,
 					provider,
 					oauthProvider: this.extractOauthProvider(data),
@@ -46,6 +53,7 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 			case 'user.updated':
 				return {
 					eventType: 'user.updated',
+					id,
 					externalAuthId,
 					provider,
 					oauthProvider: this.extractOauthProvider(data),

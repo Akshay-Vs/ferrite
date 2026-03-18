@@ -1,16 +1,17 @@
+import { CommonModule } from '@common/common.module';
+import { HttpExceptionFilter } from '@common/filters/http-error-filter';
 import { CoreModule } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { HealthModule } from '@modules/health/health.module';
+import { OutboxModule } from '@modules/outbox/outbox.module';
 import { UsersModule } from '@modules/users/users.module';
+import { WebhooksModule } from '@modules/webhooks/webhooks.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
-import { HttpExceptionFilter } from './common/filters/http-error-filter';
-import { HealthModule } from './modules/health/health.module';
-import { OutboxModule } from './modules/outbox/outbox.module';
-import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
 @Module({
 	imports: [
@@ -25,6 +26,7 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 		UsersModule,
 		WebhooksModule,
 		OutboxModule,
+		CommonModule,
 	],
 	providers: [
 		// Guards

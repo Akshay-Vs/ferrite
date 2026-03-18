@@ -27,10 +27,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 		return this.tracer.withSpan(
 			'use-case.create-user',
 			async () => {
-				const existing = await this.repo.findUserIdByExternalAuthId(
-					input.externalAuthId,
-					input.provider
-				);
+				const existing = await this.repo.findById(input.id);
 
 				if (existing) {
 					this.logger.warn(
@@ -39,9 +36,9 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 					return err(new UserExistsError(input.externalAuthId));
 				}
 
-				const userId = await this.repo.createWithAuth(input);
-				this.logger.log(
-					`User created: id=${userId} externalAuthId=${input.externalAuthId}`
+				await this.repo.createWithAuth(input);
+				this.logger.debug(
+					`User created: id=${input.id} externalAuthId=${input.externalAuthId}`
 				);
 
 				return ok();

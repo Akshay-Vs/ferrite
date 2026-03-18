@@ -16,7 +16,10 @@ export const updateProfileSchema = z
 		preferredLocale: z.string().max(10),
 		preferredCurrency: z.string().length(3),
 	})
-	.partial();
+	.partial()
+	.refine((data) => Object.values(data).some((v) => v !== undefined), {
+		message: 'At least one field must be provided',
+	});
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export class UpdateProfileInputDTO extends createZodDto(updateProfileSchema) {}

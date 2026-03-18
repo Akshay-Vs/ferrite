@@ -4,16 +4,12 @@ import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { DeleteUserUseCase } from './application/use-case/delete-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
-import { GetUserProfileUseCase } from './application/use-case/get-user-profile.usecase';
 import { UpdateOwnProfileUseCase } from './application/use-case/update-own-profile.usecase';
-import { UpdateUserUseCase } from './application/use-case/update-user.usecase';
 import {
 	CREATE_USER_UC,
 	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
-	GET_USER_PROFILE_UC,
 	UPDATE_OWN_PROFILE_UC,
-	UPDATE_USER_UC,
 } from './domain/ports/use-cases.port';
 import { USER_REPOSITORY } from './domain/ports/user-repository.port';
 import {
@@ -49,16 +45,8 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 			useClass: CreateUserUseCase,
 		},
 		{
-			provide: UPDATE_USER_UC,
-			useClass: UpdateUserUseCase,
-		},
-		{
 			provide: DELETE_USER_UC,
 			useClass: DeleteUserUseCase,
-		},
-		{
-			provide: GET_USER_PROFILE_UC,
-			useClass: GetUserProfileUseCase,
 		},
 		{
 			provide: GET_OWN_PROFILE_UC,
