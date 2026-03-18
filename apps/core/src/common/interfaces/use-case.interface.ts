@@ -34,5 +34,7 @@ export interface IUseCase<
 	 * - `Ok<TOutput>` when the use case succeeds
 	 * - `Err<TError>` when the use case fails
 	 */
-	execute(input: TInput): Promise<Result<TOutput, TError>>;
+	execute(
+		input: TInput
+	): Promise<Result<TOutput, TError>> | Result<TOutput, TError>;
 }
