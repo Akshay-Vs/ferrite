@@ -36,6 +36,13 @@
 			"when": 1773665787932,
 			"tag": "0004_absurd_phantom_reporter",
 			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1773823379793,
+			"tag": "0005_harsh_kitty_pryde",
+			"breakpoints": true
 		}
 	]
 }

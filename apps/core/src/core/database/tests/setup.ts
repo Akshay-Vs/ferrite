@@ -68,6 +68,7 @@ export async function setupTestDB(): Promise<TDatabase> {
 export async function cleanupTables(): Promise<void> {
 	await _db.execute(sql`
 		TRUNCATE TABLE
+			outbox_events,
 			user_auth_providers,
 			user_payment_methods,
 			user_notification_preferences,

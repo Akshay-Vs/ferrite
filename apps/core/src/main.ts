@@ -40,7 +40,7 @@ async function bootstrap() {
 	registerShutdownHook(app);
 
 	// Enable raw body parsing for webhooks
-	app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+	app.use('/webhooks', express.raw({ type: 'application/json' }));
 
 	app.useLogger(await app.resolve(AppLogger));
 	app.use(helmet());

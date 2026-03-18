@@ -25,7 +25,7 @@ export {
 	type WebhookPayload,
 	webhookPayloadSchema,
 } from './domain/schemas/webhook-claims.zodschema';
-
+export { AuthUserParam } from './infrastructure/http/decorators/auth-user.decorator';
 export { PublicRoute } from './infrastructure/http/decorators/public-route.decorator';
 export { WebhookRoute } from './infrastructure/http/decorators/webhook-route.decorator';
 export { AuthGuard } from './infrastructure/http/guards/auth.guard';

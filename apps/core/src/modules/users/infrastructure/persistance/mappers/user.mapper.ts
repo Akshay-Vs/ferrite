@@ -1,5 +1,9 @@
-import type { NewUser } from '@core/database/schema/user.schema';
+import type { NewUser, User } from '@core/database/schema/user.schema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
+import type {
+	UserProfileBase,
+	UserProfileFull,
+} from '@users/domain/schemas/user-profile.zodschema';
 import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
 
 /**
@@ -32,5 +36,34 @@ export class UserMapper {
 		update.updatedAt = new Date();
 
 		return update;
+	}
+
+	static toUserProfile(user: User): UserProfileFull {
+		return {
+			id: user.id,
+			email: user.email,
+			emailVerified: user.emailVerified,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			avatarUrl: user.avatarUrl,
+			dateOfBirth: user.dateOfBirth,
+			preferredLocale: user.preferredLocale,
+			preferredCurrency: user.preferredCurrency,
+			isActive: user.isActive,
+			createdAt: user.createdAt,
+			updatedAt: user.updatedAt,
+		};
+	}
+
+	static toBaseUserProfile(user: User): UserProfileBase {
+		return {
+			id: user.id,
+			email: user.email,
+			emailVerified: user.emailVerified,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			avatarUrl: user.avatarUrl,
+			isActive: user.isActive,
+		};
 	}
 }

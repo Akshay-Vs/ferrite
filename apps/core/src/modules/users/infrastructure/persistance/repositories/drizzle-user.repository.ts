@@ -3,21 +3,28 @@ import { traceDbOp } from '@common/utils/trace-db-op.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders } from '@core/database/schema/auth.schema';
-import { users } from '@core/database/schema/user.schema';
+import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
+import { type User, users } from '@core/database/schema/user.schema';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import {
+	type IOutboxRepository,
+	OUTBOX_REPOSITORY,
+} from '@modules/outbox/domain/ports/outbox-repository.port';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
+import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
 import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
 export class DrizzleUserRepository implements IUserRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
-		@Inject(OTEL_TRACER) private readonly tracer: ITracer
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		@Inject(OUTBOX_REPOSITORY) private readonly outboxRepo: IOutboxRepository
 	) {}
 
 	async createWithAuth(event: UserCreatedEvent): Promise<string> {
@@ -165,6 +172,67 @@ export class DrizzleUserRepository implements IUserRepository {
 					.limit(1);
 
 				return row?.userId ?? null;
+			}
+		);
+	}
+
+	async findById(id: string): Promise<User | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findById',
+			{
+				'db.table': 'users',
+				'db.operation': 'select',
+			},
+			async () => {
+				const [user] = await this.db
+					.select()
+					.from(users)
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.limit(1);
+
+				return user ?? null;
+			}
+		);
+	}
+
+	async updateProfileById(
+		id: string,
+		data: UpdateProfileInput,
+		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateProfileById',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+			},
+			async () => {
+				return this.db.transaction(async (tx) => {
+					// 1. Update user
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.update',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									...data,
+									updatedAt: new Date(),
+								})
+								.where(and(eq(users.id, id), isNull(users.deletedAt)))
+								.returning({ id: users.id })
+					);
+
+					if (result.length === 0) return false;
+
+					// 2. Insert outbox event
+					await this.outboxRepo.insert(tx, outboxEvent);
+
+					return true;
+				});
 			}
 		);
 	}
