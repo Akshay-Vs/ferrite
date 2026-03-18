@@ -10,11 +10,7 @@ import { Inject } from '@nestjs/common';
 import { type Context, context, propagation } from '@opentelemetry/api';
 import {
 	CREATE_USER_UC,
-	DELETE_USER_UC,
 	type ICreateUserUseCase,
-	type IDeleteUserUseCase,
-	type IUpdateUserUseCase,
-	UPDATE_USER_UC,
 } from '@users/domain/ports/use-cases.port';
 import {
 	type IWebhookMapperRegistry,
@@ -34,9 +30,7 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 		@Inject(WEBHOOK_MAPPER_REGISTRY)
 		private readonly registry: IWebhookMapperRegistry,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(CREATE_USER_UC) private readonly createUser: ICreateUserUseCase,
-		@Inject(UPDATE_USER_UC) private readonly updateUser: IUpdateUserUseCase,
-		@Inject(DELETE_USER_UC) private readonly deleteUser: IDeleteUserUseCase
+		@Inject(CREATE_USER_UC) private readonly createUser: ICreateUserUseCase
 	) {
 		super();
 		this.logger.setContext(this.constructor.name);
@@ -81,12 +75,6 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 					switch (eventType) {
 						case 'user.created':
 							result = await this.createUser.execute(userSyncEvent);
-							break;
-						case 'user.updated':
-							result = await this.updateUser.execute(userSyncEvent);
-							break;
-						case 'user.deleted':
-							result = await this.deleteUser.execute(userSyncEvent);
 							break;
 						default: {
 							throw new Error(`Unhandled event type: ${eventType}`);
