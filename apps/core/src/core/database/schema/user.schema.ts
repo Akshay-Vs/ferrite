@@ -20,7 +20,7 @@ import { addressTypeEnum } from './enum';
 export const users = pgTable(
 	'users',
 	{
-		id: uuid('id').primaryKey().defaultRandom(),
+		id: uuid('id').primaryKey(),
 		email: varchar('email', { length: 255 }).notNull().unique(),
 		emailVerified: boolean('email_verified').notNull().default(false),
 		avatarUrl: varchar('avatar_url', { length: 2048 }),

@@ -4,6 +4,7 @@
  * Pass `overrides` to customise specific fields.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { NewUserPaymentMethod } from '../schema/payment.schema';
 import type { NewUserNotificationPreference } from '../schema/preferences.schema';
 import type {
@@ -25,6 +26,7 @@ let emailCounter = 0;
 export function createTestUser(overrides: Partial<NewUser> = {}): NewUser {
 	emailCounter += 1;
 	return {
+		id: uuidv4(),
 		email: `test-${emailCounter}-${Date.now()}@example.com`,
 		...overrides,
 	};

@@ -29,25 +29,14 @@ export class GetOwnProfileUseCase implements IGetOwnProfileUseCase {
 		return this.tracer.withSpan(
 			'use-case.get-own-profile',
 			async () => {
-				const userId = await this.repo.findUserIdByExternalAuthId(
-					authUser.externalAuthId,
-					authUser.provider
-				);
-
-				if (!userId) {
-					this.logger.warn(
-						`Internal user id not found for externalAuthId=${authUser.externalAuthId}`
-					);
-					return err(new UserNotFoundError(authUser.externalAuthId));
-				}
-
-				const user = await this.repo.findById(userId);
+				const user = await this.repo.findById(authUser.id);
 
 				if (!user) {
 					this.logger.warn(
-						`User found by external mapping but row missing: id=${userId}`
+						`User found by external mapping but row missing: id=${authUser.id}`
 					);
-					return err(new UserNotFoundError(userId));
+
+					return err(new UserNotFoundError(authUser.id));
 				}
 
 				return ok(UserMapper.toUserProfile(user));
