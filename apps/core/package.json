@@ -42,7 +42,6 @@
 		"@opentelemetry/sdk-node": "^0.213.0",
 		"@opentelemetry/sdk-trace-base": "^2.6.0",
 		"@opentelemetry/semantic-conventions": "^1.40.0",
-		"@willsoto/nestjs-prometheus": "^6.0.2",
 		"bullmq": "^5.70.4",
 		"dotenv": "^17.3.1",
 		"drizzle": "^1.4.0",
