@@ -6,10 +6,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './common/filters/http-error-filter';
 import { HealthModule } from './modules/health/health.module';
+import { OutboxModule } from './modules/outbox/outbox.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 
 @Module({
@@ -19,12 +19,12 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 		ThrottlerModule.forRoot({
 			throttlers: [{ ttl: 60000, limit: 100 }],
 		}),
-		PrometheusModule.register(),
 		AuthModule, // ← provides AuthGuard, WebhookGuard, use cases
 		CoreModule,
 		HealthModule,
 		UsersModule,
 		WebhooksModule,
+		OutboxModule,
 	],
 	providers: [
 		// Guards
