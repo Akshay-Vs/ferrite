@@ -25,6 +25,10 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 					.values(entry)
 					.returning({ id: outboxEvents.id });
 
+				if (!inserted) {
+					throw new Error('Outbox insert failed: no row returned');
+				}
+
 				return inserted.id;
 			}
 		);

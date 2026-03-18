@@ -1,10 +1,14 @@
 import { randomUUID } from 'crypto';
 import { outboxEvents } from '../schema';
-import { db, setupTestDB, teardownTestDB } from './setup';
+import { cleanupTables, db, setupTestDB, teardownTestDB } from './setup';
 
 describe('outbox_events table', () => {
 	beforeAll(async () => {
 		await setupTestDB();
+	});
+
+	beforeEach(async () => {
+		await cleanupTables();
 	});
 
 	afterAll(async () => {
