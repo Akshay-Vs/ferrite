@@ -39,9 +39,9 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 					return err(new UserExistsError(input.externalAuthId));
 				}
 
-				const userId = await this.repo.createWithAuth(input);
-				this.logger.log(
-					`User created: id=${userId} externalAuthId=${input.externalAuthId}`
+				await this.repo.createWithAuth(input);
+				this.logger.debug(
+					`User created: id=${input.id} externalAuthId=${input.externalAuthId}`
 				);
 
 				return ok();

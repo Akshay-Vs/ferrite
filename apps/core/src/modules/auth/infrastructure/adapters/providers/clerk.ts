@@ -6,7 +6,9 @@ import {
 } from '@auth/domain/schemas';
 import { webhookPayloadSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
+import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
+import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -30,9 +32,11 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	private readonly secretKey: string;
 
 	constructor(
-		private config: ConfigService,
-		private logger: AppLogger,
-		@Inject(OTEL_TRACER) private tracer: ITracer
+		private readonly config: ConfigService,
+		private readonly logger: AppLogger,
+
+		@Inject(OTEL_TRACER) private tracer: ITracer,
+		@Inject(GENERATE_USER_ID) private generateUserId: GenerateUserId
 	) {
 		this.logger.setContext(ClerkAdapter.name);
 		this.secretKey = this.config.getOrThrow<string>('AUTH_CLERK_SECRET_KEY');
@@ -76,6 +80,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	//  ITokenTransformer
 	toAuthUser(claims: RawTokenClaims): AuthUser {
 		return {
+			id: this.generateUserId(claims.sub),
 			externalAuthId: claims.sub,
 			email: claims.email,
 			emailVerified: claims.email_verified,
