@@ -1,4 +1,3 @@
-import { GenerateUserIdProvider } from '@common/providers/generate-user-id.provider';
 import { OutboxModule } from '@modules/outbox/outbox.module';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
@@ -67,7 +66,6 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 			useFactory: (clerk: ClerkWebhookMapper): IWebhookMapper[] => [clerk],
 			inject: [ClerkWebhookMapper],
 		},
-		GenerateUserIdProvider,
 		ClerkWebhookMapper,
 
 		// Queue worker
