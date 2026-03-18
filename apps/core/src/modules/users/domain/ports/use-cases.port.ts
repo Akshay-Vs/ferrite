@@ -15,7 +15,6 @@ export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
 export const UPDATE_USER_UC = Symbol('UPDATE_USER_UC');
 export const DELETE_USER_UC = Symbol('DELETE_USER_UC');
 
-export const GET_USER_PROFILE_UC = Symbol('GET_USER_PROFILE_UC');
 export const GET_OWN_PROFILE_UC = Symbol('GET_OWN_PROFILE_UC');
 export const UPDATE_OWN_PROFILE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 
@@ -47,6 +46,6 @@ export type IGetOwnProfileUseCase = IUseCase<
 >;
 export type IUpdateOwnProfileUseCase = IUseCase<
 	{ authUser: AuthUser; data: UpdateProfileInput },
-	void,
+	UserProfileFull,
 	UserNotFoundError
 >;

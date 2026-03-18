@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 export const GetOwnProfileDocs = () =>
 	applyDecorators(
@@ -17,40 +17,25 @@ export const UpdateOwnProfileDocs = () =>
 			schema: {
 				type: 'object',
 				properties: {
-					firstName: { type: 'string', maxLength: 100, nullable: true },
-					lastName: { type: 'string', maxLength: 100, nullable: true },
+					firstName: { type: 'string', maxLength: 100 },
+					lastName: { type: 'string', maxLength: 100 },
 					avatarUrl: {
 						type: 'string',
 						format: 'uri',
 						maxLength: 2048,
-						nullable: true,
 					},
-					dateOfBirth: { type: 'string', format: 'date', nullable: true },
-					preferredLocale: { type: 'string', maxLength: 10, nullable: true },
+					dateOfBirth: { type: 'string', format: 'date' },
+					preferredLocale: { type: 'string', maxLength: 10 },
 					preferredCurrency: {
 						type: 'string',
 						minLength: 3,
 						maxLength: 3,
-						nullable: true,
 					},
 				},
 			},
 		}),
-		ApiResponse({ status: 200, description: 'Profile successfully updated.' })
-	);
-
-export const GetUserProfileByIdDocs = () =>
-	applyDecorators(
-		ApiOperation({ summary: 'Get a user profile by ID' }),
-		ApiParam({
-			name: 'id',
-			type: 'string',
-			format: 'uuid',
-			description: 'Internal User UUID',
-		}),
 		ApiResponse({
 			status: 200,
-			description: 'Returns the requested user profile.',
-		}),
-		ApiResponse({ status: 404, description: 'User not found.' })
+			description: 'Profile successfully updated and returned.',
+		})
 	);

@@ -12,6 +12,7 @@ import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
 export class UserMapper {
 	static toNewUser(event: UserCreatedEvent): NewUser {
 		return {
+			id: event.id,
 			email: event.email,
 			emailVerified: event.emailVerified,
 			firstName: event.firstName,

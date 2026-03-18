@@ -3,6 +3,7 @@ import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
 import type { User } from '@core/database/schema/user.schema';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
+import type { UserProfileFull } from '../schemas/user-profile.zodschema';
 import { UserUpdatedEvent } from '../schemas/user-updated.zodschema';
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
@@ -57,5 +58,5 @@ export interface IUserRepository {
 		id: string,
 		data: UpdateProfileInput,
 		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
-	): Promise<boolean>;
+	): Promise<UserProfileFull | null>;
 }

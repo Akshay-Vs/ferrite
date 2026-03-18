@@ -5,6 +5,7 @@ export const userCreatedEventSchema = z.object({
 	eventType: z.literal('user.created'),
 
 	// Identity
+	id: z.uuid(),
 	externalAuthId: z.string(),
 	provider: authProvidersSchema,
 	oauthProvider: z.string().nullable(), // google, facebook, etc

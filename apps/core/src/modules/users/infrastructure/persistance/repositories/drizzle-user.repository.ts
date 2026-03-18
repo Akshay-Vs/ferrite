@@ -15,6 +15,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
+import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
 import { and, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
@@ -55,7 +56,7 @@ export class DrizzleUserRepository implements IUserRepository {
 						},
 						() =>
 							tx.insert(userAuthProviders).values({
-								userId: inserted.id,
+								userId: event.id,
 								provider: event.provider,
 								externalAuthId: event.externalAuthId,
 								oauthProvider: event.oauthProvider,
@@ -87,7 +88,7 @@ export class DrizzleUserRepository implements IUserRepository {
 				if (!userId) return false;
 
 				const update = UserMapper.toUserUpdate(event);
-				if (Object.keys(update).length === 0) return true;
+				if (Object.keys(update).length === 0) return false;
 
 				const result = await traceDbOp(
 					this.tracer,
@@ -200,7 +201,9 @@ export class DrizzleUserRepository implements IUserRepository {
 		id: string,
 		data: UpdateProfileInput,
 		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
-	): Promise<boolean> {
+	): Promise<UserProfileFull | null> {
+		if (Object.keys(data).length === 0) return null;
+
 		return traceDbOp(
 			this.tracer,
 			'db.users.updateProfileById',
@@ -223,15 +226,15 @@ export class DrizzleUserRepository implements IUserRepository {
 									updatedAt: new Date(),
 								})
 								.where(and(eq(users.id, id), isNull(users.deletedAt)))
-								.returning({ id: users.id })
+								.returning()
 					);
 
-					if (result.length === 0) return false;
+					if (result.length === 0) return null;
 
 					// 2. Insert outbox event
 					await this.outboxRepo.insert(tx, outboxEvent);
 
-					return true;
+					return UserMapper.toUserProfile(result[0]);
 				});
 			}
 		);
