@@ -1,4 +1,7 @@
 import { AuthProvider } from '@auth/index';
+import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
+import type { User } from '@core/database/schema/user.schema';
+import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
 import { UserUpdatedEvent } from '../schemas/user-updated.zodschema';
 
@@ -39,4 +42,20 @@ export interface IUserRepository {
 		externalAuthId: string,
 		provider: AuthProvider
 	): Promise<string | null>;
+
+	/**
+	 * Find a user by their internal UUID.
+	 * @returns The user object, or null if not found (or softly deleted).
+	 */
+	findById(id: string): Promise<User | null>;
+
+	/**
+	 * Update a user's profile and persist an outbox event in the same transaction.
+	 * @returns `true` if a row was updated, `false` if not found.
+	 */
+	updateProfileById(
+		id: string,
+		data: UpdateProfileInput,
+		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
+	): Promise<boolean>;
 }
