@@ -28,7 +28,7 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 			const outboxEvent: OutboxEvent<UserDeletedEvent> = {
 				aggregateId: authUser.id,
 				aggregateType: 'user',
-				eventType: 'user.profile_updated',
+				eventType: 'user.deleted',
 				payload: {
 					eventType: 'user.deleted',
 					externalAuthId: authUser.externalAuthId,
