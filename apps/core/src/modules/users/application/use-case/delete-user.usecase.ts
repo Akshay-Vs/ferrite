@@ -1,3 +1,4 @@
+import { AuthUser } from '@auth/index';
 import { ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -9,7 +10,7 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import { UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
+import { UserDeletedEvent } from '@users/domain/schemas';
 
 @Injectable()
 export class DeleteUserUseCase implements IDeleteUserUseCase {
@@ -21,13 +22,25 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(
-		input: UserDeletedEvent
-	): Promise<Result<void, UserNotFoundError>> {
+	async execute(authUser: AuthUser): Promise<Result<void, UserNotFoundError>> {
 		return this.tracer.withSpan('use-case.delete-user', async () => {
-			const deleted = await this.repo.softDeleteByExternalAuthId(
-				input.externalAuthId,
-				input.provider
+			const outboxPayload: UserDeletedEvent = {
+				eventType: 'user.deleted',
+				externalAuthId: authUser.externalAuthId,
+				provider: authUser.provider,
+			};
+
+			const outboxEvent = {
+				aggregateId: authUser.id,
+				aggregateType: 'user',
+				eventType: 'user.profile_updated',
+				payload: outboxPayload,
+			};
+
+			const deleted = await this.repo.softDeleteById(
+				authUser.id,
+				authUser.provider,
+				outboxEvent
 			);
 
 			if (!deleted) {

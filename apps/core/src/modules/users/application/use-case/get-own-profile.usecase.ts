@@ -32,10 +32,7 @@ export class GetOwnProfileUseCase implements IGetOwnProfileUseCase {
 				const user = await this.repo.findById(authUser.id);
 
 				if (!user) {
-					this.logger.warn(
-						`User found by external mapping but row missing: id=${authUser.id}`
-					);
-
+					this.logger.warn(`User row missing for id=${authUser.id}`);
 					return err(new UserNotFoundError(authUser.id));
 				}
 

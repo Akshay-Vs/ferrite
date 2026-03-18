@@ -6,13 +6,11 @@ import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { DeleteUserUseCase } from './application/use-case/delete-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
 import { UpdateOwnProfileUseCase } from './application/use-case/update-own-profile.usecase';
-import { UpdateUserUseCase } from './application/use-case/update-user.usecase';
 import {
 	CREATE_USER_UC,
 	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
 	UPDATE_OWN_PROFILE_UC,
-	UPDATE_USER_UC,
 } from './domain/ports/use-cases.port';
 import { USER_REPOSITORY } from './domain/ports/user-repository.port';
 import {
@@ -46,10 +44,6 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 		{
 			provide: CREATE_USER_UC,
 			useClass: CreateUserUseCase,
-		},
-		{
-			provide: UPDATE_USER_UC,
-			useClass: UpdateUserUseCase,
 		},
 		{
 			provide: DELETE_USER_UC,

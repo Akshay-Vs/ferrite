@@ -39,3 +39,12 @@ export const UpdateOwnProfileDocs = () =>
 			description: 'Profile successfully updated and returned.',
 		})
 	);
+
+export const DeleteOwnProfileDocs = () =>
+	applyDecorators(
+		ApiOperation({ summary: 'Delete current user profile' }),
+		ApiResponse({
+			status: 200,
+			description: 'Profile successfully deleted and returned.',
+		})
+	);

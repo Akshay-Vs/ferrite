@@ -4,7 +4,6 @@ import type { User } from '@core/database/schema/user.schema';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
 import type { UserProfileFull } from '../schemas/user-profile.zodschema';
-import { UserUpdatedEvent } from '../schemas/user-updated.zodschema';
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
 
@@ -22,27 +21,14 @@ export interface IUserRepository {
 	createWithAuth(event: UserCreatedEvent): Promise<string>;
 
 	/**
-	 * Update user fields by their external auth provider id.
-	 * @returns `true` if a row was updated, `false` if not found.
-	 */
-	updateByExternalAuthId(event: UserUpdatedEvent): Promise<boolean>;
-
-	/**
 	 * Soft-delete a user by setting `deletedAt`.
 	 * @returns `true` if a row was updated, `false` if not found.
 	 */
-	softDeleteByExternalAuthId(
-		externalAuthId: string,
-		provider: AuthProvider
+	softDeleteById(
+		id: string,
+		provider: AuthProvider,
+		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
 	): Promise<boolean>;
-
-	/**
-	 * Find a user id by their external auth provider id.
-	 */
-	findUserIdByExternalAuthId(
-		externalAuthId: string,
-		provider: AuthProvider
-	): Promise<string | null>;
 
 	/**
 	 * Find a user by their internal UUID.

@@ -31,10 +31,14 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 		return this.tracer.withSpan(
 			'use-case.update-own-profile',
 			async () => {
-				const userId = await this.repo.findUserIdByExternalAuthId(
-					input.authUser.externalAuthId,
-					input.authUser.provider
-				);
+				const user = await this.repo.findById(input.authUser.id);
+
+				if (!user) {
+					this.logger.warn(`User row missing for id=${input.authUser.id}`);
+					return err(new UserNotFoundError(input.authUser.id));
+				}
+
+				const userId = user.id;
 
 				if (!userId) {
 					this.logger.warn(

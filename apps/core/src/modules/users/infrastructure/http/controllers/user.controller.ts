@@ -4,6 +4,7 @@ import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
@@ -16,7 +17,9 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import {
+	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
+	type IDeleteUserUseCase,
 	type IGetOwnProfileUseCase,
 	type IUpdateOwnProfileUseCase,
 	UPDATE_OWN_PROFILE_UC,
@@ -24,7 +27,11 @@ import {
 
 import { UpdateProfileInputDTO } from '@users/domain/schemas';
 
-import { GetOwnProfileDocs, UpdateOwnProfileDocs } from './user.swaggerdocs';
+import {
+	DeleteOwnProfileDocs,
+	GetOwnProfileDocs,
+	UpdateOwnProfileDocs,
+} from './user.swaggerdocs';
 
 @ApiTags('Users')
 @ApiBearerAuth('swagger-access-token')
@@ -34,8 +41,13 @@ export class UserController {
 	constructor(
 		@Inject(GET_OWN_PROFILE_UC)
 		private readonly getOwnProfileUseCase: IGetOwnProfileUseCase,
+
 		@Inject(UPDATE_OWN_PROFILE_UC)
 		private readonly updateOwnProfileUseCase: IUpdateOwnProfileUseCase,
+
+		@Inject(DELETE_USER_UC)
+		private readonly deleteUserUseCase: IDeleteUserUseCase,
+
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
@@ -51,7 +63,7 @@ export class UserController {
 		});
 	}
 
-	@Patch('me')
+	@Patch()
 	@HttpCode(HttpStatus.OK)
 	@UpdateOwnProfileDocs()
 	async updateOwnProfile(
@@ -63,6 +75,19 @@ export class UserController {
 				authUser,
 				data: payload,
 			});
+			if (result.isErr()) {
+				throw new NotFoundException(result.error.message);
+			}
+			return result.value;
+		});
+	}
+
+	@Delete()
+	@HttpCode(HttpStatus.OK)
+	@DeleteOwnProfileDocs()
+	async deleteOwnProfile(@AuthUserParam() authUser: AuthUser) {
+		return this.tracer.withSpan('http.delete-own-profile', async () => {
+			const result = await this.deleteUserUseCase.execute(authUser);
 			if (result.isErr()) {
 				throw new NotFoundException(result.error.message);
 			}

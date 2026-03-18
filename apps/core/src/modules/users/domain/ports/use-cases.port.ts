@@ -4,7 +4,6 @@ import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
-import { UserDeletedEvent } from '../schemas/user-deleted.zodschema';
 import type {
 	UserProfileBase,
 	UserProfileFull,
@@ -28,11 +27,7 @@ export type IUpdateUserUseCase = IUseCase<
 	void,
 	UserNotFoundError
 >;
-export type IDeleteUserUseCase = IUseCase<
-	UserDeletedEvent,
-	void,
-	UserNotFoundError
->;
+export type IDeleteUserUseCase = IUseCase<AuthUser, void, UserNotFoundError>;
 
 export type IGetUserProfileUseCase = IUseCase<
 	string,

@@ -3,7 +3,7 @@ import { traceDbOp } from '@common/utils/trace-db-op.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders } from '@core/database/schema/auth.schema';
-import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
+import { type NewOutboxEvent } from '@core/database/schema/outbox.schema';
 import { type User, users } from '@core/database/schema/user.schema';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -16,7 +16,6 @@ import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
 import { and, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 
@@ -66,113 +65,6 @@ export class DrizzleUserRepository implements IUserRepository {
 
 					return inserted.id;
 				});
-			}
-		);
-	}
-
-	async updateByExternalAuthId(event: UserUpdatedEvent): Promise<boolean> {
-		return traceDbOp(
-			this.tracer,
-			'db.user.updateByExternalAuthId',
-			{
-				'db.table': 'users',
-				'db.operation': 'update',
-				'auth.provider': event.provider,
-			},
-			async () => {
-				const userId = await this.findUserIdByExternalAuthId(
-					event.externalAuthId,
-					event.provider
-				);
-
-				if (!userId) return false;
-
-				const update = UserMapper.toUserUpdate(event);
-				if (Object.keys(update).length === 0) return false;
-
-				const result = await traceDbOp(
-					this.tracer,
-					'db.users.update',
-					{ 'db.table': 'users', 'db.operation': 'update' },
-					() =>
-						this.db
-							.update(users)
-							.set(update)
-							.where(eq(users.id, userId))
-							.returning({ id: users.id })
-				);
-
-				return result.length > 0;
-			}
-		);
-	}
-
-	async softDeleteByExternalAuthId(
-		externalAuthId: string,
-		provider: AuthProvider
-	): Promise<boolean> {
-		return traceDbOp(
-			this.tracer,
-			'db.user.softDeleteByExternalAuthId',
-			{
-				'db.table': 'users',
-				'db.operation': 'update',
-				'auth.provider': provider,
-			},
-			async () => {
-				const userId = await this.findUserIdByExternalAuthId(
-					externalAuthId,
-					provider
-				);
-
-				if (!userId) return false;
-
-				const result = await traceDbOp(
-					this.tracer,
-					'db.users.softDelete',
-					{ 'db.table': 'users', 'db.operation': 'update' },
-					() =>
-						this.db
-							.update(users)
-							.set({
-								deletedAt: new Date(),
-								isActive: false,
-								updatedAt: new Date(),
-							})
-							.where(eq(users.id, userId))
-							.returning({ id: users.id })
-				);
-
-				return result.length > 0;
-			}
-		);
-	}
-
-	async findUserIdByExternalAuthId(
-		externalAuthId: string,
-		provider: AuthProvider
-	): Promise<string | null> {
-		return traceDbOp(
-			this.tracer,
-			'db.userAuthProviders.findByExternalAuthId',
-			{
-				'db.table': 'user_auth_providers',
-				'db.operation': 'select',
-				'auth.provider': provider,
-			},
-			async () => {
-				const [row] = await this.db
-					.select({ userId: userAuthProviders.userId })
-					.from(userAuthProviders)
-					.where(
-						and(
-							eq(userAuthProviders.externalAuthId, externalAuthId),
-							eq(userAuthProviders.provider, provider as AuthProvider)
-						)
-					)
-					.limit(1);
-
-				return row?.userId ?? null;
 			}
 		);
 	}
@@ -231,10 +123,66 @@ export class DrizzleUserRepository implements IUserRepository {
 
 					if (result.length === 0) return null;
 
-					// 2. Insert outbox event
-					await this.outboxRepo.insert(tx, outboxEvent);
-
+					// 2. Write outbox event
+					await traceDbOp(
+						this.tracer,
+						'db.outbox_events.insert',
+						{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
+						() => this.outboxRepo.insert(tx, outboxEvent)
+					);
 					return UserMapper.toUserProfile(result[0]);
+				});
+			}
+		);
+	}
+
+	async softDeleteById(
+		id: string,
+		provider: AuthProvider,
+		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.user.softDeleteByExternalAuthId',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+				'auth.provider': provider,
+			},
+			async () => {
+				const user = await this.findById(id);
+				if (!user) return false;
+				if (user.deletedAt) return false;
+
+				return this.db.transaction(async (tx) => {
+					// 1. Soft delete user
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.softDelete',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									deletedAt: new Date(),
+									isActive: false,
+									updatedAt: new Date(),
+									email: `${user.email}.${user.id}.deleted`,
+								})
+								.where(eq(users.id, user.id))
+								.returning({ id: users.id })
+					);
+					if (result.length === 0) return false;
+
+					// 2. Write outbox event
+					await traceDbOp(
+						this.tracer,
+						'db.outbox_events.insert',
+						{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
+						() => this.outboxRepo.insert(tx, outboxEvent)
+					);
+
+					return true;
 				});
 			}
 		);

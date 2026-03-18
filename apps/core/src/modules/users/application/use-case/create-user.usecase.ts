@@ -27,10 +27,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 		return this.tracer.withSpan(
 			'use-case.create-user',
 			async () => {
-				const existing = await this.repo.findUserIdByExternalAuthId(
-					input.externalAuthId,
-					input.provider
-				);
+				const existing = await this.repo.findById(input.id);
 
 				if (existing) {
 					this.logger.warn(
