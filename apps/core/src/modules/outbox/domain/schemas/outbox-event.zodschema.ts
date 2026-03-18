@@ -5,7 +5,7 @@ import { z } from 'zod/v4';
  * Used to validate outbox entries before persisting.
  */
 export const newOutboxEventSchema = z.object({
-	aggregateId: z.string().uuid(),
+	aggregateId: z.uuid(),
 	aggregateType: z.string().min(1),
 	eventType: z.string().min(1),
 	payload: z.record(z.string(), z.unknown()),

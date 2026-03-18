@@ -1,5 +1,6 @@
 import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
+import { OutboxEvent } from '@core/database/schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -54,7 +55,7 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					return ok(UserMapper.toUserProfile(existingUser));
 				}
 
-				const outboxEvent = {
+				const outboxEvent: OutboxEvent<UpdateProfileInput> = {
 					aggregateId: userId,
 					aggregateType: 'user',
 					eventType: 'user.profile_updated',

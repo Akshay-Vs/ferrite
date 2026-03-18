@@ -1,5 +1,6 @@
 import { AuthUser } from '@auth/index';
 import { ok, Result } from '@common/interfaces/result.interface';
+import { OutboxEvent } from '@core/database/schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -24,17 +25,15 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 
 	async execute(authUser: AuthUser): Promise<Result<void, UserNotFoundError>> {
 		return this.tracer.withSpan('use-case.delete-user', async () => {
-			const outboxPayload: UserDeletedEvent = {
-				eventType: 'user.deleted',
-				externalAuthId: authUser.externalAuthId,
-				provider: authUser.provider,
-			};
-
-			const outboxEvent = {
+			const outboxEvent: OutboxEvent<UserDeletedEvent> = {
 				aggregateId: authUser.id,
 				aggregateType: 'user',
 				eventType: 'user.profile_updated',
-				payload: outboxPayload,
+				payload: {
+					eventType: 'user.deleted',
+					externalAuthId: authUser.externalAuthId,
+					provider: authUser.provider,
+				},
 			};
 
 			const deleted = await this.repo.softDeleteById(

@@ -50,5 +50,9 @@ export const outboxEvents = pgTable(
 // TYPE EXPORTS
 // ─────────────────────────────────────────
 
-export type OutboxEvent = typeof outboxEvents.$inferSelect;
 export type NewOutboxEvent = typeof outboxEvents.$inferInsert;
+export type OutboxEvent<
+	T extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<NewOutboxEvent, 'id' | 'createdAt' | 'payload'> & {
+	payload: T;
+};
