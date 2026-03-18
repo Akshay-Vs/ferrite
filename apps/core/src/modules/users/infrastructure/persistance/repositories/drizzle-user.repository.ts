@@ -3,7 +3,7 @@ import { traceDbOp } from '@common/utils/trace-db-op.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders } from '@core/database/schema/auth.schema';
-import { type NewOutboxEvent } from '@core/database/schema/outbox.schema';
+import { OutboxEvent } from '@core/database/schema/outbox.schema';
 import { type User, users } from '@core/database/schema/user.schema';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -13,6 +13,7 @@ import {
 } from '@modules/outbox/domain/ports/outbox-repository.port';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
+import { UserDeletedEvent } from '@users/domain/schemas';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
@@ -92,7 +93,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	async updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
+		outboxEvent: OutboxEvent<UpdateProfileInput>
 	): Promise<UserProfileFull | null> {
 		if (Object.keys(data).length === 0) return null;
 
@@ -139,7 +140,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	async softDeleteById(
 		id: string,
 		provider: AuthProvider,
-		outboxEvent: Omit<NewOutboxEvent, 'id' | 'createdAt'>
+		outboxEvent: OutboxEvent<UserDeletedEvent>
 	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
