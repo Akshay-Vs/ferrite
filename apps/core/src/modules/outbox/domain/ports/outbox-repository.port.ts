@@ -17,4 +17,10 @@ export interface IOutboxRepository {
 	 * @returns The generated outbox event id.
 	 */
 	insert(tx: unknown, entry: DomainEvent): Promise<string>;
+
+	/**
+	 * Fetch outbox events that have not been processed yet.
+	 * Returns recent pending events.
+	 */
+	findPending(): Promise<any[]>;
 }

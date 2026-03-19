@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OUTBOX_REPOSITORY } from './domain/ports/outbox-repository.port';
-import { DrizzleOutboxRepository } from './infrastructure/drizzle-outbox.repository';
+import { DrizzleOutboxRepository } from './infrastructure/persistance/drizzle-outbox.repository';
+import { OutboxWorker } from './infrastructure/replication/outbox.worker';
 
 @Module({
 	providers: [
@@ -8,6 +9,7 @@ import { DrizzleOutboxRepository } from './infrastructure/drizzle-outbox.reposit
 			provide: OUTBOX_REPOSITORY,
 			useClass: DrizzleOutboxRepository,
 		},
+		OutboxWorker,
 	],
 	exports: [OUTBOX_REPOSITORY],
 })

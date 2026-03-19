@@ -3,6 +3,7 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
+import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
 import type { ICreateUserUseCase } from '@users/domain/ports/use-cases.port';
 import {
@@ -23,7 +24,7 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 
 	async execute(
 		input: UserCreatedEvent
-	): Promise<Result<void, UserExistsError>> {
+	): Promise<Result<void, UserExistsError | UserConflictError>> {
 		return this.tracer.withSpan(
 			'use-case.create-user',
 			async () => {
@@ -41,14 +42,22 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 					this.logger.debug(
 						`User created: id=${input.id} externalAuthId=${input.externalAuthId}`
 					);
-				} catch (error) {
-					this.logger.error(
-						`Failed to create user (potentially soft-deleted PK collision): id=${input.id} externalAuthId=${input.externalAuthId}`,
-						error instanceof Error ? error.stack : String(error)
-					);
-				}
+					return ok();
+				} catch (error: any) {
+					// 23505 is the Postgres error code for unique_violation
+					if (error?.code === '23505' || error?.cause?.code === '23505') {
+						this.logger.warn(
+							`User creation conflict (potentially soft-deleted PK): id=${input.id} externalAuthId=${input.externalAuthId}`
+						);
+						return err(new UserConflictError(input.externalAuthId));
+					}
 
-				return ok();
+					this.logger.error(
+						`Failed to create user: id=${input.id} externalAuthId=${input.externalAuthId}`,
+						error //? error.stack : String(error)
+					);
+					throw error;
+				}
 			},
 			{ 'use-case.externalAuthId': input.externalAuthId }
 		);

@@ -29,8 +29,6 @@ export const registerShutdownHook = (app: INestApplication) => {
 			);
 	};
 
-	app.enableShutdownHooks();
-
 	process.on('uncaughtException', shutdown('uncaughtException'));
 	process.on('unhandledRejection', shutdown('unhandledRejection'));
 	process.on('SIGINT', shutdown('SIGINT'));

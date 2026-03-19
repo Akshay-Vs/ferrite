@@ -4,11 +4,13 @@ import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { DeleteUserUseCase } from './application/use-case/delete-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
+import { RouteUserEventsUsecase } from './application/use-case/route-user-events.usercase';
 import { UpdateOwnProfileUseCase } from './application/use-case/update-own-profile.usecase';
 import {
 	CREATE_USER_UC,
 	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
+	ROUTE_USER_EVENTS_UC,
 	UPDATE_OWN_PROFILE_UC,
 } from './domain/ports/use-cases.port';
 import { USER_REPOSITORY } from './domain/ports/user-repository.port';
@@ -55,6 +57,10 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 		{
 			provide: UPDATE_OWN_PROFILE_UC,
 			useClass: UpdateOwnProfileUseCase,
+		},
+		{
+			provide: ROUTE_USER_EVENTS_UC,
+			useClass: RouteUserEventsUsecase,
 		},
 		{
 			provide: WEBHOOK_MAPPER_REGISTRY,

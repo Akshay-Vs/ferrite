@@ -1,17 +1,18 @@
 import { WebhookPayload } from '@auth/index';
-import { Result } from '@common/interfaces/result.interface';
 import { webhookEnvelopeSchema } from '@common/schemas/webhook-envelope.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { BaseConsumer } from '@core/queue/base.consumer';
+import { UnsupportedEventTypeError } from '@core/queue/queue.errors';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Processor } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { type Context, context, propagation } from '@opentelemetry/api';
+import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
 import {
-	CREATE_USER_UC,
-	type ICreateUserUseCase,
+	type IRouteUserEventsUseCase,
+	ROUTE_USER_EVENTS_UC,
 } from '@users/domain/ports/use-cases.port';
 import {
 	type IWebhookMapperRegistry,
@@ -31,7 +32,8 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 		@Inject(WEBHOOK_MAPPER_REGISTRY)
 		private readonly registry: IWebhookMapperRegistry,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(CREATE_USER_UC) private readonly createUser: ICreateUserUseCase
+		@Inject(ROUTE_USER_EVENTS_UC)
+		private readonly routeUserEvents: IRouteUserEventsUseCase
 	) {
 		super();
 		this.logger.setContext(this.constructor.name);
@@ -69,22 +71,15 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 					const userSyncEvent = this.transformEvent(job);
 					this.logger.log(`Processing ${userSyncEvent.eventType}`);
 
-					// Dispatch to use-case
-					let result: Result<void, Error>;
-					const eventType = userSyncEvent.eventType;
-
-					switch (eventType) {
-						case 'user.created':
-							result = await this.createUser.execute(userSyncEvent);
-							break;
-						default: {
-							throw new Error(`Unhandled event type: ${eventType}`);
-						}
-					}
+					const result = await this.routeUserEvents.execute(userSyncEvent);
 
 					// Handle result
 					if (result.isErr()) {
-						if (result.error instanceof UserExistsError) {
+						if (
+							result.error instanceof UnsupportedEventTypeError ||
+							result.error instanceof UserExistsError ||
+							result.error instanceof UserConflictError
+						) {
 							this.logger.warn(
 								`Acknowledging expected domain error: ${result.error.message}`
 							);
