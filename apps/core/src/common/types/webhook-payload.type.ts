@@ -1,4 +1,9 @@
-import { IncomingHttpHeaders } from 'node:http';
+/**
+ * Transport-agnostic header map.
+ * Structurally compatible with Node `IncomingHttpHeaders` so that Express
+ * request objects can be passed directly without conversion.
+ */
+export type WebhookHeaders = Record<string, string | string[] | undefined>;
 
 /**
  * Raw HTTP envelope received by the webhook controller.
@@ -20,5 +25,5 @@ export interface RawWebhookRequest {
 	 * - Firebase: N/A (uses JWT verification)
 	 * - Kinde:    svix-id, svix-timestamp, svix-signature
 	 */
-	headers: IncomingHttpHeaders;
+	headers: WebhookHeaders;
 }
