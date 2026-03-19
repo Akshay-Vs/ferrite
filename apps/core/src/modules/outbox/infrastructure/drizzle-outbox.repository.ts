@@ -1,20 +1,18 @@
-import { traceDbOp } from '@common/utils/trace-db-op.util';
 import type { TDatabase } from '@core/database/db.type';
-import type { NewOutboxEvent } from '@core/database/schema/outbox.schema';
 import { outboxEvents } from '@core/database/schema/outbox.schema';
+import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
+import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DrizzleOutboxRepository implements IOutboxRepository {
 	constructor(@Inject(OTEL_TRACER) private readonly tracer: ITracer) {}
 
-	async insert(
-		tx: Parameters<Parameters<TDatabase['transaction']>[0]>[0],
-		entry: Omit<NewOutboxEvent, 'id' | 'createdAt'>
-	): Promise<string> {
+	async insert(txRaw: unknown, entry: DomainEvent): Promise<string> {
+		const tx = txRaw as Parameters<Parameters<TDatabase['transaction']>[0]>[0];
 		return traceDbOp(
 			this.tracer,
 			'db.outboxEvents.insert',

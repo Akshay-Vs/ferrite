@@ -26,6 +26,11 @@ export const outboxEvents = pgTable(
 		maxRetries: integer('max_retries').notNull().default(5),
 		errorDetail: text('error_detail'),
 
+		// Scheduled job
+		scheduledAt: timestamp('scheduled_at', { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+
 		// Claiming mechanism
 		lockedAt: timestamp('locked_at', { withTimezone: true }),
 

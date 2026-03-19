@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import {
-	Attributes,
-	Span,
-	SpanStatusCode,
-	Tracer,
-	trace,
-} from '@opentelemetry/api';
-import { ITracer } from './tracer.port';
+import { SpanStatusCode, Tracer, trace } from '@opentelemetry/api';
+import { type ISpan, type ITracer, type SpanAttributes } from './tracer.port';
 
 @Injectable()
 export class TracerService implements ITracer {
@@ -22,8 +16,8 @@ export class TracerService implements ITracer {
 	 */
 	withSpan<T>(
 		name: string,
-		fn: (span: Span) => Promise<T>,
-		attributes?: Attributes
+		fn: (span: ISpan) => Promise<T>,
+		attributes?: SpanAttributes
 	): Promise<T> {
 		return this.tracer.startActiveSpan(name, async (span) => {
 			try {

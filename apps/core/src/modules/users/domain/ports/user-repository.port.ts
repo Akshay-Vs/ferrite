@@ -1,6 +1,5 @@
 import { AuthProvider } from '@auth/index';
-import type { OutboxEvent } from '@core/database/schema/outbox.schema';
-import type { User } from '@core/database/schema/user.schema';
+import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { UserDeletedEvent } from '../schemas';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
@@ -28,22 +27,22 @@ export interface IUserRepository {
 	softDeleteById(
 		id: string,
 		provider: AuthProvider,
-		outboxEvent: OutboxEvent<UserDeletedEvent>
+		outboxEvent: DomainEvent<UserDeletedEvent>
 	): Promise<boolean>;
 
 	/**
 	 * Find a user by their internal UUID.
-	 * @returns The user object, or null if not found (or softly deleted).
+	 * @returns The user profile, or null if not found (or soft-deleted).
 	 */
-	findById(id: string): Promise<User | null>;
+	findById(id: string): Promise<UserProfileFull | null>;
 
 	/**
 	 * Update a user's profile and persist an outbox event in the same transaction.
-	 * @returns `true` if a row was updated, `false` if not found.
+	 * @returns The updated profile, or null if user not found.
 	 */
 	updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: OutboxEvent<UpdateProfileInput>
+		outboxEvent: DomainEvent<UpdateProfileInput>
 	): Promise<UserProfileFull | null>;
 }

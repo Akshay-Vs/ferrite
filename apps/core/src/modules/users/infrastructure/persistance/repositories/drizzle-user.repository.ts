@@ -1,16 +1,15 @@
 import { AuthProvider } from '@auth/index';
-import { traceDbOp } from '@common/utils/trace-db-op.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
-import { userAuthProviders } from '@core/database/schema/auth.schema';
-import { OutboxEvent } from '@core/database/schema/outbox.schema';
-import { type User, users } from '@core/database/schema/user.schema';
+import { userAuthProviders, users } from '@core/database/schema';
+import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
 	type IOutboxRepository,
 	OUTBOX_REPOSITORY,
 } from '@modules/outbox/domain/ports/outbox-repository.port';
+import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import { UserDeletedEvent } from '@users/domain/schemas';
@@ -23,10 +22,14 @@ import { UserMapper } from '../mappers/user.mapper';
 @Injectable()
 export class DrizzleUserRepository implements IUserRepository {
 	constructor(
-		@Inject(DB) private readonly db: TDatabase,
+		@Inject(DB) private readonly db: any, // type erasure for decorator metadata
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(OUTBOX_REPOSITORY) private readonly outboxRepo: IOutboxRepository
 	) {}
+
+	private get typedDb(): TDatabase {
+		return this.db;
+	}
 
 	async createWithAuth(event: UserCreatedEvent): Promise<string> {
 		return traceDbOp(
@@ -36,7 +39,7 @@ export class DrizzleUserRepository implements IUserRepository {
 			async () => {
 				const newUser = UserMapper.toNewUser(event);
 
-				return this.db.transaction(async (tx) => {
+				return this.typedDb.transaction(async (tx) => {
 					//Span: insert user row
 					const [inserted] = await traceDbOp(
 						this.tracer,
@@ -70,7 +73,7 @@ export class DrizzleUserRepository implements IUserRepository {
 		);
 	}
 
-	async findById(id: string): Promise<User | null> {
+	async findById(id: string): Promise<UserProfileFull | null> {
 		return traceDbOp(
 			this.tracer,
 			'db.users.findById',
@@ -79,13 +82,13 @@ export class DrizzleUserRepository implements IUserRepository {
 				'db.operation': 'select',
 			},
 			async () => {
-				const [user] = await this.db
+				const [user] = await this.typedDb
 					.select()
 					.from(users)
 					.where(and(eq(users.id, id), isNull(users.deletedAt)))
 					.limit(1);
 
-				return user ?? null;
+				return user ? UserMapper.toUserProfile(user) : null;
 			}
 		);
 	}
@@ -93,10 +96,8 @@ export class DrizzleUserRepository implements IUserRepository {
 	async updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: OutboxEvent<UpdateProfileInput>
+		outboxEvent: DomainEvent<UpdateProfileInput>
 	): Promise<UserProfileFull | null> {
-		if (Object.keys(data).length === 0) return null;
-
 		return traceDbOp(
 			this.tracer,
 			'db.users.updateProfileById',
@@ -105,7 +106,7 @@ export class DrizzleUserRepository implements IUserRepository {
 				'db.operation': 'update',
 			},
 			async () => {
-				return this.db.transaction(async (tx) => {
+				return this.typedDb.transaction(async (tx) => {
 					// 1. Update user
 					const result = await traceDbOp(
 						this.tracer,
@@ -131,6 +132,7 @@ export class DrizzleUserRepository implements IUserRepository {
 						{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
 						() => this.outboxRepo.insert(tx, outboxEvent)
 					);
+
 					return UserMapper.toUserProfile(result[0]);
 				});
 			}
@@ -140,7 +142,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	async softDeleteById(
 		id: string,
 		provider: AuthProvider,
-		outboxEvent: OutboxEvent<UserDeletedEvent>
+		outboxEvent: DomainEvent<UserDeletedEvent>
 	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
@@ -153,9 +155,8 @@ export class DrizzleUserRepository implements IUserRepository {
 			async () => {
 				const user = await this.findById(id);
 				if (!user) return false;
-				if (user.deletedAt) return false;
 
-				return this.db.transaction(async (tx) => {
+				return this.typedDb.transaction(async (tx) => {
 					// 1. Soft delete user
 					const result = await traceDbOp(
 						this.tracer,
@@ -168,9 +169,9 @@ export class DrizzleUserRepository implements IUserRepository {
 									deletedAt: new Date(),
 									isActive: false,
 									updatedAt: new Date(),
-									email: `${user.email}.${user.id}.deleted`,
+									email: `${user.email}.${id}.deleted`,
 								})
-								.where(eq(users.id, user.id))
+								.where(eq(users.id, id))
 								.returning({ id: users.id })
 					);
 					if (result.length === 0) return false;

@@ -1,4 +1,18 @@
-import { Attributes, Span } from '@opentelemetry/api';
+/**
+ * Minimal span abstraction exposed to callers of {@link ITracer.withSpan}.
+ *
+ * Only exposes `setAttributes` — span lifecycle (start, end, error recording)
+ * is managed by the tracer implementation, not by consumers.
+ */
+export interface ISpan {
+	setAttributes(attributes: SpanAttributes): void;
+}
+
+/**
+ * Key-value bag attached to a span.
+ * Intentionally limited to primitive types to stay vendor-agnostic.
+ */
+export type SpanAttributes = Record<string, string | number | boolean>;
 
 /**
  * Tracing port.
@@ -18,7 +32,7 @@ export interface ITracer {
 	 */
 	withSpan<T>(
 		name: string,
-		fn: (span: Span) => Promise<T>,
-		attributes?: Attributes
+		fn: (span: ISpan) => Promise<T>,
+		attributes?: SpanAttributes
 	): Promise<T>;
 }

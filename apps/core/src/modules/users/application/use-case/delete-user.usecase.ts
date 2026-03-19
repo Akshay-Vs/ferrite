@@ -1,9 +1,9 @@
-import { AuthUser } from '@auth/index';
-import { ok, Result } from '@common/interfaces/result.interface';
-import { OutboxEvent } from '@core/database/schema';
+import type { AuthUser } from '@auth/index';
+import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IDeleteUserUseCase } from '@users/domain/ports/use-cases.port';
@@ -11,7 +11,7 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import { UserDeletedEvent } from '@users/domain/schemas';
+import type { UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
 
 @Injectable()
 export class DeleteUserUseCase implements IDeleteUserUseCase {
@@ -23,32 +23,45 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(authUser: AuthUser): Promise<Result<void, UserNotFoundError>> {
-		return this.tracer.withSpan('use-case.delete-user', async () => {
-			const outboxEvent: OutboxEvent<UserDeletedEvent> = {
-				aggregateId: authUser.id,
-				aggregateType: 'user',
-				eventType: 'user.profile_updated',
-				payload: {
+	async execute(
+		authUser: AuthUser
+	): Promise<Result<boolean, UserNotFoundError>> {
+		return this.tracer.withSpan(
+			'use-case.delete-user',
+			async () => {
+				const user = await this.repo.findById(authUser.id);
+
+				if (!user) {
+					return err(new UserNotFoundError(authUser.id));
+				}
+
+				const outboxEvent: DomainEvent<UserDeletedEvent> = {
+					aggregateId: user.id,
+					aggregateType: 'user',
 					eventType: 'user.deleted',
-					externalAuthId: authUser.externalAuthId,
-					provider: authUser.provider,
-				},
-			};
+					payload: {
+						eventType: 'user.deleted',
+						externalAuthId: authUser.externalAuthId,
+						provider: authUser.provider,
+					},
+				};
 
-			const deleted = await this.repo.softDeleteById(
-				authUser.id,
-				authUser.provider,
-				outboxEvent
-			);
+				const deleted = await this.repo.softDeleteById(
+					user.id,
+					authUser.provider,
+					outboxEvent
+				);
 
-			if (!deleted) {
-				this.logger.debug(`User already deleted or not found (no-op)`);
-				return ok();
-			}
+				if (!deleted) {
+					return err(new UserNotFoundError(user.id));
+				}
 
-			this.logger.log(`User soft-deleted`);
-			return ok();
-		});
+				this.logger.log(
+					`User soft-deleted: id=${user.id}, provider=${authUser.provider}`
+				);
+				return ok(true);
+			},
+			{ 'use-case.externalAuthId': authUser.externalAuthId }
+		);
 	}
 }

@@ -25,7 +25,7 @@ import {
 	UPDATE_OWN_PROFILE_UC,
 } from '@users/domain/ports/use-cases.port';
 
-import { UpdateProfileInputDTO } from '@users/domain/schemas';
+import { UpdateProfileInputDTO } from '../dto/update-profile.dto';
 
 import {
 	DeleteOwnProfileDocs,

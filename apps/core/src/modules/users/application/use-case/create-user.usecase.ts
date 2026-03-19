@@ -36,10 +36,17 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 					return err(new UserExistsError(input.externalAuthId));
 				}
 
-				await this.repo.createWithAuth(input);
-				this.logger.debug(
-					`User created: id=${input.id} externalAuthId=${input.externalAuthId}`
-				);
+				try {
+					await this.repo.createWithAuth(input);
+					this.logger.debug(
+						`User created: id=${input.id} externalAuthId=${input.externalAuthId}`
+					);
+				} catch (error) {
+					this.logger.error(
+						`Failed to create user (potentially soft-deleted PK collision): id=${input.id} externalAuthId=${input.externalAuthId}`,
+						error instanceof Error ? error.stack : String(error)
+					);
+				}
 
 				return ok();
 			},

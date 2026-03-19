@@ -1,24 +1,30 @@
 # Ferrite Core — Agent Context
-- path apps/core
+- path: `apps/core`
+- description: This directory contains the core NestJS headless application.
 
 ## Architecture
 
-Hexagonal (ports & adapters) .
+This project follows Hexagonal Architecture (Ports and Adapters). All structural rules,
+layer contracts, anti-patterns, and wiring conventions are defined in the
+`hexagonal-architecture` skill. Load and follow that skill for any task involving module
+creation, refactoring, code review, or architectural decisions.
+
+Directory layout reference:
 
 ```
 modules/<feature>/
-├── domain/          # Ports (interfaces), schemas (zod), errors
-│   ├── ports/       # Repository & use-case interfaces + DI tokens
-│   ├── schemas/     # Zod validation schemas, provider-specific mappers
-│   └── errors/      # Domain error classes
-├── application/     # Use-cases implementing IUseCase<TInput, TOutput>
+├── domain/
+│   ├── ports/
+│   ├── schemas/
+│   └── errors/
+├── application/
 │   └── use-case/
-└── infrastructure/  # Adapters (DB repos, queue workers, HTTP controllers)
+└── infrastructure/
     ├── persistance/
-    │   ├── repositories/  # Drizzle implementations of repository ports
-    │   └── mappers/       # Domain ↔ DB entity mappers
-    ├── queue/             # BullMQ producers/consumers
-    └── http/              # Controllers, guards, decorators
+    │   ├── repositories/
+    │   └── mappers/
+    ├── queue/
+    └── http/
 ```
 
 ## Key Patterns
