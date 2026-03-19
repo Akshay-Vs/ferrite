@@ -1,0 +1,1 @@
+ALTER TABLE "outbox_events" ADD COLUMN "queue_name" text NOT NULL;

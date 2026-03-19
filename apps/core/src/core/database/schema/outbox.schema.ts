@@ -20,6 +20,7 @@ export const outboxEvents = pgTable(
 		aggregateId: uuid('aggregate_id').notNull(),
 		aggregateType: text('aggregate_type').notNull(),
 		eventType: text('event_type').notNull(),
+		queueName: text('queue_name').notNull(),
 		payload: jsonb('payload').notNull(),
 		status: text('status').notNull().default('pending'),
 		retryCount: integer('retry_count').notNull().default(0),
@@ -56,8 +57,9 @@ export const outboxEvents = pgTable(
 // ─────────────────────────────────────────
 
 export type NewOutboxEvent = typeof outboxEvents.$inferInsert;
+export type OutboxEventRow = typeof outboxEvents.$inferSelect;
 export type OutboxEvent<
 	T extends Record<string, unknown> = Record<string, unknown>,
-> = Omit<NewOutboxEvent, 'id' | 'createdAt' | 'payload'> & {
-	payload: T;
-};
+> =
+	| (Omit<NewOutboxEvent, 'id' | 'createdAt' | 'payload'> & { payload: T }) // write
+	| (Omit<OutboxEventRow, 'payload'> & { payload: T }); // read
