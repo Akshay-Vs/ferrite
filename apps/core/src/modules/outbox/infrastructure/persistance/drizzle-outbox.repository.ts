@@ -51,6 +51,7 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 					.select()
 					.from(outboxEvents)
 					.where(isNull(outboxEvents.processedAt))
+					.orderBy(outboxEvents.createdAt)
 					.limit(100);
 			}
 		);
