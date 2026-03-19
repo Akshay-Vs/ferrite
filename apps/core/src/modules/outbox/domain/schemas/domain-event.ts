@@ -13,5 +13,6 @@ export interface DomainEvent<
 	readonly aggregateId: string;
 	readonly aggregateType: string;
 	readonly eventType: string;
+	readonly queueName: string;
 	readonly payload: T;
 }

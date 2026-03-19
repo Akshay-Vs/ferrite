@@ -8,6 +8,7 @@ export const newOutboxEventSchema = z.object({
 	aggregateId: z.uuid(),
 	aggregateType: z.string().min(1),
 	eventType: z.string().min(1),
+	queueName: z.string().min(1),
 	payload: z.record(z.string(), z.unknown()),
 	status: z.string().default('pending'),
 	retryCount: z.number().int().nonnegative().default(0),

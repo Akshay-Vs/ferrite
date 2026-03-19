@@ -1,19 +1,23 @@
-import { DB } from '@core/database/db.provider';
-import type { TDatabase } from '@core/database/db.type';
-import { outboxEvents } from '@core/database/schema/outbox.schema';
+import { DB, SUBSCRIBER_CLIENT } from '@core/database/db.provider';
+import type { Psql, TDatabase } from '@core/database/db.type';
+import {
+	type OutboxEventRow,
+	outboxEvents,
+} from '@core/database/schema/outbox.schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
 import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { Inject, Injectable } from '@nestjs/common';
-import { isNull } from 'drizzle-orm';
+import { eq, inArray, isNull, sql } from 'drizzle-orm';
 
 @Injectable()
 export class DrizzleOutboxRepository implements IOutboxRepository {
 	constructor(
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(DB) private readonly db: TDatabase
+		@Inject(DB) private readonly db: TDatabase,
+		@Inject(SUBSCRIBER_CLIENT) private readonly psql: Psql
 	) {}
 
 	async insert(txRaw: unknown, entry: DomainEvent): Promise<string> {
@@ -50,5 +54,52 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 					.limit(100);
 			}
 		);
+	}
+
+	async claimPendingBatch(
+		_workerId: string,
+		batchSize: number,
+		cursor?: Date
+	): Promise<OutboxEventRow[]> {
+		return this.psql<OutboxEventRow[]>`
+    UPDATE outbox_events
+    SET
+      status    = 'processing',
+      locked_at = NOW()
+    WHERE id IN (
+      SELECT id FROM outbox_events
+      WHERE status      = 'pending'
+        AND (locked_at IS NULL OR locked_at < NOW() - INTERVAL '2 minutes')
+        AND (${cursor ?? null}::timestamptz IS NULL
+             OR created_at > ${cursor ?? null}::timestamptz)
+      ORDER BY created_at ASC
+      LIMIT ${batchSize}
+      FOR UPDATE SKIP LOCKED
+    )
+    RETURNING *
+  `;
+	}
+
+	async markProcessed(ids: string[]): Promise<void> {
+		if (ids.length === 0) return;
+		await this.db
+			.update(outboxEvents)
+			.set({
+				status: 'processed',
+				processedAt: sql`NOW()`,
+			})
+			.where(inArray(outboxEvents.id, ids));
+	}
+
+	async markFailed(id: string, error: string): Promise<void> {
+		await this.db
+			.update(outboxEvents)
+			.set({
+				status: sql`CASE WHEN retry_count + 1 >= max_retries THEN 'failed' ELSE 'pending' END`,
+				retryCount: sql`retry_count + 1`,
+				lockedAt: null,
+				errorDetail: error,
+			})
+			.where(eq(outboxEvents.id, id));
 	}
 }

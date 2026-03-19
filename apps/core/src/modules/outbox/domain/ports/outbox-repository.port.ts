@@ -23,4 +23,29 @@ export interface IOutboxRepository {
 	 * Returns recent pending events.
 	 */
 	findPending(): Promise<any[]>;
+
+	/**
+	 * Claim a batch of pending events for processing.
+	 * @param workerId  Worker ID to claim events for.
+	 * @param batchSize Maximum number of events to claim.
+	 * @param cursor    Cursor to start from (optional).
+	 * @returns A batch of pending events.
+	 */
+	claimPendingBatch(
+		workerId: string,
+		batchSize: number,
+		cursor?: Date
+	): Promise<any[]>;
+
+	/**
+	 * Mark events as successfully processed.
+	 * @param ids  Event IDs to mark.
+	 */
+	markProcessed(ids: string[]): Promise<void>;
+
+	/**
+	 * Mark a single event as failed, incrementing retry_count.
+	 * Resets to 'pending' for retry unless max retries reached.
+	 */
+	markFailed(id: string, error: string): Promise<void>;
 }
