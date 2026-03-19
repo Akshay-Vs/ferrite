@@ -27,7 +27,7 @@ export type IUpdateUserUseCase = IUseCase<
 	void,
 	UserNotFoundError
 >;
-export type IDeleteUserUseCase = IUseCase<AuthUser, void, UserNotFoundError>;
+export type IDeleteUserUseCase = IUseCase<AuthUser, boolean, UserNotFoundError>;
 
 export type IGetUserProfileUseCase = IUseCase<
 	string,
