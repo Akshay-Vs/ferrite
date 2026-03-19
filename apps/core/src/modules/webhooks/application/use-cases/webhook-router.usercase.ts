@@ -6,35 +6,40 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
-import { UserSyncProducer } from '@webhooks/infrastructure/queue/user-sync.producer';
+import {
+	type IUserSyncProducer,
+	USER_SYNC_PRODUCER,
+} from '@webhooks/domain/ports/user-sync-producer.port';
 
 @Injectable()
 export class WebhookRouterUsecase implements IUseCase<WebhookPayload, boolean> {
 	constructor(
 		private readonly logger: AppLogger,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		private readonly userSync: UserSyncProducer
+		@Inject(USER_SYNC_PRODUCER)
+		private readonly userSyncProducer: IUserSyncProducer
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
+
 	async execute(payload: WebhookPayload): Promise<Result<boolean, Error>> {
 		return this.tracer.withSpan(
-			'webhook-router.execute',
+			'use-case.webhook-router',
 			async () => {
-				const { eventType } = payload;
+				const eventType = payload.eventType;
 
 				if (!userEventsSchema.safeParse(eventType).success) {
-					this.logger.debug(`Ignoring unsupported event ${eventType}`);
-					return ok(false);
+					this.logger.debug(`Ignoring unsupported eventType: ${eventType}`);
+					return ok(true);
 				}
 
 				this.logger.debug(`Enqueueing user event ${eventType}`);
-				await this.userSync.enqueue(payload, eventType);
+				await this.userSyncProducer.enqueue(payload, eventType);
 				return ok(true);
 			},
 			{
-				'webhook-router.execute.id': payload?.eventId,
-				'webhook-router.execute.type': payload?.eventType,
+				'webhook.provider': payload.provider,
+				'webhook.eventType': payload.eventType,
 			}
 		);
 	}
