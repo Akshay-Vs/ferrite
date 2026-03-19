@@ -12,6 +12,7 @@ import {
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
 import type { UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
+import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()
 export class DeleteUserUseCase implements IDeleteUserUseCase {
@@ -39,6 +40,7 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 					aggregateId: user.id,
 					aggregateType: 'user',
 					eventType: 'user.deleted',
+					queueName: USER_SYNC_QUEUE,
 					payload: {
 						eventType: 'user.deleted',
 						externalAuthId: authUser.externalAuthId,

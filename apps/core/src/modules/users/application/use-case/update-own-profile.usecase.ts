@@ -13,6 +13,7 @@ import {
 } from '@users/domain/ports/user-repository.port';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
+import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()
 export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
@@ -58,6 +59,7 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					aggregateId: userId,
 					aggregateType: 'user',
 					eventType: 'user.profile_updated',
+					queueName: USER_SYNC_QUEUE,
 					payload: { ...input.data },
 				};
 
