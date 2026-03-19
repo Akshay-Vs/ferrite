@@ -1,2 +1,2 @@
 export * from './tracer.constraint';
-export type * from './tracer.port';
+export type { ISpan, ITracer, SpanAttributes } from './tracer.port';
