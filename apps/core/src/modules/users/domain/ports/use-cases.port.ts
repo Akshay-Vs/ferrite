@@ -1,5 +1,6 @@
 import type { AuthUser } from '@auth/index';
 import { IUseCase } from '@common/interfaces/use-case.interface';
+import { UserConflictError } from '../errors/user-conflict.error';
 import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
@@ -20,7 +21,7 @@ export const UPDATE_OWN_PROFILE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 export type ICreateUserUseCase = IUseCase<
 	UserCreatedEvent,
 	void,
-	UserExistsError
+	UserExistsError | UserConflictError
 >;
 export type IUpdateUserUseCase = IUseCase<
 	UserUpdatedEvent,

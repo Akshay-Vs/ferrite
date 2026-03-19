@@ -8,6 +8,7 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Processor } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { type Context, context, propagation } from '@opentelemetry/api';
+import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
 import {
 	CREATE_USER_UC,
@@ -84,7 +85,10 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 
 					// Handle result
 					if (result.isErr()) {
-						if (result.error instanceof UserExistsError) {
+						if (
+							result.error instanceof UserExistsError ||
+							result.error instanceof UserConflictError
+						) {
 							this.logger.warn(
 								`Acknowledging expected domain error: ${result.error.message}`
 							);
