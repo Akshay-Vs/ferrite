@@ -11,7 +11,6 @@ import {
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { UserMapper } from '@users/infrastructure/persistance/mappers/user.mapper';
 
 @Injectable()
 export class GetOwnProfileUseCase implements IGetOwnProfileUseCase {
@@ -36,7 +35,7 @@ export class GetOwnProfileUseCase implements IGetOwnProfileUseCase {
 					return err(new UserNotFoundError(authUser.id));
 				}
 
-				return ok(UserMapper.toUserProfile(user));
+				return ok(user);
 			},
 			{ 'use-case.externalAuthId': authUser.externalAuthId }
 		);

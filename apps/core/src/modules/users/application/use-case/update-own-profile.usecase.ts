@@ -1,9 +1,9 @@
 import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { OutboxEvent } from '@core/database/schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IUpdateOwnProfileUseCase } from '@users/domain/ports/use-cases.port';
@@ -13,7 +13,6 @@ import {
 } from '@users/domain/ports/user-repository.port';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { UserMapper } from '@users/infrastructure/persistance/mappers/user.mapper';
 
 @Injectable()
 export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
@@ -52,10 +51,10 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					this.logger.debug('No fields to update, skipping write');
 					const existingUser = await this.repo.findById(userId);
 					if (!existingUser) return err(new UserNotFoundError(userId));
-					return ok(UserMapper.toUserProfile(existingUser));
+					return ok(existingUser);
 				}
 
-				const outboxEvent: OutboxEvent<UpdateProfileInput> = {
+				const outboxEvent: DomainEvent<UpdateProfileInput> = {
 					aggregateId: userId,
 					aggregateType: 'user',
 					eventType: 'user.profile_updated',
