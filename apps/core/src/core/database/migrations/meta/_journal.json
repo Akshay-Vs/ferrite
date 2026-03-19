@@ -43,6 +43,13 @@
 			"when": 1773823379793,
 			"tag": "0005_harsh_kitty_pryde",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1773911548797,
+			"tag": "0006_naive_outlaw_kid",
+			"breakpoints": true
 		}
 	]
 }
