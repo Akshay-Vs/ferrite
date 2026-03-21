@@ -5,57 +5,15 @@
 		{
 			"idx": 0,
 			"version": "7",
-			"when": 1772553321606,
-			"tag": "0000_broken_jack_flag",
+			"when": 1774117813678,
+			"tag": "0000_initial",
 			"breakpoints": true
 		},
 		{
 			"idx": 1,
 			"version": "7",
-			"when": 1772560383310,
-			"tag": "0001_redundant_jack_flag",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1772614590879,
-			"tag": "0002_swift_amphibian",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1773603850715,
-			"tag": "0003_conscious_madelyne_pryor",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1773665787932,
-			"tag": "0004_absurd_phantom_reporter",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1773823379793,
-			"tag": "0005_harsh_kitty_pryde",
-			"breakpoints": true
-		},
-		{
-			"idx": 6,
-			"version": "7",
-			"when": 1773911548797,
-			"tag": "0006_naive_outlaw_kid",
-			"breakpoints": true
-		},
-		{
-			"idx": 7,
-			"version": "7",
-			"when": 1773950881854,
-			"tag": "0007_closed_agent_brand",
+			"when": 1774117826291,
+			"tag": "0001_outbox-wal",
 			"breakpoints": true
 		}
 	]
