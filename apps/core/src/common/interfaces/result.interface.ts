@@ -1,6 +1,6 @@
 export type Result<T, E extends Error = Error> = Ok<T, E> | Err<T, E>;
 
-export class Ok<T, E extends Error = Error> {
+export class Ok<T, E extends Error = never> {
 	readonly ok = true as const;
 	readonly error = undefined;
 
@@ -62,16 +62,18 @@ export class Err<T, E extends Error = Error> {
 
 //  Constructors
 
-export function ok(): Ok<void>;
-export function ok<T>(value: T): Ok<T>;
+export function ok<T = void, E extends Error = never>(): Ok<T, E>;
+export function ok<T, E extends Error = never>(value: T): Ok<T, E>;
 /**
  * Creates an Ok wrapper containing the given value or `undefined` when no value is provided.
  *
  * @param value - The value to wrap; if omitted, the result holds `undefined`.
  * @returns An `Ok` instance containing `value`, or `Ok(undefined)` when no value is supplied.
  */
-export function ok<T>(value?: T): Ok<T | undefined> {
-	return new Ok(value);
+export function ok<T, E extends Error = never>(
+	value?: T
+): Ok<T | undefined, E> {
+	return new Ok<T | undefined, E>(value as any);
 }
 export const err = <T, E extends Error = Error>(error: E): Err<T, E> =>
 	new Err(error);
