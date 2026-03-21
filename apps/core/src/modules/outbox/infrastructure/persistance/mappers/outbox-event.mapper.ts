@@ -1,4 +1,5 @@
-import { OutboxEvent } from '@core/database/schema';
+import { NewOutboxEvent, OutboxEvent } from '@core/database/schema';
+import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 
 export class OutboxEventMapper {
 	static toOutboxEvent<
@@ -24,6 +25,17 @@ export class OutboxEventMapper {
 				? new Date(raw.notify_sent_at as string)
 				: null,
 			createdAt: new Date(raw.created_at as string),
+		};
+	}
+
+	static toNewOutboxEvent(event: CreateOutboxEvent): NewOutboxEvent {
+		return {
+			aggregateId: event.aggregateId,
+			aggregateType: event.aggregateType,
+			eventType: event.eventType,
+			queueName: event.queueName,
+			payload: event.payload,
+			maxRetries: event.maxRetries,
 		};
 	}
 }

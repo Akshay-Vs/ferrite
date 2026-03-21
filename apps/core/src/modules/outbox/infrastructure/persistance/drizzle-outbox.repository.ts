@@ -4,7 +4,7 @@ import { outboxEvents } from '@core/database/schema';
 import { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
 import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
-import { OutboxEventMapper } from './outbox-event.mapper';
+import { OutboxEventMapper } from './mappers/outbox-event.mapper';
 
 @Injectable()
 export class DrizzleOutboxRepository implements IOutboxRepository {
