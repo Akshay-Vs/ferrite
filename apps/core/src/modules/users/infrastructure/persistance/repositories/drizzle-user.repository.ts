@@ -6,10 +6,10 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
-	type IOutboxRepository,
-	OUTBOX_REPOSITORY,
-} from '@modules/outbox/domain/ports/outbox-repository.port';
-import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
+	type IInsertOutboxEvent,
+	INSERT_OUTBOX_EVENT_UC,
+} from '@modules/outbox';
+import { OutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import { UserDeletedEvent } from '@users/domain/schemas';
@@ -22,9 +22,9 @@ import { UserMapper } from '../mappers/user.mapper';
 @Injectable()
 export class DrizzleUserRepository implements IUserRepository {
 	constructor(
-		@Inject(DB) private readonly db: any, // type erasure for decorator metadata
+		@Inject(DB) private readonly db: TDatabase, // type erasure for decorator metadata
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(OUTBOX_REPOSITORY) private readonly outboxRepo: IOutboxRepository
+		@Inject(INSERT_OUTBOX_EVENT_UC) private readonly outbox: IInsertOutboxEvent
 	) {}
 
 	private get typedDb(): TDatabase {
@@ -96,7 +96,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	async updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: DomainEvent<UpdateProfileInput>
+		outboxEvent: OutboxEvent<UpdateProfileInput>
 	): Promise<UserProfileFull | null> {
 		return traceDbOp(
 			this.tracer,
@@ -126,12 +126,17 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return null;
 
 					// 2. Write outbox event
-					await traceDbOp(
+					const outboxResult = await traceDbOp(
 						this.tracer,
 						'db.outbox_events.insert',
 						{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
-						() => this.outboxRepo.insert(tx, outboxEvent)
+						() =>
+							this.outbox.execute({
+								event: outboxEvent,
+								tx: tx,
+							})
 					);
+					outboxResult.unwrap();
 
 					return UserMapper.toUserProfile(result[0]);
 				});
@@ -142,7 +147,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	async softDeleteById(
 		id: string,
 		provider: AuthProvider,
-		outboxEvent: DomainEvent<UserDeletedEvent>
+		outboxEvent: OutboxEvent<UserDeletedEvent>
 	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
@@ -177,12 +182,17 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return false;
 
 					// 2. Write outbox event
-					await traceDbOp(
+					const outboxResult = await traceDbOp(
 						this.tracer,
 						'db.outbox_events.insert',
 						{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
-						() => this.outboxRepo.insert(tx, outboxEvent)
+						() =>
+							this.outbox.execute({
+								event: outboxEvent,
+								tx: tx,
+							})
 					);
+					outboxResult.unwrap();
 
 					return true;
 				});

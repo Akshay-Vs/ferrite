@@ -1,5 +1,5 @@
 import { AuthProvider } from '@auth/index';
-import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
+import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { UserDeletedEvent } from '../schemas';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '../schemas/user-created.zodschema';
@@ -27,7 +27,7 @@ export interface IUserRepository {
 	softDeleteById(
 		id: string,
 		provider: AuthProvider,
-		outboxEvent: DomainEvent<UserDeletedEvent>
+		outboxEvent: CreateOutboxEvent<UserDeletedEvent>
 	): Promise<boolean>;
 
 	/**
@@ -43,6 +43,6 @@ export interface IUserRepository {
 	updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: DomainEvent<UpdateProfileInput>
+		outboxEvent: CreateOutboxEvent<UpdateProfileInput>
 	): Promise<UserProfileFull | null>;
 }

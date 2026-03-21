@@ -3,7 +3,7 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
+import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IUpdateOwnProfileUseCase } from '@users/domain/ports/use-cases.port';
@@ -55,11 +55,12 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					return ok(existingUser);
 				}
 
-				const outboxEvent: DomainEvent<UpdateProfileInput> = {
+				const outboxEvent: CreateOutboxEvent<UpdateProfileInput> = {
 					aggregateId: userId,
 					aggregateType: 'user',
 					eventType: 'user.profile_updated',
 					queueName: USER_SYNC_QUEUE,
+					maxRetries: 5,
 					payload: { ...input.data },
 				};
 
