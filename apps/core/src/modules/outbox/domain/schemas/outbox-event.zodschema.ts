@@ -4,15 +4,35 @@ import { z } from 'zod/v4';
  * Zod schema for creating a new outbox event.
  * Used to validate outbox entries before persisting.
  */
-export const newOutboxEventSchema = z.object({
+
+export const OutboxEventSchema = z.object({
+	id: z.uuid(),
 	aggregateId: z.uuid(),
-	aggregateType: z.string().min(1),
-	eventType: z.string().min(1),
-	queueName: z.string().min(1),
-	payload: z.record(z.string(), z.unknown()),
-	status: z.string().default('pending'),
-	retryCount: z.number().int().nonnegative().default(0),
-	maxRetries: z.number().int().nonnegative().default(5),
+	aggregateType: z.string(),
+	eventType: z.string(),
+	queueName: z.string(),
+	payload: z.unknown(),
+	retryCount: z.number().int(),
+	maxRetries: z.number().int(),
+	createdAt: z.date(),
 });
 
-export type NewOutboxEventInput = z.infer<typeof newOutboxEventSchema>;
+export const CreateOutboxEventSchema = OutboxEventSchema.omit({
+	id: true,
+	retryCount: true,
+	createdAt: true,
+});
+
+export type OutboxEvent<T = unknown> = Omit<
+	z.infer<typeof OutboxEventSchema>,
+	'payload'
+> & {
+	payload: T;
+};
+
+export type CreateOutboxEvent<T = unknown> = Omit<
+	z.infer<typeof CreateOutboxEventSchema>,
+	'payload'
+> & {
+	payload: T;
+};
