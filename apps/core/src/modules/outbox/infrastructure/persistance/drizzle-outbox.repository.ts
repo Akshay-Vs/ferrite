@@ -1,54 +1,22 @@
 import { DB } from '@core/database/db.provider';
-import type { TDatabase } from '@core/database/db.type';
-import { outboxEvents } from '@core/database/schema/outbox.schema';
-import { traceDbOp } from '@core/database/utils/trace-db-op.util';
-import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
-import type { DomainEvent } from '@modules/outbox/domain/schemas/domain-event';
+import { DrizzleTransaction, type TDatabase } from '@core/database/db.type';
+import { outboxEvents } from '@core/database/schema';
+import { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
+import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
-import { isNull } from 'drizzle-orm';
+import { OutboxEventMapper } from './mappers/outbox-event.mapper';
 
 @Injectable()
 export class DrizzleOutboxRepository implements IOutboxRepository {
-	constructor(
-		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(DB) private readonly db: TDatabase
-	) {}
+	constructor(@Inject(DB) private readonly db: TDatabase) {}
 
-	async insert(txRaw: unknown, entry: DomainEvent): Promise<string> {
-		const tx = txRaw as Parameters<Parameters<TDatabase['transaction']>[0]>[0];
-		return traceDbOp(
-			this.tracer,
-			'db.outboxEvents.insert',
-			{ 'db.table': 'outbox_events', 'db.operation': 'insert' },
-			async () => {
-				const [inserted] = await tx
-					.insert(outboxEvents)
-					.values(entry)
-					.returning({ id: outboxEvents.id });
-
-				if (!inserted) {
-					throw new Error('Outbox insert failed: no row returned');
-				}
-
-				return inserted.id;
-			}
-		);
-	}
-
-	async findPending(): Promise<any[]> {
-		return traceDbOp(
-			this.tracer,
-			'db.outboxEvents.findPending',
-			{ 'db.table': 'outbox_events', 'db.operation': 'select' },
-			async () => {
-				return this.db
-					.select()
-					.from(outboxEvents)
-					.where(isNull(outboxEvents.processedAt))
-					.limit(100);
-			}
-		);
+	async insert(
+		event: CreateOutboxEvent,
+		trx?: DrizzleTransaction
+	): Promise<void> {
+		const db = trx ?? this.db;
+		await db
+			.insert(outboxEvents)
+			.values(OutboxEventMapper.toNewOutboxEvent(event));
 	}
 }

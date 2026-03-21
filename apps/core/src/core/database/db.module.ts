@@ -1,48 +1,28 @@
 // src/db/db.module.ts
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-	createDrizzle,
-	createSubscriber,
-	DB,
-	DB_CLIENT,
-	DB_POOL,
-	SUBSCRIBER,
-	SUBSCRIBER_CLIENT,
-} from './db.provider';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import { createPool, DB, DB_CLIENT } from './db.provider';
 import { DatabaseShutdownService } from './db.shutdown';
+import * as schema from './schema';
 
 @Global()
 @Module({
 	providers: [
 		{
-			provide: DB_POOL,
+			provide: DB_CLIENT,
 			inject: [ConfigService],
 			useFactory: (config: ConfigService) =>
-				createDrizzle(config.getOrThrow<string>('DATABASE_URL')),
+				createPool(config.getOrThrow<string>('DATABASE_URL')),
 		},
 		{
 			provide: DB,
-			inject: [DB_POOL],
-			useFactory: ({ db }: { db: any }) => db,
-		},
-		{
-			provide: DB_CLIENT,
-			inject: [DB_POOL],
-			useFactory: ({ client }: { client: any }) => client,
-		},
-		{
-			provide: SUBSCRIBER,
-			inject: [ConfigService],
-			useFactory: (config: ConfigService) =>
-				createSubscriber(config.getOrThrow<string>('DATABASE_URL')),
-		},
-		{
-			provide: SUBSCRIBER_CLIENT,
-			useExisting: SUBSCRIBER,
+			inject: [DB_CLIENT],
+			useFactory: (client: Pool) => drizzle(client, { schema }),
 		},
 		DatabaseShutdownService,
 	],
-	exports: [DB, DB_CLIENT, SUBSCRIBER, SUBSCRIBER_CLIENT],
+	exports: [DB, DB_CLIENT],
 })
 export class DatabaseModule {}
