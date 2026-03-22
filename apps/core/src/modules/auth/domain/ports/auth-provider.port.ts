@@ -48,3 +48,7 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
  * Implemented by: ClerkAdapter, KindeAdapter etc
  */
 export interface IWebhookAuth extends IWebhookVerifier {}
+
+export interface IDeleteUser {
+	deleteUser(externalAuthId: string): Promise<boolean>;
+}

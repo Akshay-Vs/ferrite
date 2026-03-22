@@ -3,7 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
 import { VerifyWebhookUseCase } from './application/use-cases/verify-webhook.usecase';
-import { TOKEN_AUTH, WEBHOOK_AUTH } from './domain/ports/auth-provider.tokens';
+import {
+	AUTH_PROVIDER,
+	TOKEN_AUTH,
+	WEBHOOK_AUTH,
+} from './domain/ports/auth-provider.tokens';
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
@@ -32,6 +36,12 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 			useClass: AuthGuard, // ← resolved from AuthModule
 		},
 
+		{
+			provide: AUTH_PROVIDER,
+			useFactory: (f: AuthProviderFactory) => f.getAdapter(),
+			inject: [AuthProviderFactory],
+		},
+
 		JwtTokenUseCase,
 		VerifyWebhookUseCase,
 
@@ -43,6 +53,7 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 	exports: [
 		AuthGuard,
 		WebhookGuard,
+		AUTH_PROVIDER,
 
 		//? Resolved from AuthModule
 		JwtTokenUseCase,
