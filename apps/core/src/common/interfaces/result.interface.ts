@@ -62,7 +62,7 @@ export class Err<T, E extends Error = Error> {
 
 //  Constructors
 
-export function ok<T = void, E extends Error = never>(): Ok<T, E>;
+export function ok<E extends Error = never>(): Ok<void, E>;
 export function ok<T, E extends Error = never>(value: T): Ok<T, E>;
 /**
  * Creates an Ok wrapper containing the given value or `undefined` when no value is provided.
@@ -73,7 +73,7 @@ export function ok<T, E extends Error = never>(value: T): Ok<T, E>;
 export function ok<T, E extends Error = never>(
 	value?: T
 ): Ok<T | undefined, E> {
-	return new Ok<T | undefined, E>(value as any);
+	return new Ok<T | undefined, E>(value);
 }
 export const err = <T, E extends Error = Error>(error: E): Err<T, E> =>
 	new Err(error);
