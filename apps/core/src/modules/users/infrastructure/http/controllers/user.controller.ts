@@ -17,10 +17,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import {
-	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
-	type IDeleteUserUseCase,
 	type IGetOwnProfileUseCase,
+	type IInitiateDeleteUserUseCase,
+	INITIATE_DELETE_USER_UC,
 	type IUpdateOwnProfileUseCase,
 	UPDATE_OWN_PROFILE_UC,
 } from '@users/domain/ports/use-cases.port';
@@ -45,8 +45,8 @@ export class UserController {
 		@Inject(UPDATE_OWN_PROFILE_UC)
 		private readonly updateOwnProfileUseCase: IUpdateOwnProfileUseCase,
 
-		@Inject(DELETE_USER_UC)
-		private readonly deleteUserUseCase: IDeleteUserUseCase,
+		@Inject(INITIATE_DELETE_USER_UC)
+		private readonly InitiatedeleteUserUseCase: IInitiateDeleteUserUseCase,
 
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
@@ -87,7 +87,7 @@ export class UserController {
 	@DeleteOwnProfileDocs()
 	async deleteOwnProfile(@AuthUserParam() authUser: AuthUser) {
 		return this.tracer.withSpan('http.delete-own-profile', async () => {
-			const result = await this.deleteUserUseCase.execute(authUser);
+			const result = await this.InitiatedeleteUserUseCase.execute(authUser);
 			if (result.isErr()) {
 				throw new NotFoundException(result.error.message);
 			}
