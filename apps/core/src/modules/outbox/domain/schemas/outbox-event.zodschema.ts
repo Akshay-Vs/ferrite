@@ -25,16 +25,14 @@ export const CreateOutboxEventSchema = OutboxEventSchema.omit({
 	createdAt: true,
 });
 
-export type OutboxEvent<T = unknown> = Omit<
-	z.infer<typeof OutboxEventSchema>,
-	'payload'
-> & {
+export type OutboxEvent<
+	T extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<z.infer<typeof OutboxEventSchema>, 'payload'> & {
 	payload: T;
 };
 
-export type CreateOutboxEvent<T = unknown> = Omit<
-	z.infer<typeof CreateOutboxEventSchema>,
-	'payload'
-> & {
+export type CreateOutboxEvent<
+	T extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<z.infer<typeof CreateOutboxEventSchema>, 'payload'> & {
 	payload: T;
 };
