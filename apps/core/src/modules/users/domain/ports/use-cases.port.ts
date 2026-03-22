@@ -3,14 +3,11 @@ import { IUseCase } from '@common/interfaces/use-case.interface';
 import { UserConflictError } from '../errors/user-conflict.error';
 import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
-import { UserSyncEvent } from '../schemas';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
-import { UserCreatedEvent } from '../schemas/user-created.zodschema';
 import type {
 	UserProfileBase,
 	UserProfileFull,
 } from '../schemas/user-profile.zodschema';
-import { UserUpdatedEvent } from '../schemas/user-updated.zodschema';
 
 export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
 export const UPDATE_USER_UC = Symbol('UPDATE_USER_UC');
@@ -20,18 +17,18 @@ export const GET_OWN_PROFILE_UC = Symbol('GET_OWN_PROFILE_UC');
 export const UPDATE_OWN_PROFILE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 
 export type ICreateUserUseCase = IUseCase<
-	UserCreatedEvent,
+	any,
 	void,
-	UserExistsError | UserConflictError
+	UserExistsError | UserConflictError | Error
 >;
 
-export type IUpdateUserUseCase = IUseCase<
-	UserUpdatedEvent,
-	void,
-	UserNotFoundError
->;
+export type IUpdateUserUseCase = IUseCase<any, void, UserNotFoundError | Error>;
 
-export type IDeleteUserUseCase = IUseCase<AuthUser, boolean, UserNotFoundError>;
+export type IDeleteUserUseCase = IUseCase<
+	AuthUser | any, // Can be called with AuthUser directly (primary) or raw queue event (secondary)
+	boolean,
+	UserNotFoundError | Error
+>;
 
 export type IGetUserProfileUseCase = IUseCase<
 	string,
@@ -51,4 +48,4 @@ export type IUpdateOwnProfileUseCase = IUseCase<
 	UserNotFoundError
 >;
 
-export type IRouteUserEventsUseCase = IUseCase<UserSyncEvent, void, Error>;
+export type IRouteUserEventsUseCase = IUseCase<any, void, Error>;
