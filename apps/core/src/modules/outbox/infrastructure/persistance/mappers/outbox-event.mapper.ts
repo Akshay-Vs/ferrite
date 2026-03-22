@@ -18,6 +18,8 @@ export class OutboxEventMapper {
 			retryCount: raw.retry_count as number,
 			maxRetries: raw.max_retries as number,
 			createdAt: new Date(raw.created_at as string),
+			__traceContext:
+				(raw.trace_context as Record<string, string>) ?? undefined,
 		};
 	}
 
@@ -29,6 +31,7 @@ export class OutboxEventMapper {
 			queueName: event.queueName,
 			payload: event.payload,
 			maxRetries: event.maxRetries,
+			__traceContext: event.__traceContext,
 		};
 	}
 }

@@ -44,6 +44,8 @@ export const outboxEvents = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true })
 			.notNull()
 			.defaultNow(),
+
+		__traceContext: jsonb('trace_context'),
 	},
 	(t) => [
 		index('idx_outbox_pending')

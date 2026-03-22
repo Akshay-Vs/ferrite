@@ -7,7 +7,6 @@ export const webhookEnvelopeSchema = z
 	.object({
 		provider: authProvidersSchema,
 		timestamp: z.number().int().nonnegative(),
-		__traceContext: z.record(z.string(), z.string()).optional(),
 	})
 	.extend(eventPayloadSchema.shape);
 

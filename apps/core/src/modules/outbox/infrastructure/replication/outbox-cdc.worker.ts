@@ -1,3 +1,5 @@
+import type { ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer';
 import {
 	type IOutboxProducer,
 	OUTBOX_PRODUCER,
@@ -31,7 +33,10 @@ export class OutboxCDCWorker
 		private config: ConfigService,
 
 		@Inject(OUTBOX_PRODUCER)
-		private readonly producer: IOutboxProducer
+		private readonly producer: IOutboxProducer,
+
+		@Inject(OTEL_TRACER)
+		private readonly tracer: ITracer
 	) {
 		this.replicationService = new LogicalReplicationService(
 			{ connectionString: this.config.get('DATABASE_URL') },
@@ -108,8 +113,23 @@ export class OutboxCDCWorker
 	}
 
 	private async processEvent(event: OutboxEvent) {
-		const valdatedEvent = OutboxEventSchema.parse(event);
-		await this.producer.enqueue(valdatedEvent);
+		const validatedEvent = OutboxEventSchema.parse(event);
+
+		await this.tracer.withLinkedSpan(
+			'outbox.cdc.process',
+			validatedEvent.__traceContext,
+			async () => {
+				await this.producer.enqueue(validatedEvent);
+			},
+			undefined, // defaults to CONSUMER
+			{
+				'outbox.event_type': validatedEvent.eventType,
+				'outbox.queue_name': validatedEvent.queueName,
+				'outbox.aggregate_type': validatedEvent.aggregateType,
+				'outbox.aggregate_id': validatedEvent.aggregateId,
+				'outbox.event_id': validatedEvent.eventId,
+			}
+		);
 	}
 
 	private async retryWithBackoff(
