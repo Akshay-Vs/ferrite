@@ -1,3 +1,4 @@
+import { eventPayloadSchema } from '@common/schemas/event-payload.zodschema';
 import { z } from 'zod/v4';
 
 /**
@@ -5,20 +6,21 @@ import { z } from 'zod/v4';
  * Used to validate outbox entries before persisting.
  */
 
-export const OutboxEventSchema = z.object({
-	id: z.uuid(),
-	aggregateId: z.uuid(),
-	aggregateType: z.string(),
-	eventType: z.string(),
-	queueName: z.string(),
-	payload: z.unknown(),
-	retryCount: z.number().int(),
-	maxRetries: z.number().int(),
-	createdAt: z.date(),
-});
+export const OutboxEventSchema = z
+	.object({
+		aggregateId: z.uuid(),
+		aggregateType: z.string(),
+		eventType: z.string(),
+		queueName: z.string(),
+		payload: z.unknown(),
+		retryCount: z.number().int(),
+		maxRetries: z.number().int(),
+		createdAt: z.date(),
+	})
+	.extend(eventPayloadSchema.shape);
 
 export const CreateOutboxEventSchema = OutboxEventSchema.omit({
-	id: true,
+	eventId: true,
 	retryCount: true,
 	createdAt: true,
 });

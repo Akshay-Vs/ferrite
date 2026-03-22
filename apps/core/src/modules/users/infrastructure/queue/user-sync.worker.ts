@@ -1,5 +1,7 @@
-import { WebhookPayload } from '@auth/index';
-import { webhookEnvelopeSchema } from '@common/schemas/webhook-envelope.zodschema';
+import {
+	EventPayload,
+	eventPayloadSchema,
+} from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { BaseConsumer } from '@core/queue/base.consumer';
 import { UnsupportedEventTypeError } from '@core/queue/queue.errors';
@@ -14,23 +16,13 @@ import {
 	type IRouteUserEventsUseCase,
 	ROUTE_USER_EVENTS_UC,
 } from '@users/domain/ports/use-cases.port';
-import {
-	type IWebhookMapperRegistry,
-	WEBHOOK_MAPPER_REGISTRY,
-} from '@users/domain/ports/webhook-mapper.registry.port';
-import {
-	UserSyncEvent,
-	userSyncEventSchema,
-} from '@users/domain/schemas/user-sync-event.zodschema';
 import { Job } from 'bullmq';
 import { USER_SYNC_QUEUE } from './queue.constraints';
 
 @Processor(USER_SYNC_QUEUE)
-export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
+export class UserSyncWorker extends BaseConsumer<EventPayload> {
 	constructor(
 		private readonly logger: AppLogger,
-		@Inject(WEBHOOK_MAPPER_REGISTRY)
-		private readonly registry: IWebhookMapperRegistry,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(ROUTE_USER_EVENTS_UC)
 		private readonly routeUserEvents: IRouteUserEventsUseCase
@@ -39,39 +31,32 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	private transformEvent(job: Job<WebhookPayload>): UserSyncEvent {
-		// Validate raw envelope
-		const payload = webhookEnvelopeSchema.parse(job.data);
-
-		// Map external payload to standard event candidate
-		const mapper = this.registry.resolve(job.data.provider);
-		const mapped = mapper.map(payload);
-
-		if (!mapped) {
-			throw new Error('Unknown event type');
-		}
-
-		// Re-validate and normalize mapper output
-		const validatedEvent = userSyncEventSchema.parse(mapped);
-
-		return validatedEvent;
-	}
-
-	private getTraceContext(job: Job<WebhookPayload>): Context {
+	private getTraceContext(job: Job<any>): Context {
 		const carrier = job.data.__traceContext ?? {};
 		return propagation.extract(context.active(), carrier);
 	}
 
-	async handle(job: Job<WebhookPayload>): Promise<void> {
+	async handle(job: Job<EventPayload>): Promise<void> {
 		const traceContext = this.getTraceContext(job);
 		await context.with(traceContext, async () => {
 			return await this.tracer.withSpan(
 				'user-sync-worker.handle',
 				async () => {
-					const userSyncEvent = this.transformEvent(job);
-					this.logger.log(`Processing ${userSyncEvent.eventType}`);
+					this.logger.debug(`Processing ${JSON.stringify(job.data, null, 2)}`);
+					const validatedEvent = eventPayloadSchema.safeParse(job.data);
 
-					const result = await this.routeUserEvents.execute(userSyncEvent);
+					if (validatedEvent.error) {
+						this.logger.error(
+							`Failed to validate event: ${validatedEvent.error.message}`
+						);
+						throw validatedEvent.error;
+					}
+
+					const { eventType } = validatedEvent.data;
+
+					this.logger.debug(`Proceeding to route ${eventType}`);
+
+					const result = await this.routeUserEvents.execute(job.data);
 
 					// Handle result
 					if (result.isErr()) {
@@ -87,7 +72,7 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 						}
 
 						this.logger.error(
-							`Failed to process ${userSyncEvent.eventType}: ${result.error.message}`
+							`Failed to process ${eventType}: ${result.error.message}`
 						);
 						throw result.error;
 					}
@@ -95,7 +80,9 @@ export class UserSyncWorker extends BaseConsumer<WebhookPayload> {
 				{
 					'user-sync-worker.job.id': job.id ?? 'unknown',
 					'user-sync-worker.event.type':
-						(job.data as any)?.eventType ?? 'unknown',
+						(job.data as any)?.eventType ??
+						(job.data as any)?.type ??
+						'unknown',
 				}
 			);
 		});
