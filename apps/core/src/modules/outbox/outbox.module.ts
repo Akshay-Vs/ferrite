@@ -1,5 +1,6 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 import {
 	INSERT_OUTBOX_EVENT_UC,
 	InsertOutboxEventUseCase,
@@ -15,6 +16,9 @@ import { OutboxReplicationSetupService } from './infrastructure/replication/outb
 	imports: [
 		BullModule.registerQueue({
 			name: 'default',
+		}),
+		BullModule.registerQueue({
+			name: USER_SYNC_QUEUE,
 		}),
 	],
 	providers: [

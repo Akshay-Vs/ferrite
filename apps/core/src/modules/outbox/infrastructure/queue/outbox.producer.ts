@@ -1,14 +1,13 @@
 import { IOutboxProducer } from '@modules/outbox/domain/ports/outbox-producer.port';
 import type { OutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
-import { InjectQueue } from '@nestjs/bullmq';
+import { getQueueToken } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { Queue } from 'bullmq';
 
 @Injectable()
 export class OutboxProducer implements IOutboxProducer {
-	private readonly queues = new Map<string, Queue>();
-
-	constructor(@InjectQueue('default') private readonly defaultQueue: Queue) {}
+	constructor(private readonly moduleRef: ModuleRef) {}
 
 	async enqueue(event: OutboxEvent): Promise<void> {
 		const queue = this.getQueue(event.queueName);
@@ -18,14 +17,12 @@ export class OutboxProducer implements IOutboxProducer {
 	}
 
 	private getQueue(name: string): Queue {
-		if (!this.queues.has(name)) {
-			this.queues.set(
-				name,
-				new Queue(name, {
-					connection: this.defaultQueue.opts.connection,
-				})
+		try {
+			return this.moduleRef.get<Queue>(getQueueToken(name), { strict: false });
+		} catch (error) {
+			throw new Error(
+				`Queue '${name}' is not registered. Please ensure it is registered via BullModule.registerQueue.`
 			);
 		}
-		return this.queues.get(name)!;
 	}
 }
