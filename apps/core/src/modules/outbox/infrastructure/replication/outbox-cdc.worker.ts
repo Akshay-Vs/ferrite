@@ -105,8 +105,6 @@ export class OutboxCDCWorker
 	}
 
 	private async processEvent(event: OutboxEvent) {
-		// wire BullMQ here in the next step
-		this.logger.log(`Processing ${event.eventType}`);
 		this.producer.enqueue(event);
 	}
 
