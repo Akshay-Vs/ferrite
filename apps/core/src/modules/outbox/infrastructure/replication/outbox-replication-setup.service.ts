@@ -11,7 +11,7 @@ export class OutboxReplicationSetupService implements OnApplicationBootstrap {
 	async onApplicationBootstrap() {
 		// plain pg client — runs outside any transaction
 		const client = new Client({
-			connectionString: this.config.get('DATABASE_URL'),
+			connectionString: this.config.getOrThrow('DATABASE_URL'),
 		});
 
 		try {
@@ -24,35 +24,34 @@ export class OutboxReplicationSetupService implements OnApplicationBootstrap {
 	}
 
 	private async ensurePublication(client: Client) {
-		const { rows } = await client.query(`
-      SELECT pubname FROM pg_publication WHERE pubname = 'outbox_pub'
-    `);
-
-		if (rows.length === 0) {
+		try {
 			await client.query(`
         CREATE PUBLICATION outbox_pub FOR TABLE outbox_events
       `);
 			this.logger.log('✓ Publication created');
-		} else {
-			this.logger.log('✓ Publication already exists');
+		} catch (error: any) {
+			if (error.code === '42P07' || error.code === '42710') {
+				this.logger.log('✓ Publication already exists');
+			} else {
+				throw error;
+			}
 		}
 	}
 
 	private async ensureReplicationSlot(client: Client) {
-		const { rows } = await client.query(`
-      SELECT slot_name FROM pg_replication_slots
-      WHERE slot_name = 'outbox_slot'
-    `);
-
-		if (rows.length === 0) {
+		try {
 			// this is why we need plain pg — must run outside a transaction
 			// postgres.js wraps everything in transactions, this would fail
 			await client.query(`
         SELECT pg_create_logical_replication_slot('outbox_slot', 'pgoutput')
       `);
 			this.logger.log('✓ Replication slot created');
-		} else {
-			this.logger.log('✓ Replication slot already exists');
+		} catch (error: any) {
+			if (error.code === '42P07' || error.code === '42710') {
+				this.logger.log('✓ Replication slot already exists');
+			} else {
+				throw error;
+			}
 		}
 	}
 }
