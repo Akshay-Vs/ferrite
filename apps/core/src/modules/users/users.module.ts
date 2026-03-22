@@ -2,15 +2,17 @@ import { OutboxModule } from '@modules/outbox/outbox.module';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
-import { DeleteUserUseCase } from './application/use-case/delete-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
+import { InitiateDeleteUserUseCase } from './application/use-case/initiate-user-deletion.usecase';
 import { RouteUserEventsUsecase } from './application/use-case/route-user-events.usercase';
+import { SyncUserDeletionUseCase } from './application/use-case/sync-user-deletion.usercase';
 import { UpdateOwnProfileUseCase } from './application/use-case/update-own-profile.usecase';
 import {
 	CREATE_USER_UC,
-	DELETE_USER_UC,
 	GET_OWN_PROFILE_UC,
+	INITIATE_DELETE_USER_UC,
 	ROUTE_USER_EVENTS_UC,
+	SYNC_USER_DELETION_UC,
 	UPDATE_OWN_PROFILE_UC,
 } from './domain/ports/use-cases.port';
 import { USER_REPOSITORY } from './domain/ports/user-repository.port';
@@ -47,8 +49,12 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 			useClass: CreateUserUseCase,
 		},
 		{
-			provide: DELETE_USER_UC,
-			useClass: DeleteUserUseCase,
+			provide: INITIATE_DELETE_USER_UC,
+			useClass: InitiateDeleteUserUseCase,
+		},
+		{
+			provide: SYNC_USER_DELETION_UC,
+			useClass: SyncUserDeletionUseCase,
 		},
 		{
 			provide: GET_OWN_PROFILE_UC,
