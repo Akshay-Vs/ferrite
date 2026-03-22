@@ -5,7 +5,12 @@ import {
 	WebhookPayload,
 } from '@auth/domain/schemas';
 import { webhookPayloadSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
-import { verifyToken as clerkVerifyToken, WebhookEvent } from '@clerk/backend';
+import {
+	ClerkClient,
+	verifyToken as clerkVerifyToken,
+	createClerkClient,
+	WebhookEvent,
+} from '@clerk/backend';
 import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
@@ -13,6 +18,7 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
+	IDeleteUser,
 	ITokenAuth,
 	IWebhookAuth,
 } from '@modules/auth/domain/ports/auth-provider.port';
@@ -28,8 +34,10 @@ import { Webhook } from 'svix';
 export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
 
 @Injectable()
-export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
+export class ClerkAdapter implements ITokenAuth, IWebhookAuth, IDeleteUser {
 	private readonly secretKey: string;
+	private readonly publishableKey: string;
+	private readonly clerkClient: ClerkClient;
 
 	constructor(
 		private readonly config: ConfigService,
@@ -40,6 +48,14 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 	) {
 		this.logger.setContext(ClerkAdapter.name);
 		this.secretKey = this.config.getOrThrow<string>('AUTH_CLERK_SECRET_KEY');
+		this.publishableKey = this.config.getOrThrow<string>(
+			'AUTH_CLERK_PUBLISHABLE_KEY'
+		);
+
+		this.clerkClient = createClerkClient({
+			secretKey: this.secretKey,
+			publishableKey: this.publishableKey,
+		});
 	}
 
 	//  ITokenVerifier
@@ -168,7 +184,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 						eventId: svixId,
 						eventType: verified.type,
 						timestamp: parsedTimestamp,
-						data: (verified as any).data,
+						payload: (verified as any).data,
 					});
 
 					return parsed;
@@ -182,5 +198,16 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth {
 				}
 			}
 		);
+	}
+
+	async deleteUser(externalAuthId: string): Promise<void> {
+		return this.tracer.withSpan('adapters.clerk.deleteUser', async (span) => {
+			try {
+				await this.clerkClient.users.deleteUser(externalAuthId);
+			} catch (error) {
+				this.logger.error(`Failed to delete user in Clerk: ${error}`);
+				throw new Error(`Failed to delete user in Clerk: ${error}`);
+			}
+		});
 	}
 }

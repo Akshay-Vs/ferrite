@@ -22,6 +22,7 @@ describe('outbox_events table', () => {
 				aggregateId: randomUUID(),
 				aggregateType: 'user',
 				eventType: 'user.created',
+				queueName: 'test_queue',
 				payload: { id: 'test', name: 'tester' },
 			})
 			.returning();
@@ -55,6 +56,7 @@ describe('outbox_events table', () => {
 				aggregateId: randomUUID(),
 				aggregateType: 'user',
 				eventType: 'user.updated',
+				queueName: 'test_queue',
 				payload: {},
 				status: 'processing',
 				retryCount: 1,

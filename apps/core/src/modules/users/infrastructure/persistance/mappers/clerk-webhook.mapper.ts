@@ -16,7 +16,7 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 	) {}
 
 	map(payload: WebhookPayload): UserSyncEvent | null {
-		const { eventType, data } = payload;
+		const { payload: data, eventType } = payload;
 		const externalAuthId = data.id as string;
 		const provider = 'clerk';
 		const id = this.generateUserId(externalAuthId);
