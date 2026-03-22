@@ -1,4 +1,3 @@
-import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -6,16 +5,17 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import type { IDeleteUserUseCase } from '@users/domain/ports/use-cases.port';
+import type { IInitiateDeleteUserUseCase } from '@users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import type { UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
+
+import { type UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
 import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()
-export class DeleteUserUseCase implements IDeleteUserUseCase {
+export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 	constructor(
 		@Inject(USER_REPOSITORY) private readonly repo: IUserRepository,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
@@ -25,11 +25,12 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 	}
 
 	async execute(
-		authUser: AuthUser
-	): Promise<Result<boolean, UserNotFoundError>> {
+		input: any
+	): Promise<Result<boolean, UserNotFoundError | Error>> {
 		return this.tracer.withSpan(
 			'use-case.delete-user',
 			async () => {
+				const authUser = input as any;
 				const user = await this.repo.findById(authUser.id);
 
 				if (!user) {
@@ -64,7 +65,10 @@ export class DeleteUserUseCase implements IDeleteUserUseCase {
 				);
 				return ok(true);
 			},
-			{ 'use-case.externalAuthId': authUser.externalAuthId }
+			{
+				'use-case.externalAuthId':
+					input?.externalAuthId ?? input?.data?.id ?? 'unknown',
+			}
 		);
 	}
 }
