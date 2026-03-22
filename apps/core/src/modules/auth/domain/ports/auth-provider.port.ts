@@ -50,5 +50,5 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
 export interface IWebhookAuth extends IWebhookVerifier {}
 
 export interface IDeleteUser {
-	deleteUser(externalAuthId: string): Promise<boolean>;
+	deleteUser(externalAuthId: string): Promise<void>;
 }

@@ -36,7 +36,7 @@ export class SyncUserDeletionUseCase implements ISyncUserDeletionUseCase {
 				);
 				return ok();
 			} catch (e: any) {
-				this.logger.error('Failed to parse or map payload in DeleteUser', e);
+				this.logger.error('Failed to process user deletion event', e);
 				return err(e instanceof Error ? e : new Error(String(e)));
 			}
 		});
