@@ -2,7 +2,10 @@ import {
 	type IOutboxProducer,
 	OUTBOX_PRODUCER,
 } from '@modules/outbox/domain/ports/outbox-producer.port';
-import type { OutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
+import {
+	type OutboxEvent,
+	OutboxEventSchema,
+} from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import {
 	Inject,
 	Injectable,
@@ -105,7 +108,8 @@ export class OutboxCDCWorker
 	}
 
 	private async processEvent(event: OutboxEvent) {
-		this.producer.enqueue(event);
+		const valdatedEvent = OutboxEventSchema.parse(event);
+		await this.producer.enqueue(valdatedEvent);
 	}
 
 	private async retryWithBackoff(
