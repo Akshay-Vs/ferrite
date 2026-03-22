@@ -12,8 +12,8 @@ export class OutboxProducer implements IOutboxProducer {
 
 	async enqueue(event: OutboxEvent): Promise<void> {
 		const queue = this.getQueue(event.queueName);
-		await queue.add(event.eventType, event.payload, {
-			jobId: event.id, // idempotency
+		await queue.add(event.eventType, event, {
+			jobId: event.eventId, // idempotency
 		});
 	}
 
