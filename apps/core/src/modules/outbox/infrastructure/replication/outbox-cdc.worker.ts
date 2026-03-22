@@ -28,6 +28,9 @@ export class OutboxCDCWorker
 {
 	private readonly logger = new Logger(OutboxCDCWorker.name);
 	private replicationService: LogicalReplicationService;
+	// Serializes acknowledge() calls so LSNs are always confirmed in arrival
+	// order, even though processEvent/retryWithBackoff run concurrently.
+	private nextAckPromise: Promise<void> = Promise.resolve();
 
 	constructor(
 		private config: ConfigService,
@@ -67,25 +70,29 @@ export class OutboxCDCWorker
 			publicationNames: ['outbox_pub'],
 		});
 
-		this.replicationService.on('data', async (lsn, log) => {
+		this.replicationService.on('data', (lsn, log) => {
 			if (log.tag !== 'insert') return;
 			if (log.relation.name !== 'outbox_events') return;
 
 			const rawEvent = log.new;
-
 			const event = OutboxEventMapper.toOutboxEvent(rawEvent) as OutboxEvent;
 
-			const success = await this.retryWithBackoff(
+			// Start processing concurrently, but chain the ack step so that
+			// acknowledge() calls are always issued in strict arrival order.
+			const processingPromise = this.retryWithBackoff(
 				() => this.processEvent(event),
 				{ retries: 5, delay: 500 }
 			);
 
-			if (success) {
-				await this.replicationService.acknowledge(lsn);
-				this.logger.log(`✓ Acked LSN: ${lsn}`);
-			} else {
-				this.logger.error(`✗ Failed after all retries`);
-			}
+			this.nextAckPromise = this.nextAckPromise.then(async () => {
+				const success = await processingPromise;
+				if (success) {
+					await this.replicationService.acknowledge(lsn);
+					this.logger.log(`✓ Acked LSN: ${lsn}`);
+				} else {
+					this.logger.error(`✗ Failed after all retries for LSN: ${lsn}`);
+				}
+			});
 		});
 
 		this.replicationService.on('error', (err) => {
