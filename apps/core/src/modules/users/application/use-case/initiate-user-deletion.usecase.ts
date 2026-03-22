@@ -1,3 +1,4 @@
+import { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -25,12 +26,11 @@ export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 	}
 
 	async execute(
-		input: any
+		authUser: AuthUser
 	): Promise<Result<boolean, UserNotFoundError | Error>> {
 		return this.tracer.withSpan(
 			'use-case.delete-user',
 			async () => {
-				const authUser = input as any;
 				const user = await this.repo.findById(authUser.id);
 
 				if (!user) {
@@ -66,8 +66,7 @@ export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 				return ok(true);
 			},
 			{
-				'use-case.externalAuthId':
-					input?.externalAuthId ?? input?.data?.id ?? 'unknown',
+				'use-case.externalAuthId': authUser.externalAuthId,
 			}
 		);
 	}

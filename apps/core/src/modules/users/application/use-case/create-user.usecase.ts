@@ -82,10 +82,10 @@ export class CreateUserUseCase implements ICreateUserUseCase {
 				}
 
 				this.logger.error(
-					`Failed to create user: eventId=${payload}`,
+					`Failed to create user: eventId=${payload.eventId}`,
 					error //? error.stack : String(error)
 				);
-				throw error;
+				return err(error instanceof Error ? error : new Error(String(error)));
 			}
 		});
 	}

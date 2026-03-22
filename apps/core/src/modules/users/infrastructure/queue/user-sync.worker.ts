@@ -44,7 +44,7 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 				async () => {
 					const validatedEvent = eventPayloadSchema.safeParse(job.data);
 
-					if (validatedEvent.error) {
+					if (!validatedEvent.success) {
 						this.logger.error(
 							`Failed to validate event: ${validatedEvent.error.message}`
 						);
@@ -52,7 +52,9 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 					}
 
 					const { eventType } = validatedEvent.data;
-					const result = await this.routeUserEvents.execute(job.data);
+					const result = await this.routeUserEvents.execute(
+						validatedEvent.data
+					);
 
 					// Handle result
 					if (result.isErr()) {

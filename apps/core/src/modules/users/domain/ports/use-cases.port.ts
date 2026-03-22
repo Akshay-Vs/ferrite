@@ -34,13 +34,18 @@ export type ICreateUserUseCase = IUseCase<
 /**
  * Updates the user's profile.
  *
- * Called by the HTTP API.
+ * Called by the USER_SYNC_QUEUE consumer after the CDC listener
+ * forwards the USER_UPDATED outbox event.
  *
- * @input  any - the user's ID
- * @output void
- * @throws UserNotFoundError - if the user does not exist
+ * `@input`  EventPayload - the USER_UPDATED event payload from the queue job
+ * `@output` void
+ * `@throws` UserNotFoundError - if the user does not exist
  */
-export type IUpdateUserUseCase = IUseCase<any, void, UserNotFoundError | Error>;
+export type IUpdateUserUseCase = IUseCase<
+	EventPayload,
+	void,
+	UserNotFoundError | Error
+>;
 
 /**
  * Gets the user's profile.
