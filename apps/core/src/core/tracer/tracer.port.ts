@@ -49,23 +49,23 @@ export interface ITracer {
 	): Promise<T>;
 
 	/**
-	 * Start a **new root span** linked to the trace encoded in `carrier` (W3C
-	 * `traceparent` / `tracestate`), execute `fn` within it, and end the span.
+	 * Start an async span seamlessly continuing the trace encoded in `carrier`
+	 * (W3C `traceparent` / `tracestate`), execute `fn` within it, and end it.
 	 *
 	 * Use this for async / decoupled workflows (e.g. outbox CDC, queue consumers)
-	 * where the current execution is causally related to an earlier trace but
-	 * should form its own root — per the OTel messaging semantic conventions.
+	 * where the async execution should logically continue the original request's
+	 * trace by becoming a child span of the propagated context.
 	 *
-	 * If `carrier` is absent or yields no valid span context, the span is still
-	 * created (without a link) so the call is always safe.
+	 * If `carrier` is absent or yields no valid span context, a new root span
+	 * is automatically created, so the call is always safe.
 	 *
-	 * @param name    Span name.
-	 * @param carrier Optional W3C propagation carrier captured at write time.
-	 * @param fn      Async function executed with the created span.
-	 * @param kind    SpanKind (defaults to CONSUMER).
+	 * @param name       Span name.
+	 * @param carrier    Optional W3C propagation carrier captured at publish time.
+	 * @param fn         Async function executed with the created span.
+	 * @param kind       SpanKind (defaults to CONSUMER).
 	 * @param attributes Optional span attributes.
 	 */
-	withLinkedSpan<T>(
+	withPropagatedSpan<T>(
 		name: string,
 		carrier: Record<string, string> | undefined,
 		fn: (span: ISpan) => Promise<T>,

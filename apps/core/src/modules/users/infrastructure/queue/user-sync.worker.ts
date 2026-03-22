@@ -32,7 +32,7 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 
 	async handle(job: Job<EventPayload>): Promise<void> {
 		// Link to the trace context from the producer
-		await this.tracer.withLinkedSpan(
+		await this.tracer.withPropagatedSpan(
 			'user-sync-worker.handle',
 			job.data.__traceContext,
 			async () => {

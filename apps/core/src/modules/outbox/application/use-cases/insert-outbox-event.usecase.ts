@@ -21,9 +21,9 @@ export class InsertOutboxEventUseCase implements IInsertOutboxEvent {
 
 	async execute(input: OutboxInput): Promise<Result<void, Error>> {
 		try {
-			// Capture the W3C propagation carrier from the current active context.
-			// This allows the CDC worker to link back to this trace when it picks
-			// up the event from WAL — without attaching it as a child span.
+			// Capture the W3C propagation carrier from the current active context
+			// so that downstream asynchronous workers (CDC & consumers) can resume
+			// the trace as child spans.
 			const traceContext: Record<string, string> = {};
 			propagation.inject(context.active(), traceContext);
 

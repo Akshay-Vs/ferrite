@@ -122,7 +122,7 @@ export class OutboxCDCWorker
 	private async processEvent(event: OutboxEvent) {
 		const validatedEvent = OutboxEventSchema.parse(event);
 
-		await this.tracer.withLinkedSpan(
+		await this.tracer.withPropagatedSpan(
 			'outbox.cdc.process',
 			validatedEvent.__traceContext,
 			async () => {
