@@ -42,7 +42,6 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 			return await this.tracer.withSpan(
 				'user-sync-worker.handle',
 				async () => {
-					this.logger.debug(`Processing ${JSON.stringify(job.data, null, 2)}`);
 					const validatedEvent = eventPayloadSchema.safeParse(job.data);
 
 					if (validatedEvent.error) {
@@ -53,9 +52,6 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 					}
 
 					const { eventType } = validatedEvent.data;
-
-					this.logger.debug(`Proceeding to route ${eventType}`);
-
 					const result = await this.routeUserEvents.execute(job.data);
 
 					// Handle result
@@ -78,11 +74,8 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 					}
 				},
 				{
-					'user-sync-worker.job.id': job.id ?? 'unknown',
-					'user-sync-worker.event.type':
-						(job.data as any)?.eventType ??
-						(job.data as any)?.type ??
-						'unknown',
+					'user-sync-worker.job.id': job.data.eventId,
+					'user-sync-worker.event.type': job.data.eventType,
 				}
 			);
 		});
