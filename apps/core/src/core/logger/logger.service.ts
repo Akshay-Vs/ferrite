@@ -248,8 +248,8 @@ export class AppLogger implements LoggerService, OnModuleDestroy {
 			...(store?.requestId && { requestId: store.requestId }),
 			...(store?.userId && { userId: store.userId }),
 			...(isValidSpan && {
-				traceId: spanContext!.traceId,
-				spanId: spanContext!.spanId,
+				traceId: spanContext?.traceId,
+				spanId: spanContext?.spanId,
 			}),
 		};
 	}

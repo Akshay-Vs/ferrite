@@ -15,28 +15,59 @@ export class OutboxProducer implements IOutboxProducer {
 	) {}
 
 	async enqueue(event: OutboxEvent): Promise<void> {
+		await this.enqueueBatch([event]);
+	}
+
+	async enqueueBatch(events: OutboxEvent[]): Promise<void> {
+		if (events.length === 0) return;
+
+		const byQueue = this.groupByQueue(events); // ← replace Map.groupBy
+
 		await this.tracer.withSpan(
-			'outbox.producer.enqueue',
+			'outbox.producer.enqueueBatch',
 			async () => {
-				const queue = this.getQueue(event.queueName);
-				// The full event (including __traceContext) is serialised into the
-				// BullMQ job data so the consumer can restore the origin trace.
-				await queue.add(event.eventType, event, {
-					jobId: event.eventId, // idempotency
-				});
+				await Promise.all(
+					[...byQueue.entries()].map(([queueName, queueEvents]) =>
+						this.enqueueBatchForQueue(queueName, queueEvents)
+					)
+				);
 			},
 			{
-				'outbox.queue_name': event.queueName,
-				'outbox.event_type': event.eventType,
-				'outbox.event_id': event.eventId,
+				'outbox.batch_size': events.length,
+				'outbox.queue_count': byQueue.size,
 			}
 		);
+	}
+	private groupByQueue(events: OutboxEvent[]): Map<string, OutboxEvent[]> {
+		return events.reduce((map, event) => {
+			const group = map.get(event.queueName) ?? [];
+			group.push(event);
+			map.set(event.queueName, group);
+			return map;
+		}, new Map<string, OutboxEvent[]>());
+	}
+
+	private async enqueueBatchForQueue(
+		queueName: string,
+		events: OutboxEvent[]
+	): Promise<void> {
+		const queue = this.getQueue(queueName);
+
+		const jobs = events.map((event) => ({
+			name: event.eventType,
+			data: event,
+			opts: {
+				jobId: event.eventId, // idempotency
+			},
+		}));
+
+		await queue.addBulk(jobs);
 	}
 
 	private getQueue(name: string): Queue {
 		try {
 			return this.moduleRef.get<Queue>(getQueueToken(name), { strict: false });
-		} catch (error) {
+		} catch {
 			throw new Error(
 				`Queue '${name}' is not registered. Please ensure it is registered via BullModule.registerQueue.`
 			);

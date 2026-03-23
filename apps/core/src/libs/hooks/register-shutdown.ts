@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { otelSDK } from '../instrumentation';
+import { otelSDK } from '../../instrumentation';
 
 export const registerShutdownHook = (app: INestApplication) => {
 	let isShuttingDown = false;
