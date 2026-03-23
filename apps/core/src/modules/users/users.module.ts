@@ -3,17 +3,19 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
+import { InitiateProfileUpdateUseCase } from './application/use-case/initiate-profile-update.usecase';
 import { InitiateDeleteUserUseCase } from './application/use-case/initiate-user-deletion.usecase';
 import { RouteUserEventsUsecase } from './application/use-case/route-user-events.usercase';
+import { SyncProfileUpdateUseCase } from './application/use-case/sync-profile-update.usecase';
 import { SyncUserDeletionUseCase } from './application/use-case/sync-user-deletion.usercase';
-import { UpdateOwnProfileUseCase } from './application/use-case/update-own-profile.usecase';
 import {
 	CREATE_USER_UC,
 	GET_OWN_PROFILE_UC,
 	INITIATE_DELETE_USER_UC,
+	INITIATE_PROFILE_UPDATE_UC,
 	ROUTE_USER_EVENTS_UC,
 	SYNC_USER_DELETION_UC,
-	UPDATE_OWN_PROFILE_UC,
+	SYNC_USER_UPDATE_UC,
 } from './domain/ports/use-cases.port';
 import { USER_REPOSITORY } from './domain/ports/user-repository.port';
 import {
@@ -61,8 +63,12 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 			useClass: GetOwnProfileUseCase,
 		},
 		{
-			provide: UPDATE_OWN_PROFILE_UC,
-			useClass: UpdateOwnProfileUseCase,
+			provide: INITIATE_PROFILE_UPDATE_UC,
+			useClass: InitiateProfileUpdateUseCase,
+		},
+		{
+			provide: SYNC_USER_UPDATE_UC,
+			useClass: SyncProfileUpdateUseCase,
 		},
 		{
 			provide: ROUTE_USER_EVENTS_UC,

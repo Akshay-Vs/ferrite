@@ -6,17 +6,20 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import type { IUpdateOwnProfileUseCase } from '@users/domain/ports/use-cases.port';
+import type { IInitiateProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
+import { UserUpdatedEvent } from '@users/domain/schemas';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()
-export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
+export class InitiateProfileUpdateUseCase
+	implements IInitiateProfileUpdateUseCase
+{
 	constructor(
 		@Inject(USER_REPOSITORY) private readonly repo: IUserRepository,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
@@ -55,13 +58,21 @@ export class UpdateOwnProfileUseCase implements IUpdateOwnProfileUseCase {
 					return ok(existingUser);
 				}
 
-				const outboxEvent: CreateOutboxEvent<UpdateProfileInput> = {
+				const eventType = 'user.updated';
+
+				const outboxEvent: CreateOutboxEvent<UserUpdatedEvent> = {
 					aggregateId: userId,
 					aggregateType: 'user',
-					eventType: 'user.profile_updated',
+					eventType: eventType,
 					queueName: USER_SYNC_QUEUE,
 					maxRetries: 5,
-					payload: { ...input.data },
+					payload: {
+						eventType: eventType,
+						externalAuthId: input.authUser.externalAuthId,
+						provider: input.authUser.provider,
+						firstName: input.data.firstName,
+						lastName: input.data.lastName,
+					},
 				};
 
 				const updatedProfile = await this.repo.updateProfileById(

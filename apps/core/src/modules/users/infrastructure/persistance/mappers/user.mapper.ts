@@ -26,13 +26,10 @@ export class UserMapper {
 	static toUserUpdate(event: UserUpdatedEvent): Partial<Omit<NewUser, 'id'>> {
 		const update: Record<string, unknown> = {};
 
-		if (event.email !== undefined) update.email = event.email;
-		if (event.emailVerified !== undefined)
-			update.emailVerified = event.emailVerified;
 		if (event.firstName !== undefined) update.firstName = event.firstName;
 		if (event.lastName !== undefined) update.lastName = event.lastName;
-		if (event.avatarUrl !== undefined) update.avatarUrl = event.avatarUrl;
-		if (event.banned !== undefined) update.isBanned = event.banned;
+		if (event.publicMetadata?.role !== undefined)
+			update.role = event.publicMetadata.role;
 
 		update.updatedAt = new Date();
 
