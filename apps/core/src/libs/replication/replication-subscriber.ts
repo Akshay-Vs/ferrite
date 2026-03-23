@@ -19,6 +19,7 @@ export interface ReplicationSubscriberOptions {
  */
 export class ReplicationSubscriber {
 	private attempt = 0;
+	private isEnabled = true;
 
 	constructor(
 		private readonly service: LogicalReplicationService,
@@ -37,13 +38,16 @@ export class ReplicationSubscriber {
 
 		const plugin = new PgoutputPlugin({ protoVersion, publicationNames });
 
-		while (true) {
+		while (this.isEnabled) {
 			try {
 				this.attempt++;
 				this.logger.log(`Connection attempt ${this.attempt}...`);
 				await this.service.subscribe(plugin, slotName);
 				this.attempt = 0; // reset on clean disconnect
 			} catch (err) {
+				// if the subscriber is disabled, stop re-trying
+				if (!this.isEnabled) break;
+
 				const delay = exponentialBackoff({
 					initialDelay,
 					maxDelay,
@@ -55,6 +59,10 @@ export class ReplicationSubscriber {
 				await this.sleep(delay);
 			}
 		}
+	}
+
+	stop() {
+		this.isEnabled = false;
 	}
 
 	private sleep(ms: number) {
