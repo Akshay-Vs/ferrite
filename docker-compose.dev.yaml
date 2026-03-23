@@ -19,9 +19,15 @@ services:
       - "-c"
       - "wal_level=logical"
       - "-c"
+      - "wal_compression=on"
+      - "-c"
       - "max_replication_slots=10"
       - "-c"
       - "max_wal_senders=10"
+      - "-c"
+      - "synchronous_commit=off"
+      - "-c"
+      - "wal_sender_timeout=60s"
     networks:
       - observability
 
