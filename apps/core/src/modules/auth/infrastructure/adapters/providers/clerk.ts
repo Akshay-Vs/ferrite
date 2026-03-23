@@ -201,7 +201,7 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth, IDeleteUser {
 	}
 
 	async deleteUser(externalAuthId: string): Promise<void> {
-		return this.tracer.withSpan('adapters.clerk.deleteUser', async (span) => {
+		return this.tracer.withSpan('adapters.clerk.deleteUser', async (_span) => {
 			try {
 				await this.clerkClient.users.deleteUser(externalAuthId);
 			} catch (error) {
