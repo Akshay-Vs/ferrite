@@ -1,5 +1,6 @@
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AuthUser, RawTokenClaims, WebhookPayload } from '../schemas';
+import { UserUpdatePayload } from '../schemas/user-update-payload.zodschema';
 
 export interface ITokenVerifier {
 	/**
@@ -51,4 +52,8 @@ export interface IWebhookAuth extends IWebhookVerifier {}
 
 export interface IDeleteUser {
 	deleteUser(externalAuthId: string): Promise<void>;
+}
+
+export interface IUpdateUser {
+	updateUser(externalAuthId: string, payload: UserUpdatePayload): Promise<void>;
 }

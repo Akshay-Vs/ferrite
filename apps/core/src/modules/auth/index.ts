@@ -22,6 +22,10 @@ export {
 	rawTokenClaimsSchema,
 } from './domain/schemas/token-claims.zodschema';
 export {
+	type UserUpdatePayload,
+	UserUpdatePayloadSchema,
+} from './domain/schemas/user-update-payload.zodschema';
+export {
 	type WebhookPayload,
 	webhookPayloadSchema,
 } from './domain/schemas/webhook-claims.zodschema';
