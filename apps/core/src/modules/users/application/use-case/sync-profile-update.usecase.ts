@@ -27,15 +27,13 @@ export class SyncProfileUpdateUseCase implements ISyncUserDeletionUseCase {
 					input.payload
 				);
 
-				setTimeout(async () => {
-					await this.authProvider.updateUser(validatedEvent.externalAuthId, {
-						firstName: validatedEvent.firstName,
-						lastName: validatedEvent.lastName,
-						publicMetadata: {
-							role: validatedEvent.publicMetadata?.role,
-						},
-					});
-				}, 5000);
+				await this.authProvider.updateUser(validatedEvent.externalAuthId, {
+					firstName: validatedEvent.firstName,
+					lastName: validatedEvent.lastName,
+					publicMetadata: {
+						role: validatedEvent.publicMetadata?.role,
+					},
+				});
 
 				this.logger.debug(
 					`User updated successfully: id=${validatedEvent.externalAuthId}`
@@ -43,6 +41,7 @@ export class SyncProfileUpdateUseCase implements ISyncUserDeletionUseCase {
 
 				return ok();
 			} catch (error) {
+				this.logger.error(`Failed to update user: ${error.message}`);
 				return err(error);
 			}
 		});
