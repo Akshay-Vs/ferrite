@@ -8,7 +8,10 @@ import {
 	type IOutboxProducer,
 	OUTBOX_PRODUCER,
 } from '@modules/outbox/domain/ports/outbox-producer.port';
-import { type OutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
+import {
+	type OutboxEvent,
+	OutboxEventSchema,
+} from '@modules/outbox/domain/schemas/outbox-event.zodschema';
 import {
 	Inject,
 	Injectable,
@@ -69,6 +72,7 @@ export class OutboxCDCWorker
 	async onApplicationShutdown() {
 		this.logger.log('Draining ack queue before shutdown...');
 		try {
+			this.subscriber.stop();
 			await this.ackQueue.drain(); // wait for all pending acks and flush
 			this.logger.log('Ack queue drained');
 		} catch {
@@ -111,7 +115,8 @@ export class OutboxCDCWorker
 			'outbox.cdc.process',
 			event.__traceContext,
 			async () => {
-				await this.producer.enqueue(event);
+				const validatedEvent = await OutboxEventSchema.parseAsync(event);
+				await this.producer.enqueue(validatedEvent);
 			},
 			undefined,
 			{
