@@ -1,4 +1,5 @@
 import { AppLogger } from '@core/logger/logger.service';
+import { registerShutdownHook } from '@libs/hooks/register-shutdown';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NextFunction, Request, Response } from 'express';
@@ -6,7 +7,6 @@ import express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { otelSDK } from './instrumentation';
-import { registerShutdownHook } from './libs/register-shutdown';
 import { setupSwagger } from './swagger';
 
 const PORT = process.env.PORT ?? 4000;
