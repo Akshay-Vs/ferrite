@@ -3,11 +3,14 @@ import { OTEL_TRACER } from '@core/tracer';
 import { ConcurrencyLimiter } from '@libs/limiters/concurrency-limiter';
 import { OrderedAckQueue } from '@libs/replication/ordered-ack-queue';
 import { ReplicationSubscriber } from '@libs/replication/replication-subscriber';
-import { retryWithBackoff } from '@libs/retry/retry-with-backoff';
 import {
 	type IOutboxProducer,
 	OUTBOX_PRODUCER,
 } from '@modules/outbox/domain/ports/outbox-producer.port';
+import {
+	type IOutboxRepository,
+	OUTBOX_REPOSITORY,
+} from '@modules/outbox/domain/ports/outbox-repository.port';
 import {
 	type OutboxEvent,
 	OutboxEventSchema,
@@ -37,6 +40,7 @@ export class OutboxCDCWorker
 	constructor(
 		private config: ConfigService,
 		@Inject(OUTBOX_PRODUCER) private readonly producer: IOutboxProducer,
+		@Inject(OUTBOX_REPOSITORY) private readonly repository: IOutboxRepository,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.replicationService = new LogicalReplicationService(
@@ -66,20 +70,21 @@ export class OutboxCDCWorker
 
 	onApplicationBootstrap() {
 		this.registerHandlers();
-		this.subscriber.start(); // start connection
+		this.subscriber.start();
 	}
 
 	async onApplicationShutdown() {
 		this.logger.log('Draining ack queue before shutdown...');
 		try {
 			this.subscriber.stop();
-			await this.ackQueue.drain(); // wait for all pending acks and flush
+			await this.ackQueue.drain();
 			this.logger.log('Ack queue drained');
 		} catch {
 			this.logger.log('Drain failed, shutting down anyway');
 		}
 		await this.replicationService.stop();
 	}
+
 	private registerHandlers() {
 		this.replicationService.on('data', (lsn, log) => {
 			if (log.tag !== 'insert') return;
@@ -87,15 +92,22 @@ export class OutboxCDCWorker
 
 			const event = OutboxEventMapper.toOutboxEvent(log.new) as OutboxEvent;
 
-			const processingPromise = this.limiter.run(() =>
-				retryWithBackoff(() => this.processEvent(event), {
-					retries: 5,
-					logger: this.logger,
-				})
-			);
+			// Try to process once. Any failure — permanent (bad queue name, schema
+			// mismatch) or transient (Redis blip) — is dead-lettered immediately so
+			// the LSN advances without delay. Events persist in outbox_events with
+			// status='dead_lettered' and are recoverable via the polling fallback.
+			const processingPromise = this.limiter.run(async () => {
+				try {
+					await this.processEvent(event);
+				} catch (err) {
+					await this.deadLetter(event, (err as Error).message);
+				}
+				// Always resolve true — the LSN must advance regardless.
+				return true as boolean;
+			});
 
 			this.ackQueue.enqueue(
-				processingPromise.then(() => true),
+				processingPromise,
 				() => this.replicationService.acknowledge(lsn),
 				lsn
 			);
@@ -127,5 +139,19 @@ export class OutboxCDCWorker
 				'outbox.event_id': event.eventId,
 			}
 		);
+	}
+
+	private async deadLetter(event: OutboxEvent, reason: string) {
+		this.logger.error(
+			`Dead-lettering event ${event.eventId} (${event.eventType}): ${reason}`
+		);
+		try {
+			await this.repository.markDeadLettered(event.eventId, reason);
+		} catch (err) {
+			// Log but do not rethrow — a DL write failure must never re-block the LSN.
+			this.logger.error(
+				`Failed to write dead-letter record for ${event.eventId}: ${(err as Error).message}`
+			);
+		}
 	}
 }
