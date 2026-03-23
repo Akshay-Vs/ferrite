@@ -25,7 +25,7 @@ services:
       - "-c"
       - "max_wal_senders=10"
       - "-c"
-      - "synchronous_commit=off"
+      - "synchronous_commit=${POSTGRES_SYNCHRONOUS_COMMIT:-local}"
       - "-c"
       - "wal_sender_timeout=60s"
     networks:
