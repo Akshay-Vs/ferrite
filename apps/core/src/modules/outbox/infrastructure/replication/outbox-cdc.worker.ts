@@ -1,3 +1,5 @@
+import type { ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer';
 import {
 	type IOutboxProducer,
 	OUTBOX_PRODUCER,
@@ -26,12 +28,18 @@ export class OutboxCDCWorker
 {
 	private readonly logger = new Logger(OutboxCDCWorker.name);
 	private replicationService: LogicalReplicationService;
+	// Serializes acknowledge() calls so LSNs are always confirmed in arrival
+	// order, even though processEvent/retryWithBackoff run concurrently.
+	private nextAckPromise: Promise<void> = Promise.resolve();
 
 	constructor(
 		private config: ConfigService,
 
 		@Inject(OUTBOX_PRODUCER)
-		private readonly producer: IOutboxProducer
+		private readonly producer: IOutboxProducer,
+
+		@Inject(OTEL_TRACER)
+		private readonly tracer: ITracer
 	) {
 		this.replicationService = new LogicalReplicationService(
 			{ connectionString: this.config.get('DATABASE_URL') },
@@ -62,25 +70,29 @@ export class OutboxCDCWorker
 			publicationNames: ['outbox_pub'],
 		});
 
-		this.replicationService.on('data', async (lsn, log) => {
+		this.replicationService.on('data', (lsn, log) => {
 			if (log.tag !== 'insert') return;
 			if (log.relation.name !== 'outbox_events') return;
 
 			const rawEvent = log.new;
-
 			const event = OutboxEventMapper.toOutboxEvent(rawEvent) as OutboxEvent;
 
-			const success = await this.retryWithBackoff(
+			// Start processing concurrently, but chain the ack step so that
+			// acknowledge() calls are always issued in strict arrival order.
+			const processingPromise = this.retryWithBackoff(
 				() => this.processEvent(event),
 				{ retries: 5, delay: 500 }
 			);
 
-			if (success) {
-				await this.replicationService.acknowledge(lsn);
-				this.logger.log(`✓ Acked LSN: ${lsn}`);
-			} else {
-				this.logger.error(`✗ Failed after all retries`);
-			}
+			this.nextAckPromise = this.nextAckPromise.then(async () => {
+				const success = await processingPromise;
+				if (success) {
+					await this.replicationService.acknowledge(lsn);
+					this.logger.log(`✓ Acked LSN: ${lsn}`);
+				} else {
+					this.logger.error(`✗ Failed after all retries for LSN: ${lsn}`);
+				}
+			});
 		});
 
 		this.replicationService.on('error', (err) => {
@@ -108,8 +120,23 @@ export class OutboxCDCWorker
 	}
 
 	private async processEvent(event: OutboxEvent) {
-		const valdatedEvent = OutboxEventSchema.parse(event);
-		await this.producer.enqueue(valdatedEvent);
+		const validatedEvent = OutboxEventSchema.parse(event);
+
+		await this.tracer.withPropagatedSpan(
+			'outbox.cdc.process',
+			validatedEvent.__traceContext,
+			async () => {
+				await this.producer.enqueue(validatedEvent);
+			},
+			undefined, // defaults to CONSUMER
+			{
+				'outbox.event_type': validatedEvent.eventType,
+				'outbox.queue_name': validatedEvent.queueName,
+				'outbox.aggregate_type': validatedEvent.aggregateType,
+				'outbox.aggregate_id': validatedEvent.aggregateId,
+				'outbox.event_id': validatedEvent.eventId,
+			}
+		);
 	}
 
 	private async retryWithBackoff(

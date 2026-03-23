@@ -9,6 +9,18 @@ export interface ISpan {
 }
 
 /**
+ * OTel SpanKind values re-exported through the port so callers remain
+ * vendor-agnostic and never import from `@opentelemetry/api` directly.
+ */
+export enum TracerSpanKind {
+	INTERNAL = 0,
+	SERVER = 1,
+	CLIENT = 2,
+	PRODUCER = 3,
+	CONSUMER = 4,
+}
+
+/**
  * Key-value bag attached to a span.
  * Intentionally limited to primitive types to stay vendor-agnostic.
  */
@@ -33,6 +45,31 @@ export interface ITracer {
 	withSpan<T>(
 		name: string,
 		fn: (span: ISpan) => Promise<T>,
+		attributes?: SpanAttributes
+	): Promise<T>;
+
+	/**
+	 * Start an async span seamlessly continuing the trace encoded in `carrier`
+	 * (W3C `traceparent` / `tracestate`), execute `fn` within it, and end it.
+	 *
+	 * Use this for async / decoupled workflows (e.g. outbox CDC, queue consumers)
+	 * where the async execution should logically continue the original request's
+	 * trace by becoming a child span of the propagated context.
+	 *
+	 * If `carrier` is absent or yields no valid span context, a new root span
+	 * is automatically created, so the call is always safe.
+	 *
+	 * @param name       Span name.
+	 * @param carrier    Optional W3C propagation carrier captured at publish time.
+	 * @param fn         Async function executed with the created span.
+	 * @param kind       SpanKind (defaults to CONSUMER).
+	 * @param attributes Optional span attributes.
+	 */
+	withPropagatedSpan<T>(
+		name: string,
+		carrier: Record<string, string> | undefined,
+		fn: (span: ISpan) => Promise<T>,
+		kind?: TracerSpanKind,
 		attributes?: SpanAttributes
 	): Promise<T>;
 }

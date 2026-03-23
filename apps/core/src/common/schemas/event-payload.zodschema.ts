@@ -5,6 +5,7 @@ export const eventPayloadSchema = z
 		eventId: z.string().min(1),
 		eventType: z.string().min(1),
 		payload: z.record(z.string(), z.unknown()),
+		__traceContext: z.record(z.string(), z.string()).optional(),
 	})
 	.catchall(z.unknown());
 
