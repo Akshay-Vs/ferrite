@@ -1,5 +1,6 @@
 import { type IUpdateUser } from '@auth/domain/ports/auth-provider.port';
 import { AUTH_PROVIDER } from '@auth/domain/ports/auth-provider.tokens';
+import { UserUpdatePayload } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { EventPayload } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
@@ -27,13 +28,35 @@ export class SyncProfileUpdateUseCase implements ISyncUserDeletionUseCase {
 					input.payload
 				);
 
-				await this.authProvider.updateUser(validatedEvent.externalAuthId, {
-					firstName: validatedEvent.firstName,
-					lastName: validatedEvent.lastName,
-					publicMetadata: {
-						role: validatedEvent.publicMetadata?.role,
-					},
-				});
+				// patch with only the fields that are mapped
+				const patch: UserUpdatePayload = {};
+
+				if (validatedEvent.firstName !== undefined) {
+					patch.firstName = validatedEvent.firstName;
+				}
+
+				if (validatedEvent.lastName !== undefined) {
+					patch.lastName = validatedEvent.lastName;
+				}
+
+				if (validatedEvent.publicMetadata?.role !== undefined) {
+					patch.publicMetadata = {
+						role: validatedEvent.publicMetadata.role,
+					};
+				}
+
+				// if no patch, skip
+				if (Object.keys(patch).length === 0) {
+					this.logger.debug(
+						`No mapped profile fields in event; skipping sync: id=${validatedEvent.externalAuthId}`
+					);
+					return ok();
+				}
+
+				await this.authProvider.updateUser(
+					validatedEvent.externalAuthId,
+					patch
+				);
 
 				this.logger.debug(
 					`User updated successfully: id=${validatedEvent.externalAuthId}`

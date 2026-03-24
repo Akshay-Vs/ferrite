@@ -221,13 +221,27 @@ export class ClerkAdapter
 	): Promise<void> {
 		return this.tracer.withSpan('adapters.clerk.updateUser', async (_span) => {
 			try {
-				await this.clerkClient.users.updateUser(externalAuthId, {
-					firstName: payload.firstName,
-					lastName: payload.lastName,
-					publicMetadata: {
-						role: payload?.publicMetadata?.role,
-					},
-				});
+				const clerkPayload: {
+					firstName?: string;
+					lastName?: string;
+					publicMetadata?: { role: string };
+				} = {};
+
+				if (payload.firstName !== undefined) {
+					clerkPayload.firstName = payload.firstName;
+				}
+
+				if (payload.lastName !== undefined) {
+					clerkPayload.lastName = payload.lastName;
+				}
+
+				if (payload.publicMetadata?.role !== undefined) {
+					clerkPayload.publicMetadata = {
+						role: payload.publicMetadata.role,
+					};
+				}
+
+				await this.clerkClient.users.updateUser(externalAuthId, clerkPayload);
 			} catch (error) {
 				this.logger.error(`Failed to update user in Clerk: ${error}`);
 				throw new Error(`Failed to update user in Clerk: ${error}`);
