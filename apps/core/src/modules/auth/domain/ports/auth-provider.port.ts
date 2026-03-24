@@ -50,10 +50,20 @@ export interface ITokenAuth extends ITokenVerifier, ITokenTransformer {}
  */
 export interface IWebhookAuth extends IWebhookVerifier {}
 
+/**
+ * Port for user deletion.
+ * Used to delete user from third-party auth providers.
+ * Implemented by: ClerkAdapter, KindeAdapter etc
+ */
 export interface IDeleteUser {
 	deleteUser(externalAuthId: string): Promise<void>;
 }
 
+/**
+ * Port for user update.
+ * Used to update user profile fields in third-party auth providers.
+ * Implemented by: ClerkAdapter, KindeAdapter etc
+ */
 export interface IUpdateUser {
 	updateUser(externalAuthId: string, payload: UserUpdatePayload): Promise<void>;
 }
