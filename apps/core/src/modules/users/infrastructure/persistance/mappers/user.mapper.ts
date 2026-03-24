@@ -28,8 +28,6 @@ export class UserMapper {
 
 		if (event.firstName !== undefined) update.firstName = event.firstName;
 		if (event.lastName !== undefined) update.lastName = event.lastName;
-		if (event.publicMetadata?.role !== undefined)
-			update.role = event.publicMetadata.role;
 
 		update.updatedAt = new Date();
 
