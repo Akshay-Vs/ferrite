@@ -8,7 +8,9 @@ import {
 	type ICreateUserUseCase,
 	type IRouteUserEventsUseCase,
 	type ISyncUserDeletionUseCase,
+	type ISyncUserProfileUpdateUseCase,
 	SYNC_USER_DELETION_UC,
+	SYNC_USER_UPDATE_UC,
 } from '@users/domain/ports/use-cases.port';
 
 @Injectable()
@@ -17,7 +19,9 @@ export class RouteUserEventsUsecase implements IRouteUserEventsUseCase {
 		private readonly logger: AppLogger,
 		@Inject(CREATE_USER_UC) private readonly createUser: ICreateUserUseCase,
 		@Inject(SYNC_USER_DELETION_UC)
-		private readonly syncDelete: ISyncUserDeletionUseCase
+		private readonly syncDelete: ISyncUserDeletionUseCase,
+		@Inject(SYNC_USER_UPDATE_UC)
+		private readonly syncUpdate: ISyncUserProfileUpdateUseCase
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
@@ -28,6 +32,9 @@ export class RouteUserEventsUsecase implements IRouteUserEventsUseCase {
 		switch (eventType) {
 			case 'user.created':
 				return this.createUser.execute(payload);
+
+			case 'user.updated':
+				return this.syncUpdate.execute(payload);
 
 			case 'user.deleted': {
 				const result = await this.syncDelete.execute(payload);

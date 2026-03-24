@@ -1,7 +1,9 @@
+import { authProvidersSchema, UserUpdatePayloadSchema } from '@auth/index';
 import { z } from 'zod/v4';
-import { userCreatedEventSchema } from './user-created.zodschema';
 
-export const userUpdatedEventSchema = userCreatedEventSchema.extend({
+export const userUpdatedEventSchema = UserUpdatePayloadSchema.extend({
+	externalAuthId: z.string(),
+	provider: authProvidersSchema,
 	eventType: z.literal('user.updated'),
 });
 

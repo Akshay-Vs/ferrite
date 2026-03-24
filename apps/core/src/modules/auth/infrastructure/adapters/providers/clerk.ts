@@ -4,6 +4,7 @@ import {
 	RawTokenClaims,
 	WebhookPayload,
 } from '@auth/domain/schemas';
+import { UserUpdatePayload } from '@auth/domain/schemas/user-update-payload.zodschema';
 import { webhookPayloadSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import {
 	ClerkClient,
@@ -20,6 +21,7 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
 	IDeleteUser,
 	ITokenAuth,
+	IUpdateUser,
 	IWebhookAuth,
 } from '@modules/auth/domain/ports/auth-provider.port';
 import {
@@ -34,7 +36,9 @@ import { Webhook } from 'svix';
 export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
 
 @Injectable()
-export class ClerkAdapter implements ITokenAuth, IWebhookAuth, IDeleteUser {
+export class ClerkAdapter
+	implements ITokenAuth, IWebhookAuth, IDeleteUser, IUpdateUser
+{
 	private readonly secretKey: string;
 	private readonly publishableKey: string;
 	private readonly clerkClient: ClerkClient;
@@ -207,6 +211,40 @@ export class ClerkAdapter implements ITokenAuth, IWebhookAuth, IDeleteUser {
 			} catch (error) {
 				this.logger.error(`Failed to delete user in Clerk: ${error}`);
 				throw new Error(`Failed to delete user in Clerk: ${error}`);
+			}
+		});
+	}
+
+	async updateUser(
+		externalAuthId: string,
+		payload: UserUpdatePayload
+	): Promise<void> {
+		return this.tracer.withSpan('adapters.clerk.updateUser', async (_span) => {
+			try {
+				const clerkPayload: {
+					firstName?: string;
+					lastName?: string;
+					publicMetadata?: { role: string };
+				} = {};
+
+				if (payload.firstName !== undefined) {
+					clerkPayload.firstName = payload.firstName;
+				}
+
+				if (payload.lastName !== undefined) {
+					clerkPayload.lastName = payload.lastName;
+				}
+
+				if (payload.publicMetadata?.role !== undefined) {
+					clerkPayload.publicMetadata = {
+						role: payload.publicMetadata.role,
+					};
+				}
+
+				await this.clerkClient.users.updateUser(externalAuthId, clerkPayload);
+			} catch (error) {
+				this.logger.error(`Failed to update user in Clerk: ${error}`);
+				throw new Error(`Failed to update user in Clerk: ${error}`);
 			}
 		});
 	}

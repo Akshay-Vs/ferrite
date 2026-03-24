@@ -53,25 +53,10 @@ export class ClerkWebhookMapper implements IWebhookMapper {
 			case 'user.updated':
 				return {
 					eventType: 'user.updated',
-					id,
 					externalAuthId,
 					provider,
-					oauthProvider: this.extractOauthProvider(data),
-					email: this.extractPrimaryEmail(data),
-					emailVerified: this.extractEmailVerified(data),
-					phoneNumber: this.extractPrimaryPhone(data),
-					phoneVerified: this.extractPhoneVerified(data),
-					username: (data.username as string) ?? null,
 					firstName: (data.first_name as string) ?? null,
 					lastName: (data.last_name as string) ?? null,
-					avatarUrl: (data.image_url as string) ?? null,
-					locale: (data.locale as string) ?? null,
-					twoFactorEnabled: (data.two_factor_enabled as boolean) ?? false,
-					banned: (data.banned as boolean) ?? false,
-					locked: (data.locked as boolean) ?? false,
-					providerCreatedAt: data.created_at as number,
-					providerUpdatedAt: data.updated_at as number,
-					lastSignInAt: (data.last_sign_in_at as number) ?? null,
 				};
 
 			case 'user.deleted':

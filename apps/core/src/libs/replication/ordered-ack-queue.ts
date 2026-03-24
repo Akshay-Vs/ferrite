@@ -42,9 +42,10 @@ export class OrderedAckQueue {
 		this.nextAckPromise = this.nextAckPromise.then(async () => {
 			const success = await processingPromise;
 
+			// success===false means the caller already dead-lettered the event
+			// in the DB. We still advance the LSN so the pipeline is never blocked.
 			if (!success) {
-				this.logger.error(`Failed after all retries for LSN: ${lsn}`);
-				throw new Error(`Failed to process LSN: ${lsn}`);
+				this.logger.warn(`Event dead-lettered; advancing LSN anyway: ${lsn}`);
 			}
 
 			this.lastAckFn = ack;

@@ -11,8 +11,9 @@ export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
 export const UPDATE_USER_UC = Symbol('UPDATE_USER_UC');
 export const ROUTE_USER_EVENTS_UC = Symbol('ROUTE_USER_EVENTS_UC');
 export const GET_OWN_PROFILE_UC = Symbol('GET_OWN_PROFILE_UC');
-export const UPDATE_OWN_PROFILE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
+export const INITIATE_PROFILE_UPDATE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 export const INITIATE_DELETE_USER_UC = Symbol('INITIATE_DELETE_USER_UC');
+export const SYNC_USER_UPDATE_UC = Symbol('SYNC_USER_UPDATE_UC');
 export const SYNC_USER_DELETION_UC = Symbol('SYNC_USER_DELETION_UC');
 
 /**
@@ -47,15 +48,19 @@ export type IGetOwnProfileUseCase = IUseCase<
 >;
 
 /**
- * Updates the user's profile.
+ * Initiates the user profile update flow.
  *
  * Called by the HTTP API.
+ * Responsibilities (in order):
+ *   1. Verify the user exists
+ *   2. Update the user's profile
+ *   3. Write a USER_UPDATED event to the outbox within the same transaction
  *
- * @input  { authUser: AuthUser; data: UpdateProfileInput } - the authenticated user and their updated profile
- * @output UserProfileFull - the updated user profile
+ * @input  AuthUser - the authenticated user requesting profile update
+ * @output boolean  - true if the user was updated, false if already gone (idempotent)
  * @throws UserNotFoundError - if the user does not exist
  */
-export type IUpdateOwnProfileUseCase = IUseCase<
+export type IInitiateProfileUpdateUseCase = IUseCase<
 	{ authUser: AuthUser; data: UpdateProfileInput },
 	UserProfileFull,
 	UserNotFoundError
@@ -113,3 +118,21 @@ export type IInitiateDeleteUserUseCase = IUseCase<
  * @throws Error - if any external provider call fails after exhausting retries
  */
 export type ISyncUserDeletionUseCase = IUseCase<EventPayload, void, Error>;
+
+/**
+ * Updates the user's profile.
+ *
+ * Called by the USER_SYNC_QUEUE consumer after the CDC listener
+ * forwards the USER_UPDATED outbox event. Responsible for propagating
+ * the update to all third-party services (Kinde, Clerk, etc.).
+ *
+ * This use case is deliberately decoupled from IUpdateOwnProfileUseCase —
+ * it knows nothing about the local database, the outbox, or how it was triggered.
+ * It only knows how to update a user's profile given a payload.
+ *
+ * @input  EventPayload - the USER_UPDATED event payload from the queue job
+ * @output void
+ * @throws Error - if any external provider call fails after exhausting retries
+ */
+export interface ISyncUserProfileUpdateUseCase
+	extends IUseCase<EventPayload, void, Error> {}

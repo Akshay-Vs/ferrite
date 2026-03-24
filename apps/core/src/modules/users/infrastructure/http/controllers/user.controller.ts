@@ -20,9 +20,9 @@ import {
 	GET_OWN_PROFILE_UC,
 	type IGetOwnProfileUseCase,
 	type IInitiateDeleteUserUseCase,
+	type IInitiateProfileUpdateUseCase,
 	INITIATE_DELETE_USER_UC,
-	type IUpdateOwnProfileUseCase,
-	UPDATE_OWN_PROFILE_UC,
+	INITIATE_PROFILE_UPDATE_UC,
 } from '@users/domain/ports/use-cases.port';
 
 import { UpdateProfileInputDTO } from '../dto/update-profile.dto';
@@ -42,8 +42,8 @@ export class UserController {
 		@Inject(GET_OWN_PROFILE_UC)
 		private readonly getOwnProfileUseCase: IGetOwnProfileUseCase,
 
-		@Inject(UPDATE_OWN_PROFILE_UC)
-		private readonly updateOwnProfileUseCase: IUpdateOwnProfileUseCase,
+		@Inject(INITIATE_PROFILE_UPDATE_UC)
+		private readonly updateOwnProfileUseCase: IInitiateProfileUpdateUseCase,
 
 		@Inject(INITIATE_DELETE_USER_UC)
 		private readonly InitiatedeleteUserUseCase: IInitiateDeleteUserUseCase,
