@@ -56,8 +56,8 @@ export type IGetOwnProfileUseCase = IUseCase<
  *   2. Update the user's profile
  *   3. Write a USER_UPDATED event to the outbox within the same transaction
  *
- * @input  AuthUser - the authenticated user requesting profile update
- * @output boolean  - true if the user was updated, false if already gone (idempotent)
+ * @input { authUser: AuthUser; data: UpdateProfileInput } - the authenticated user and requested profile changes
+ * @output UserProfileFull - the updated profile
  * @throws UserNotFoundError - if the user does not exist
  */
 export type IInitiateProfileUpdateUseCase = IUseCase<

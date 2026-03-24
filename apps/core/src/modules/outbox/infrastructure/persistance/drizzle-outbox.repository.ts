@@ -1,6 +1,7 @@
 import { DB } from '@core/database/db.provider';
 import { DrizzleTransaction, type TDatabase } from '@core/database/db.type';
 import { outboxEvents } from '@core/database/schema';
+import { AppLogger } from '@core/logger/logger.service';
 import type { ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer';
 import { IOutboxRepository } from '@modules/outbox/domain/ports/outbox-repository.port';
@@ -13,7 +14,8 @@ import { OutboxEventMapper } from './mappers/outbox-event.mapper';
 export class DrizzleOutboxRepository implements IOutboxRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
-		@Inject(OTEL_TRACER) private readonly tracer: ITracer
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
 	) {}
 
 	async insert(
@@ -41,13 +43,20 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 		await this.tracer.withSpan(
 			'outbox.mark_dead_lettered',
 			async () => {
-				await this.db
+				const result = await this.db
 					.update(outboxEvents)
 					.set({
 						status: 'dead_lettered',
 						errorDetail: reason,
 					})
-					.where(eq(outboxEvents.id, eventId));
+					.where(eq(outboxEvents.id, eventId))
+					.returning({
+						id: outboxEvents.id,
+					});
+
+				if (result.length === 0) {
+					this.logger.error(`Failed to mark dead lettered: eventId=${eventId}`);
+				}
 			},
 			{ 'outbox.event_id': eventId }
 		);
