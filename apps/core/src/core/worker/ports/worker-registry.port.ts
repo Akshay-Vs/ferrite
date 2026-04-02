@@ -8,5 +8,5 @@ export interface IWorkerRegistry {
 	/**
 	 * Returns the task list.
 	 */
-	getTaskList(): TaskList;
+	getTaskRunners(): TaskList;
 }
