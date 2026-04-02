@@ -23,9 +23,11 @@ export const registerShutdownHook = (app: INestApplication) => {
 						console.log('OpenTelemetry resources shut down successfully.')
 					)
 					.catch((e) => console.error('Error shutting down:', e))
-					.finally(() =>
-						process.exit(reason === 'SIGINT' || reason === 'SIGTERM' ? 0 : 1)
-					)
+					.finally(() => {
+						setTimeout(() => {
+							process.exit(reason === 'SIGINT' || reason === 'SIGTERM' ? 0 : 1);
+						}, 100);
+					})
 			);
 	};
 

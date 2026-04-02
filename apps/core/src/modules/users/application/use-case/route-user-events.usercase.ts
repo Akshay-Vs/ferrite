@@ -1,4 +1,4 @@
-import { err, ok, Result } from '@common/interfaces/result.interface';
+import { err, Result } from '@common/interfaces/result.interface';
 import { EventPayload } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { UnsupportedEventTypeError } from '@core/queue/queue.errors';
@@ -36,13 +36,8 @@ export class RouteUserEventsUsecase implements IRouteUserEventsUseCase {
 			case 'user.updated':
 				return this.syncUpdate.execute(payload);
 
-			case 'user.deleted': {
-				const result = await this.syncDelete.execute(payload);
-				if (result.isErr()) {
-					return err(result.error);
-				}
-				return ok();
-			}
+			case 'user.deleted':
+				return await this.syncDelete.execute(payload);
 
 			default: {
 				this.logger.warn(`Unsupported event type: ${eventType}`);

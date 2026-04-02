@@ -20,7 +20,7 @@ NestLogger.debug(
 	'GLOBAL'
 );
 
-const logger = new NestLogger('Bootstrap');
+const logger = new NestLogger('Main');
 
 /**
  * Create, configure, and start the NestJS application.
@@ -30,8 +30,6 @@ const logger = new NestLogger('Bootstrap');
  * sets up Swagger; starts the HTTP server on the configured port and logs the active port.
  */
 async function bootstrap() {
-	otelSDK.start();
-
 	const app = await NestFactory.create(AppModule, {
 		bufferLogs: true,
 		rawBody: true,
@@ -60,15 +58,6 @@ async function bootstrap() {
 
 	if (process.env.ENABLE_SWAGGER || process.env.NODE_ENV !== 'production') {
 		setupSwagger(app);
-
-		// const tree = SpelunkerModule.explore(app);
-		// const root = SpelunkerModule.graph(tree);
-		// const edges = SpelunkerModule.findGraphEdges(root);
-		// console.log('graph LR');
-		// const mermaidEdges = edges.map(
-		//   ({ from, to }) => `  ${from.module.name}-->${to.module.name}`,
-		// );
-		// console.log(mermaidEdges.join('\n'));
 	}
 
 	await app.listen(PORT);
@@ -77,11 +66,18 @@ async function bootstrap() {
 
 void (async (): Promise<void> => {
 	try {
+		otelSDK.start();
 		await bootstrap();
 		logger.log(
 			`Server Started in ${process.env.NODE_ENV ?? 'production'} mode`
 		);
 	} catch (error) {
-		logger.error(error);
+		try {
+			await otelSDK.shutdown();
+		} catch (shutdownError) {
+			logger.error(shutdownError);
+		} finally {
+			process.exit(1);
+		}
 	}
 })();

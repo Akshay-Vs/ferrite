@@ -1,4 +1,4 @@
-import { OutboxModule } from '@modules/outbox/outbox.module';
+import { OutboxModule } from '@modules/outbox';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
