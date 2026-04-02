@@ -3,7 +3,7 @@ import { HttpExceptionFilter } from '@common/filters/http-error-filter';
 import { CoreModule } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
-import { OutboxModule } from '@modules/outbox/outbox.module';
+// import { OutboxModule } from '@modules/outbox/outbox.module';
 import { UsersModule } from '@modules/users/users.module';
 import { WebhooksModule } from '@modules/webhooks/webhooks.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -15,17 +15,17 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 
 @Module({
 	imports: [
+		CoreModule,
 		ConfigModule.forRoot({ isGlobal: true }),
 		CacheModule.register({ ttl: 60000, isGlobal: true }),
 		ThrottlerModule.forRoot({
 			throttlers: [{ ttl: 60000, limit: 100 }],
 		}),
 		AuthModule, // ← provides AuthGuard, WebhookGuard, use cases
-		CoreModule,
 		HealthModule,
 		UsersModule,
 		WebhooksModule,
-		OutboxModule,
+		// OutboxModule,
 		CommonModule,
 	],
 	providers: [

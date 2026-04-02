@@ -5,16 +5,18 @@ import { LoggerModule } from './logger/logger.module';
 import { QueueModule } from './queue/module';
 import { RequestContextModule } from './request-context/request-context.module';
 import { TracerModule } from './tracer/tracer.module';
+import { WorkerModule } from './worker/worker.module';
 
 @Global()
 @Module({
 	imports: [
-		RequestContextModule,
 		LoggerModule,
+		RequestContextModule,
 		TracerModule,
 		ConfigModule,
 		DatabaseModule,
 		QueueModule,
+		WorkerModule,
 	],
 	exports: [
 		RequestContextModule,
@@ -23,6 +25,7 @@ import { TracerModule } from './tracer/tracer.module';
 		ConfigModule,
 		DatabaseModule,
 		QueueModule,
+		WorkerModule,
 	],
 })
 export class CoreModule {}
