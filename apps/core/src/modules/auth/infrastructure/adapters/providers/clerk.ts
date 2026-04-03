@@ -33,6 +33,7 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { USER_SYNC_QUEUE } from '@users/index';
 import { Webhook } from 'svix';
 
 export const CLERK_CLIENT = Symbol('CLERK_CLIENT');
@@ -191,7 +192,7 @@ export class ClerkAdapter
 						eventType: verified.type,
 						timestamp: parsedTimestamp,
 						payload: (verified as any).data,
-						queueName: verified.type.split('.')[0].concat('_event'),
+						queueName: USER_SYNC_QUEUE,
 					});
 
 					return parsed;
