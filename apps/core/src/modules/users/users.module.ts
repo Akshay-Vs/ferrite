@@ -26,7 +26,7 @@ import { WebhookMapperRegistry } from './infrastructure/adapters/webhook-mapper-
 import { UserController } from './infrastructure/http/controllers/user.controller';
 import { ClerkWebhookMapper } from './infrastructure/persistance/mappers/clerk-webhook.mapper';
 import { DrizzleUserRepository } from './infrastructure/persistance/repositories/drizzle-user.repository';
-import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
+import { UserSyncProcessor } from './infrastructure/queue/user-sync.processor';
 
 @Module({
 	imports: [OutboxModule],
@@ -80,7 +80,7 @@ import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 		ClerkWebhookMapper,
 
 		// Queue worker
-		UserSyncWorker,
+		UserSyncProcessor,
 	],
 	exports: [],
 })

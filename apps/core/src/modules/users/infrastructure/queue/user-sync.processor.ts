@@ -1,5 +1,5 @@
 import { UnsupportedEventTypeError } from '@common/errors/unsupported-event-type.error';
-import { ok, Result } from '@common/interfaces/result.interface';
+import { err, ok, Result } from '@common/interfaces/result.interface';
 import {
 	EventPayload,
 	eventPayloadSchema,
@@ -7,8 +7,8 @@ import {
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { GraphileTask } from '@core/worker/decorators/graphile-task.decorator';
-import { BaseWorker } from '@core/worker/services/base.worker';
+import { BaseProcessor } from '@core/worker';
+import { GraphileProcessor } from '@core/worker/decorators/graphile-processor.decorator';
 import { Inject } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
@@ -19,8 +19,8 @@ import {
 import type { JobHelpers } from 'graphile-worker';
 import { USER_SYNC_QUEUE } from './queue.constraints';
 
-@GraphileTask(USER_SYNC_QUEUE)
-export class UserSyncWorker extends BaseWorker<EventPayload> {
+@GraphileProcessor(USER_SYNC_QUEUE)
+export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 	constructor(
 		protected readonly logger: AppLogger,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
@@ -32,7 +32,7 @@ export class UserSyncWorker extends BaseWorker<EventPayload> {
 
 	protected async handle(
 		payload: EventPayload,
-		helpers: JobHelpers
+		helpers?: JobHelpers
 	): Promise<Result<void, Error>> {
 		// Link to the trace context from the producer
 		return await this.tracer.withPropagatedSpan(
@@ -45,7 +45,8 @@ export class UserSyncWorker extends BaseWorker<EventPayload> {
 					this.logger.error(
 						`Failed to validate event: ${validatedEvent.error.message}`
 					);
-					throw validatedEvent.error;
+
+					return err(validatedEvent.error);
 				}
 
 				const { eventType } = validatedEvent.data;
@@ -60,13 +61,15 @@ export class UserSyncWorker extends BaseWorker<EventPayload> {
 						this.logger.warn(
 							`Acknowledging expected domain error: ${result.error.message}`
 						);
+
 						return ok(); // Acknowledge job without throwing
 					}
 
 					this.logger.error(
 						`Failed to process ${eventType}: ${result.error.message}`
 					);
-					throw result.error;
+
+					err(result.error);
 				}
 
 				return ok();
