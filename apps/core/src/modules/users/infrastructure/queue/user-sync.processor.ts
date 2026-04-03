@@ -6,8 +6,8 @@ import {
 } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 
-import { BaseProcessor } from '@core/worker';
-import { GraphileProcessor } from '@core/worker/decorators/graphile-processor.decorator';
+import { BaseProcessor } from '@core/processor';
+import { GraphileProcessor } from '@core/processor/decorators/graphile-processor.decorator';
 import { Inject } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';

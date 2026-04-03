@@ -1,4 +1,4 @@
-import { OutboxModule } from '@modules/outbox';
+import { QueueModule } from '@modules/queue';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
@@ -29,7 +29,7 @@ import { DrizzleUserRepository } from './infrastructure/persistance/repositories
 import { UserSyncProcessor } from './infrastructure/queue/user-sync.processor';
 
 @Module({
-	imports: [OutboxModule],
+	imports: [QueueModule],
 	controllers: [UserController],
 	providers: [
 		// Repository

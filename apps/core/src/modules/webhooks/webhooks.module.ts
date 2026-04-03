@@ -1,3 +1,4 @@
+import { QueueModule } from '@modules/queue';
 import { Module } from '@nestjs/common';
 import { PersistWebhookUsecase } from './application/use-cases/persist-webhook.usecase';
 import { WEBHOOK_REPOSITORY } from './domain/ports/webhook-repository.port';
@@ -6,6 +7,7 @@ import { WebhookController } from './infrastructure/http/controllers/webhook.con
 import { WebhookRepository } from './infrastructure/persistance/repositories/webhook.repository';
 
 @Module({
+	imports: [QueueModule],
 	controllers: [WebhookController],
 	providers: [
 		{

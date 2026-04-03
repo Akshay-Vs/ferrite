@@ -3,7 +3,7 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
+import type { QueueParams } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IInitiateDeleteUserUseCase } from '@users/domain/ports/use-cases.port';
@@ -37,15 +37,15 @@ export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 					return err(new UserNotFoundError(authUser.id));
 				}
 
-				const outboxEvent: CreateOutboxEvent<UserDeletedEvent> = {
+				const outboxEvent: QueueParams<UserDeletedEvent> = {
 					payload: {
 						eventType: 'user.deleted',
 						externalAuthId: authUser.externalAuthId,
 						provider: authUser.provider,
 					},
 					eventType: 'user.deleted',
-					queueName: USER_SYNC_QUEUE,
-					maxRetries: 5,
+					identifier: USER_SYNC_QUEUE,
+					maxAttempts: 5,
 				};
 
 				const deleted = await this.repo.softDeleteById(

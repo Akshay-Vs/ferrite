@@ -7,7 +7,7 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { getTraceContext } from '@core/tracer/tracer.helpers';
-import { graphileEnqueue } from '@libs/queue/graphile-enqueue';
+import { ENQUEUE_GRAPHILE_EVENT_UC, type IEnqueue } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { IWebhookRepository } from '@webhooks/domain/ports/webhook-repository.port';
 
@@ -16,6 +16,7 @@ export class WebhookRepository implements IWebhookRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		@Inject(ENQUEUE_GRAPHILE_EVENT_UC) private readonly enqueue: IEnqueue,
 		private readonly logger: AppLogger
 	) {
 		this.logger.setContext(this.constructor.name);
@@ -52,7 +53,7 @@ export class WebhookRepository implements IWebhookRepository {
 								'db.operation': 'graphile-enqueue',
 							},
 							() =>
-								graphileEnqueue(tx, {
+								this.enqueue.execute(tx, {
 									identifier: envelope.queueName,
 									maxAttempts: 3,
 									...envelope,
