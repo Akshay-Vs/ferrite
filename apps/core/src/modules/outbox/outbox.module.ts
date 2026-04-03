@@ -1,6 +1,4 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 import {
 	INSERT_OUTBOX_EVENT_UC,
 	InsertOutboxEventUseCase,
@@ -9,18 +7,8 @@ import { OUTBOX_PRODUCER } from './domain/ports/outbox-producer.port';
 import { OUTBOX_REPOSITORY } from './domain/ports/outbox-repository.port';
 import { DrizzleOutboxRepository } from './infrastructure/persistance/drizzle-outbox.repository';
 import { OutboxProducer } from './infrastructure/queue/outbox.producer';
-import { OutboxCDCWorker } from './infrastructure/replication/outbox-cdc.worker';
-import { OutboxReplicationSetupService } from './infrastructure/replication/outbox-replication-setup.service';
 
 @Module({
-	imports: [
-		BullModule.registerQueue({
-			name: 'default',
-		}),
-		BullModule.registerQueue({
-			name: USER_SYNC_QUEUE,
-		}),
-	],
 	providers: [
 		// use case
 		InsertOutboxEventUseCase,
@@ -38,8 +26,8 @@ import { OutboxReplicationSetupService } from './infrastructure/replication/outb
 			useClass: InsertOutboxEventUseCase,
 		},
 		// infrastructure
-		OutboxReplicationSetupService,
-		OutboxCDCWorker,
+		// OutboxReplicationSetupService,
+		// OutboxCDCWorker,
 	],
 	exports: [
 		InsertOutboxEventUseCase,

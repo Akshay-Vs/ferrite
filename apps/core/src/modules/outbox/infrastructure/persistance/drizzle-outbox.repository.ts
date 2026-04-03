@@ -16,7 +16,9 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 		@Inject(DB) private readonly db: TDatabase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger
-	) {}
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async insert(
 		event: CreateOutboxEvent,
@@ -56,6 +58,7 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 
 				if (result.length === 0) {
 					this.logger.error(`Failed to mark dead lettered: eventId=${eventId}`);
+					throw new Error(`Failed to mark dead lettered: eventId=${eventId}`);
 				}
 			},
 			{ 'outbox.event_id': eventId }
