@@ -5,6 +5,7 @@ import * as schema from './schema';
 
 export const DB = Symbol('DB');
 export const DB_CLIENT = Symbol('DB_CLIENT');
+export const POOL = Symbol('POOL');
 
 export function createPool(databaseUrl: string) {
 	// setup graphile-worker
