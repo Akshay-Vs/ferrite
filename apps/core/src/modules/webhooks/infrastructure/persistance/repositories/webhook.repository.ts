@@ -46,7 +46,7 @@ export class WebhookRepository implements IWebhookRepository {
 
 						await traceDbOp(
 							this.tracer,
-							'db.outbox_events.insert',
+							'db.inbox_events.insert',
 							{
 								'db.table': 'graphile-worker',
 								'db.operation': 'graphile-enqueue',
@@ -54,12 +54,9 @@ export class WebhookRepository implements IWebhookRepository {
 							() =>
 								graphileEnqueue(tx, {
 									identifier: envelope.queueName,
-									payload: {
-										data: envelope.payload,
-										__traceContext: getTraceContext(),
-									},
-									queueName: envelope.eventType,
 									maxAttempts: 3,
+									...envelope,
+									__traceContext: getTraceContext(),
 								})
 						);
 

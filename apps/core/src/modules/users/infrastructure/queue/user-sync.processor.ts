@@ -5,8 +5,7 @@ import {
 	eventPayloadSchema,
 } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
-import { type ITracer } from '@core/tracer';
-import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+
 import { BaseProcessor } from '@core/worker';
 import { GraphileProcessor } from '@core/worker/decorators/graphile-processor.decorator';
 import { Inject } from '@nestjs/common';
@@ -23,7 +22,6 @@ import { USER_SYNC_QUEUE } from './queue.constraints';
 export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 	constructor(
 		protected readonly logger: AppLogger,
-		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(ROUTE_USER_EVENTS_UC)
 		private readonly routeUserEvents: IRouteUserEventsUseCase
 	) {
@@ -34,51 +32,39 @@ export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 		payload: EventPayload,
 		helpers?: JobHelpers
 	): Promise<Result<void, Error>> {
-		// Link to the trace context from the producer
-		return await this.tracer.withPropagatedSpan(
-			'user-sync-worker.handle',
-			payload.__traceContext,
-			async () => {
-				const validatedEvent = eventPayloadSchema.safeParse(payload);
+		const validatedEvent = eventPayloadSchema.safeParse(payload);
 
-				if (!validatedEvent.success) {
-					this.logger.error(
-						`Failed to validate event: ${validatedEvent.error.message}`
-					);
+		if (!validatedEvent.success) {
+			this.logger.error(
+				`Failed to validate event: ${validatedEvent.error.message}`
+			);
 
-					return err(validatedEvent.error);
-				}
+			return err(validatedEvent.error);
+		}
 
-				const { eventType } = validatedEvent.data;
-				const result = await this.routeUserEvents.execute(validatedEvent.data);
+		const { eventType } = validatedEvent.data;
+		const result = await this.routeUserEvents.execute(validatedEvent.data);
 
-				if (result.isErr()) {
-					if (
-						result.error instanceof UnsupportedEventTypeError ||
-						result.error instanceof UserExistsError ||
-						result.error instanceof UserConflictError
-					) {
-						this.logger.warn(
-							`Acknowledging expected domain error: ${result.error.message}`
-						);
+		if (result.isErr()) {
+			if (
+				result.error instanceof UnsupportedEventTypeError ||
+				result.error instanceof UserExistsError ||
+				result.error instanceof UserConflictError
+			) {
+				this.logger.warn(
+					`Acknowledging expected domain error: ${result.error.message}`
+				);
 
-						return ok(); // Acknowledge job without throwing
-					}
-
-					this.logger.error(
-						`Failed to process ${eventType}: ${result.error.message}`
-					);
-
-					err(result.error);
-				}
-
-				return ok();
-			},
-			undefined, // defaults to CONSUMER
-			{
-				'user-sync-worker.job.id': payload.eventId,
-				'user-sync-worker.event.type': payload.eventType,
+				return ok(); // Acknowledge job without throwing
 			}
-		);
+
+			this.logger.error(
+				`Failed to process ${eventType}: ${result.error.message}`
+			);
+
+			return err(result.error);
+		}
+
+		return ok();
 	}
 }
