@@ -6,14 +6,15 @@ export const graphileEnqueue = async (
 	tx: DrizzleTransaction,
 	queueParams: QueueParams
 ) => {
-	const payload = JSON.stringify(queueParams.payload);
+	const { identifier, maxAttempts, ...jobPayloadData } = queueParams;
+	const jobPayload = JSON.stringify(jobPayloadData);
 
 	await tx.execute(sql`
     SELECT graphile_worker.add_job(
-      identifier := ${queueParams.identifier},
-      payload := ${payload}::json,
+      identifier := ${identifier},
+      payload := ${jobPayload}::json,
       queue_name := ${queueParams.queueName},
-      max_attempts := ${queueParams.maxAttempts}
+      max_attempts := ${maxAttempts}
     )
   `);
 };
