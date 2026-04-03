@@ -1,15 +1,12 @@
 import { z } from 'zod';
+import { eventPayloadSchema } from './event-payload.zodschema';
 
-const PayloadSchema = z.object({
-	__traceContext: z.record(z.string(), z.string()).optional(),
-	data: z.record(z.string(), z.unknown()),
-});
-
-export const QueueParamsSchema = z.object({
-	identifier: z.string(),
-	payload: PayloadSchema,
-	queueName: z.string(),
-	maxAttempts: z.number(),
-});
+export const QueueParamsSchema = z
+	.object({
+		identifier: z.string(),
+		maxAttempts: z.number(),
+	})
+	.extend(eventPayloadSchema.shape)
+	.catchall(z.unknown());
 
 export type QueueParams = z.infer<typeof QueueParamsSchema>;
