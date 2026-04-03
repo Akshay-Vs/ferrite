@@ -1,9 +1,9 @@
 import { Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
+import type { ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer';
+import { Inject } from '@nestjs/common';
 import type { JobHelpers } from 'graphile-worker';
-// import { OTEL_TRACER } from '@core/tracer';
-// import { Inject } from '@nestjs/common';
-// import type { ITracer } from '@core/tracer';
 
 import { IProcessor } from '../ports/worker.port';
 
@@ -16,25 +16,14 @@ import { IProcessor } from '../ports/worker.port';
  *
  * The class itself should be decorated with `@GraphileTask('task_identifier')`
  * so the `GraphileExplorerService` can discover it.
- *
- * @example
- * ```ts
- * @Injectable()
- * @GraphileTask('user:sync')
- * export class UserSyncWorker extends BaseWorker<UserSyncPayload> {
- *   protected async handle(payload: UserSyncPayload, helpers: JobHelpers): Promise<void> {
- *     // validate payload, call use-case, etc.
- *   }
- * }
- * ```
  */
 export abstract class BaseProcessor<TPayload = unknown>
 	implements IProcessor<TPayload>
 {
-	constructor(
-		protected readonly logger: AppLogger
-		// @Inject(OTEL_TRACER) private readonly tracer: ITracer,
-	) {
+	@Inject(OTEL_TRACER)
+	private readonly tracer!: ITracer;
+
+	constructor(protected readonly logger: AppLogger) {
 		this.logger.setContext(this.constructor.name);
 	}
 
@@ -43,19 +32,39 @@ export abstract class BaseProcessor<TPayload = unknown>
 	 * Executes the task with standardized logging and error handling.
 	 */
 	public async execute(payload: TPayload, helpers?: JobHelpers): Promise<void> {
-		//TODO: Add distributed tracing
-		this.logger.log('Starting job processing');
-		try {
-			await this.handle(payload, helpers);
-			this.logger.log('Job processed successfully');
-		} catch (error) {
-			this.logger.error(
-				'Job execution failed:',
-				error instanceof Error ? error.stack : String(error)
-			);
-			// Rethrow so graphile-worker registers the failure and schedules retries
-			throw error;
-		}
+		const traceContext = (payload as any)?.__traceContext;
+		const taskName = this.constructor.name;
+
+		return this.tracer.withPropagatedSpan(
+			`worker.processor.${taskName}`,
+			traceContext,
+			async (span) => {
+				if (helpers?.job?.id) {
+					span.setAttributes({
+						'worker.job.id': helpers.job.id,
+						'worker.job.task_identifier': helpers.job.task_identifier,
+					});
+				}
+
+				this.logger.log('Starting job processing');
+				try {
+					const result = await this.handle(payload, helpers);
+
+					if (result.isErr()) {
+						throw result.error;
+					}
+
+					this.logger.log('Job processed successfully');
+				} catch (error) {
+					this.logger.error(
+						'Job execution failed:',
+						error instanceof Error ? error.stack : String(error)
+					);
+					// Rethrow so graphile-worker registers the failure
+					throw error;
+				}
+			}
+		);
 	}
 
 	/**
