@@ -1,7 +1,7 @@
+import { UnsupportedEventTypeError } from '@common/errors/unsupported-event-type.error';
 import { err, Result } from '@common/interfaces/result.interface';
 import { EventPayload } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
-import { UnsupportedEventTypeError } from '@core/queue/queue.errors';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	CREATE_USER_UC,

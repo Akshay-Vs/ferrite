@@ -1,13 +1,14 @@
+import { UnsupportedEventTypeError } from '@common/errors/unsupported-event-type.error';
+import { ok, Result } from '@common/interfaces/result.interface';
 import {
 	EventPayload,
 	eventPayloadSchema,
 } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
-import { BaseConsumer } from '@core/queue/base.consumer';
-import { UnsupportedEventTypeError } from '@core/queue/queue.errors';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { Processor } from '@nestjs/bullmq';
+import { GraphileTask } from '@core/worker/decorators/graphile-task.decorator';
+import { BaseWorker } from '@core/worker/services/base.worker';
 import { Inject } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
@@ -15,28 +16,30 @@ import {
 	type IRouteUserEventsUseCase,
 	ROUTE_USER_EVENTS_UC,
 } from '@users/domain/ports/use-cases.port';
-import { Job } from 'bullmq';
+import type { JobHelpers } from 'graphile-worker';
 import { USER_SYNC_QUEUE } from './queue.constraints';
 
-@Processor(USER_SYNC_QUEUE)
-export class UserSyncWorker extends BaseConsumer<EventPayload> {
+@GraphileTask(USER_SYNC_QUEUE)
+export class UserSyncWorker extends BaseWorker<EventPayload> {
 	constructor(
-		private readonly logger: AppLogger,
+		protected readonly logger: AppLogger,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(ROUTE_USER_EVENTS_UC)
 		private readonly routeUserEvents: IRouteUserEventsUseCase
 	) {
-		super();
-		this.logger.setContext(this.constructor.name);
+		super(logger);
 	}
 
-	async handle(job: Job<EventPayload>): Promise<void> {
+	protected async handle(
+		payload: EventPayload,
+		helpers: JobHelpers
+	): Promise<Result<void, Error>> {
 		// Link to the trace context from the producer
-		await this.tracer.withPropagatedSpan(
+		return await this.tracer.withPropagatedSpan(
 			'user-sync-worker.handle',
-			job.data.__traceContext,
+			payload.__traceContext,
 			async () => {
-				const validatedEvent = eventPayloadSchema.safeParse(job.data);
+				const validatedEvent = eventPayloadSchema.safeParse(payload);
 
 				if (!validatedEvent.success) {
 					this.logger.error(
@@ -57,7 +60,7 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 						this.logger.warn(
 							`Acknowledging expected domain error: ${result.error.message}`
 						);
-						return; // Acknowledge job without throwing
+						return ok(); // Acknowledge job without throwing
 					}
 
 					this.logger.error(
@@ -65,11 +68,13 @@ export class UserSyncWorker extends BaseConsumer<EventPayload> {
 					);
 					throw result.error;
 				}
+
+				return ok();
 			},
 			undefined, // defaults to CONSUMER
 			{
-				'user-sync-worker.job.id': job.data.eventId,
-				'user-sync-worker.event.type': job.data.eventType,
+				'user-sync-worker.job.id': payload.eventId,
+				'user-sync-worker.event.type': payload.eventType,
 			}
 		);
 	}

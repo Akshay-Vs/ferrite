@@ -1,5 +1,4 @@
 import { OutboxModule } from '@modules/outbox';
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
@@ -27,16 +26,10 @@ import { WebhookMapperRegistry } from './infrastructure/adapters/webhook-mapper-
 import { UserController } from './infrastructure/http/controllers/user.controller';
 import { ClerkWebhookMapper } from './infrastructure/persistance/mappers/clerk-webhook.mapper';
 import { DrizzleUserRepository } from './infrastructure/persistance/repositories/drizzle-user.repository';
-import { USER_SYNC_QUEUE } from './infrastructure/queue/queue.constraints';
 import { UserSyncWorker } from './infrastructure/queue/user-sync.worker';
 
 @Module({
-	imports: [
-		OutboxModule,
-		BullModule.registerQueue({
-			name: USER_SYNC_QUEUE,
-		}),
-	],
+	imports: [OutboxModule],
 	controllers: [UserController],
 	providers: [
 		// Repository
