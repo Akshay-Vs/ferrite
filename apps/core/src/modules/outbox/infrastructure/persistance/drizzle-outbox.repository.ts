@@ -33,8 +33,7 @@ export class DrizzleOutboxRepository implements IOutboxRepository {
 					.values(OutboxEventMapper.toNewOutboxEvent(event));
 			},
 			{
-				'outbox.aggregate_type': event.aggregateType,
-				'outbox.aggregate_id': event.aggregateId,
+				'outbox.aggregate_type': event.queueName,
 				'outbox.event_type': event.eventType,
 				'outbox.queue_name': event.queueName,
 			}

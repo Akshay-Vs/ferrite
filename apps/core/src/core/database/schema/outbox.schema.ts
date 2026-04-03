@@ -17,8 +17,6 @@ export const outboxEvents = pgTable(
 	'outbox_events',
 	{
 		id: uuid('id').primaryKey().defaultRandom(),
-		aggregateId: uuid('aggregate_id').notNull(),
-		aggregateType: text('aggregate_type').notNull(),
 		eventType: text('event_type').notNull(),
 		queueName: text('queue_name').notNull(),
 		payload: jsonb('payload').notNull(),

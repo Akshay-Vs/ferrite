@@ -21,7 +21,7 @@ export const inboxEvents = pgTable(
 
 		// Origin of the incoming event (e.g. 'clerk', 'stripe')
 		provider: text('source').notNull(),
-		aggregateType: text('aggregate_type').notNull(),
+		queueName: text('queue_name').notNull(),
 		eventType: text('event_type').notNull(),
 		payload: jsonb('payload').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true })

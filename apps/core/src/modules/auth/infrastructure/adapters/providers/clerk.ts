@@ -2,10 +2,8 @@ import {
 	AuthUser,
 	authProvidersEnum,
 	RawTokenClaims,
-	WebhookPayload,
 } from '@auth/domain/schemas';
 import { UserUpdatePayload } from '@auth/domain/schemas/user-update-payload.zodschema';
-import { webhookPayloadSchema } from '@auth/domain/schemas/webhook-claims.zodschema';
 import {
 	ClerkClient,
 	verifyToken as clerkVerifyToken,
@@ -13,6 +11,10 @@ import {
 	WebhookEvent,
 } from '@clerk/backend';
 import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
+import {
+	WebhookEnvelope,
+	webhookEnvelopeSchema,
+} from '@common/schemas/webhook-envelope.zodschema';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
@@ -112,12 +114,12 @@ export class ClerkAdapter
 	}
 
 	//IWebhookParser
-	private zodParse(claims: WebhookPayload): any {
-		return webhookPayloadSchema.parse(claims);
+	private zodParse(claims: WebhookEnvelope): any {
+		return webhookEnvelopeSchema.parse(claims);
 	}
 
 	//  IWebhookVerifier
-	async verifyWebhook(payload: RawWebhookRequest): Promise<WebhookPayload> {
+	async verifyWebhook(payload: RawWebhookRequest): Promise<WebhookEnvelope> {
 		return this.tracer.withSpan(
 			'adapters.clerk.verifyWebhook',
 			async (span) => {
@@ -189,7 +191,7 @@ export class ClerkAdapter
 						eventType: verified.type,
 						timestamp: parsedTimestamp,
 						payload: (verified as any).data,
-						aggregateType: verified.type.split('.')[0].concat('_event'),
+						queueName: verified.type.split('.')[0].concat('_event'),
 					});
 
 					return parsed;

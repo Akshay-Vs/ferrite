@@ -3,6 +3,7 @@ import { HttpExceptionFilter } from '@common/filters/http-error-filter';
 import { CoreModule } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
+import { InboxModule } from '@modules/inbox/inbox.module';
 // import { OutboxModule } from '@modules/outbox/outbox.module';
 import { UsersModule } from '@modules/users/users.module';
 import { WebhooksModule } from '@modules/webhooks/webhooks.module';
@@ -23,6 +24,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		}),
 		AuthModule, // ← provides AuthGuard, WebhookGuard, use cases
 		HealthModule,
+		InboxModule,
 		UsersModule,
 		WebhooksModule,
 		// OutboxModule,

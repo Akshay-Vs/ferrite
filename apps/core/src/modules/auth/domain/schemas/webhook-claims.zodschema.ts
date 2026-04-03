@@ -4,5 +4,11 @@ import {
 } from '@common/schemas/webhook-envelope.zodschema';
 
 // Alias for backwards compatibility
-export { webhookEnvelopeSchema as webhookPayloadSchema };
-export type { WebhookEnvelope as WebhookPayload };
+/**
+ * @deprecated Use `webhookEnvelopeSchema` instead.
+ */
+export const webhookPayloadSchema = webhookEnvelopeSchema;
+/**
+ * @deprecated Use `WebhookEnvelope` instead.
+ */
+export type WebhookPayload = WebhookEnvelope;

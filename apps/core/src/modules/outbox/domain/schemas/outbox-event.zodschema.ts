@@ -8,11 +8,6 @@ import { z } from 'zod/v4';
 
 export const OutboxEventSchema = z
 	.object({
-		aggregateId: z.uuid(),
-		aggregateType: z.string(),
-		eventType: z.string(),
-		queueName: z.string(),
-		payload: z.unknown(),
 		retryCount: z.number().int(),
 		maxRetries: z.number().int(),
 		createdAt: z.date(),

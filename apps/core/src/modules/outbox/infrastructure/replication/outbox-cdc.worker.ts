@@ -68,9 +68,9 @@ export class OutboxCDCWorker
 		);
 	}
 
-	onApplicationBootstrap() {
+	async onApplicationBootstrap() {
 		this.registerHandlers();
-		this.subscriber.start();
+		await this.subscriber.start();
 	}
 
 	async onApplicationShutdown() {
@@ -134,8 +134,7 @@ export class OutboxCDCWorker
 			{
 				'outbox.event_type': event.eventType,
 				'outbox.queue_name': event.queueName,
-				'outbox.aggregate_type': event.aggregateType,
-				'outbox.aggregate_id': event.aggregateId,
+				'outbox.aggregate_type': event.queueName,
 				'outbox.event_id': event.eventId,
 			}
 		);

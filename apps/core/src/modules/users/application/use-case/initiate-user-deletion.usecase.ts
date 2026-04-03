@@ -45,8 +45,6 @@ export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 					},
 					eventType: 'user.deleted',
 					queueName: USER_SYNC_QUEUE,
-					aggregateId: user.id,
-					aggregateType: 'user',
 					maxRetries: 5,
 				};
 

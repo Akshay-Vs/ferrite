@@ -61,8 +61,6 @@ export class InitiateProfileUpdateUseCase
 				const eventType = 'user.updated';
 
 				const outboxEvent: CreateOutboxEvent<UserUpdatedEvent> = {
-					aggregateId: userId,
-					aggregateType: 'user',
 					eventType: eventType,
 					queueName: USER_SYNC_QUEUE,
 					maxRetries: 5,
