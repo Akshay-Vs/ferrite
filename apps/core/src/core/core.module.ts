@@ -2,7 +2,6 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/db.module';
 import { LoggerModule } from './logger/logger.module';
-import { QueueModule } from './queue/module';
 import { RequestContextModule } from './request-context/request-context.module';
 import { TracerModule } from './tracer/tracer.module';
 import { WorkerModule } from './worker/worker.module';
@@ -15,7 +14,6 @@ import { WorkerModule } from './worker/worker.module';
 		TracerModule,
 		ConfigModule,
 		DatabaseModule,
-		QueueModule,
 		WorkerModule,
 	],
 	exports: [
@@ -24,7 +22,6 @@ import { WorkerModule } from './worker/worker.module';
 		TracerModule,
 		ConfigModule,
 		DatabaseModule,
-		QueueModule,
 		WorkerModule,
 	],
 })
