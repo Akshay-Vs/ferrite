@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
@@ -37,13 +38,17 @@ export class InitiateDeleteUserUseCase implements IInitiateDeleteUserUseCase {
 					return err(new UserNotFoundError(authUser.id));
 				}
 
+				const eventId = randomUUID();
+
 				const outboxEvent: QueueParams<UserDeletedEvent> = {
 					payload: {
 						eventType: 'user.deleted',
 						externalAuthId: authUser.externalAuthId,
 						provider: authUser.provider,
 					},
+					eventId,
 					eventType: 'user.deleted',
+					queueName: USER_SYNC_QUEUE,
 					identifier: USER_SYNC_QUEUE,
 					maxAttempts: 5,
 				};

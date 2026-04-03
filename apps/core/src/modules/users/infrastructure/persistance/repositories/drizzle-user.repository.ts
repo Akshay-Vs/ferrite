@@ -126,7 +126,7 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return null;
 
 					// 2. Write outbox event
-					this.enqueue.execute(tx, outboxEvent);
+					await this.enqueue.execute(tx, outboxEvent);
 					return UserMapper.toUserProfile(result[0]);
 				});
 			}
@@ -171,7 +171,7 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return false;
 
 					// 2. Write outbox event
-					this.enqueue.execute(tx, outboxEvent);
+					await this.enqueue.execute(tx, outboxEvent);
 
 					return true;
 				});

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
@@ -59,11 +60,14 @@ export class InitiateProfileUpdateUseCase
 				}
 
 				const eventType = 'user.updated';
+				const eventId = randomUUID();
 
 				const outboxEvent: QueueParams<UserUpdatedEvent> = {
 					identifier: USER_SYNC_QUEUE,
+					queueName: USER_SYNC_QUEUE,
 					maxAttempts: 5,
 					eventType,
+					eventId,
 					payload: {
 						...input.data,
 						eventType,
