@@ -1,5 +1,6 @@
 export * from './auth.schema';
 export * from './enum';
+export * from './inbox.schema';
 export * from './outbox.schema';
 export * from './payment.schema';
 export * from './preferences.schema';
