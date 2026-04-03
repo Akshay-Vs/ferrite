@@ -3,7 +3,7 @@ import { DiscoveryService, Reflector } from '@nestjs/core';
 import { TaskList } from 'graphile-worker';
 import { WORKER_HANDLERS } from '..';
 import { IWorkerRegistry } from '../ports/worker-registry.port';
-import { BaseWorker } from './base.worker';
+import { BaseProcessor } from './graphile-base-processor.service';
 
 @Injectable()
 export class GraphileDiscoveryService implements OnModuleInit, IWorkerRegistry {
@@ -67,7 +67,7 @@ export class GraphileDiscoveryService implements OnModuleInit, IWorkerRegistry {
 				);
 			}
 
-			if (!(instance instanceof BaseWorker)) {
+			if (!(instance instanceof BaseProcessor)) {
 				providerErrors.push(
 					`"${instance.constructor.name}" has @GraphileTask but does not extend BaseWorker`
 				);

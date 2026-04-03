@@ -1,5 +1,5 @@
 import type { JobHelpers } from 'graphile-worker';
 
-export interface IWorker<TPayload = unknown> {
-	execute(payload: TPayload, helpers: JobHelpers): Promise<void>;
+export interface IProcessor<TPayload = unknown> {
+	execute(payload: TPayload, helpers?: JobHelpers): Promise<void>;
 }

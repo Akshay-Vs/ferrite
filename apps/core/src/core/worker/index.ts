@@ -1,6 +1,6 @@
-export type { IWorker } from './ports/worker.port';
+export type { IProcessor as IWorker } from './ports/worker.port';
 export type { IWorkerRegistry } from './ports/worker-registry.port';
-export { BaseWorker } from './services/base.worker';
+export { BaseProcessor } from './services/graphile-base-processor.service';
 export {
 	GRAPHILE_RUNNER,
 	WORKER_HANDLERS,
