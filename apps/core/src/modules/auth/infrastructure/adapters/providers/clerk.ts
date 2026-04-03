@@ -189,6 +189,7 @@ export class ClerkAdapter
 						eventType: verified.type,
 						timestamp: parsedTimestamp,
 						payload: (verified as any).data,
+						aggregateType: verified.type.split('.')[0].concat('_event'),
 					});
 
 					return parsed;
