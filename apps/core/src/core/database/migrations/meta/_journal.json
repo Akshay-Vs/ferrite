@@ -22,6 +22,20 @@
 			"when": 1774203550230,
 			"tag": "0002_rich_talkback",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1775142951288,
+			"tag": "0003_rapid_menace",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1775210880719,
+			"tag": "0004_unique_kabuki",
+			"breakpoints": true
 		}
 	]
 }

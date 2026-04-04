@@ -1,9 +1,10 @@
+import { randomUUID } from 'node:crypto';
 import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { CreateOutboxEvent } from '@modules/outbox/domain/schemas/outbox-event.zodschema';
+import type { QueueParams } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IInitiateProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
@@ -59,19 +60,19 @@ export class InitiateProfileUpdateUseCase
 				}
 
 				const eventType = 'user.updated';
+				const eventId = randomUUID();
 
-				const outboxEvent: CreateOutboxEvent<UserUpdatedEvent> = {
-					aggregateId: userId,
-					aggregateType: 'user',
-					eventType: eventType,
+				const outboxEvent: QueueParams<UserUpdatedEvent> = {
+					identifier: USER_SYNC_QUEUE,
 					queueName: USER_SYNC_QUEUE,
-					maxRetries: 5,
+					maxAttempts: 5,
+					eventType,
+					eventId,
 					payload: {
-						eventType: eventType,
+						...input.data,
+						eventType,
 						externalAuthId: input.authUser.externalAuthId,
 						provider: input.authUser.provider,
-						firstName: input.data.firstName,
-						lastName: input.data.lastName,
 					},
 				};
 

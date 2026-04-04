@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { outboxEvents } from '../schema';
 import { cleanupTables, db, setupTestDB, teardownTestDB } from './setup';
 
@@ -19,8 +18,6 @@ describe('outbox_events table', () => {
 		const result = await db
 			.insert(outboxEvents)
 			.values({
-				aggregateId: randomUUID(),
-				aggregateType: 'user',
 				eventType: 'user.created',
 				queueName: 'test_queue',
 				payload: { id: 'test', name: 'tester' },
@@ -31,7 +28,6 @@ describe('outbox_events table', () => {
 		const event = result[0]!;
 
 		expect(event.id).toBeDefined();
-		expect(event.aggregateType).toBe('user');
 		expect(event.eventType).toBe('user.created');
 		expect(event.payload).toEqual({ id: 'test', name: 'tester' });
 
@@ -53,8 +49,6 @@ describe('outbox_events table', () => {
 		const result = await db
 			.insert(outboxEvents)
 			.values({
-				aggregateId: randomUUID(),
-				aggregateType: 'user',
 				eventType: 'user.updated',
 				queueName: 'test_queue',
 				payload: {},

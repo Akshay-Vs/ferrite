@@ -1,4 +1,5 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { Pool } from 'pg';
 import type postgres from 'postgres';
 import type * as schema from './schema';
 
@@ -7,3 +8,4 @@ export type DrizzleTransaction = Parameters<
 >[0];
 export type TDatabase = PostgresJsDatabase<typeof schema>;
 export type Psql = postgres.Sql;
+export type { Pool };

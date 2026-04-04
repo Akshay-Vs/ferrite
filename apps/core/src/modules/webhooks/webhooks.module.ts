@@ -1,17 +1,23 @@
-import { BullModule } from '@nestjs/bullmq';
+import { QueueModule } from '@modules/queue';
 import { Module } from '@nestjs/common';
-import { USER_SYNC_QUEUE } from '@users/index';
-import { WebhookRouterUsecase } from './application/use-cases/webhook-router.usercase';
-import { USER_SYNC_PRODUCER } from './domain/ports/user-sync-producer.port';
+import { PersistWebhookUsecase } from './application/use-cases/persist-webhook.usecase';
+import { WEBHOOK_REPOSITORY } from './domain/ports/webhook-repository.port';
+import { PERSIST_WEBHOOK_UC } from './domain/ports/webhook-usecase.port';
 import { WebhookController } from './infrastructure/http/controllers/webhook.controller';
-import { UserSyncProducer } from './infrastructure/queue/user-sync.producer';
+import { WebhookRepository } from './infrastructure/persistance/repositories/webhook.repository';
 
 @Module({
-	imports: [BullModule.registerQueue({ name: USER_SYNC_QUEUE })],
+	imports: [QueueModule],
 	controllers: [WebhookController],
 	providers: [
-		WebhookRouterUsecase,
-		{ provide: USER_SYNC_PRODUCER, useClass: UserSyncProducer },
+		{
+			provide: PERSIST_WEBHOOK_UC,
+			useClass: PersistWebhookUsecase,
+		},
+		{
+			provide: WEBHOOK_REPOSITORY,
+			useClass: WebhookRepository,
+		},
 	],
 })
 export class WebhooksModule {}
