@@ -33,7 +33,7 @@ export class WebhookRepository implements IWebhookRepository {
 				'db.webhook.persist',
 				{ 'db.table': 'webhooks', 'db.operation': 'insert' },
 				async () => {
-					const [result] = await this.typedDb.transaction(async (tx) => {
+					const result = await this.typedDb.transaction(async (tx) => {
 						const [inserted] = await traceDbOp(
 							this.tracer,
 							'db.webhooks.insert',
@@ -61,7 +61,7 @@ export class WebhookRepository implements IWebhookRepository {
 								})
 						);
 
-						return inserted.id;
+						return inserted?.id ?? null;
 					});
 
 					this.logger.debug(

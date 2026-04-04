@@ -74,7 +74,7 @@ export class GraphileDiscoveryService
 
 				if (!(instance instanceof BaseProcessor)) {
 					providerErrors.push(
-						`"${instance.constructor.name}" has @GraphileTask but does not extend BaseWorker`
+						`"${instance.constructor.name}" has @GraphileTask but does not extend BaseProcessor`
 					);
 				}
 

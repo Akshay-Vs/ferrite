@@ -1,5 +1,5 @@
-import { WebhookPayload } from '@auth/index';
-import { ok, Result } from '@common/interfaces/result.interface';
+import { err, ok, Result } from '@common/interfaces/result.interface';
+import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { Inject, Injectable } from '@nestjs/common';
@@ -19,15 +19,22 @@ export class PersistWebhookUsecase implements IPersistWebhook {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	execute(payload: WebhookPayload): Promise<Result<boolean, Error>> {
+	async execute(payload: WebhookEnvelope): Promise<Result<boolean, Error>> {
 		return this.tracer.withSpan(
 			'use-case.persist-webhook',
 			async () => {
-				this.logger.debug(`Persisting webhook ${payload.eventType}`);
+				try {
+					this.logger.debug(`Persisting webhook ${payload.eventType}`);
+					const res = await this.repo.persistWebhook(payload);
+					return ok(res);
+				} catch (error) {
+					this.logger.error(
+						`Failed to persist webhook: ${payload.eventType}`,
+						error instanceof Error ? error.stack : String(error)
+					);
 
-				const res = await this.repo.persistWebhook(payload);
-
-				return ok(res);
+					return err(new Error('Failed to persist webhook'));
+				}
 			},
 			{
 				'webhook.provider': payload.provider,

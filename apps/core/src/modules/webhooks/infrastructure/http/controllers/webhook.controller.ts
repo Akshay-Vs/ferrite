@@ -1,4 +1,5 @@
-import { WebhookGuard, type WebhookPayload, WebhookRoute } from '@auth/index';
+import { WebhookGuard, WebhookRoute } from '@auth/index';
+import type { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import {
 	Controller,
 	HttpCode,
@@ -25,10 +26,10 @@ export class WebhookController {
 
 	@Post()
 	@HttpCode(HttpStatus.OK)
-	async createWebhook(@WebhookEvent() event: WebhookPayload) {
+	async createWebhook(@WebhookEvent() event: WebhookEnvelope) {
 		const ok = await this.persistWebhookUsecase.execute(event);
 		if (!ok) {
-			throw new ServiceUnavailableException('Webhook routing failed');
+			throw new ServiceUnavailableException('Webhook persistence failed');
 		}
 		return { accepted: true };
 	}

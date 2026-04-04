@@ -67,7 +67,7 @@ export abstract class BaseRunnerService
 
 				this.runner = await run({
 					pgPool: this.dbClient,
-					taskList: fullTaskList,
+					taskList: activeTaskList,
 					...options,
 				});
 
