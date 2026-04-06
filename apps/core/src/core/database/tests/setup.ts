@@ -77,6 +77,10 @@ export async function cleanupTables(): Promise<void> {
 			role_permissions,
 			permissions,
 			roles,
+			store_role_permissions,
+			store_roles,
+			store_members,
+			stores,
 			user_phones,
 			user_addresses,
 			users

@@ -11,4 +11,4 @@ import {
 	providers: [GenerateUserIdProvider],
 	exports: [GENERATE_USER_ID],
 })
-export class CommonModule {}
+export class CommonModules {}

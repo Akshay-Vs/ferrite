@@ -31,7 +31,7 @@ import {
 	DeleteOwnProfileDocs,
 	GetOwnProfileDocs,
 	UpdateOwnProfileDocs,
-} from './user.swaggerdocs';
+} from './docs/user.swaggerdocs';
 
 @ApiTags('Users')
 @ApiBearerAuth('swagger-access-token')

@@ -6,4 +6,5 @@ export * from './payment.schema';
 export * from './preferences.schema';
 export * from './relations';
 export * from './role.schema';
+export * from './store.schema';
 export * from './user.schema';

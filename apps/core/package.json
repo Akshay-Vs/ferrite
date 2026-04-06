@@ -43,6 +43,7 @@
 		"@opentelemetry/sdk-trace-base": "^2.6.0",
 		"@opentelemetry/semantic-conventions": "^1.40.0",
 		"bullmq": "^5.70.4",
+		"cosmiconfig": "^9.0.1",
 		"dotenv": "^17.3.1",
 		"drizzle": "^1.4.0",
 		"drizzle-orm": "^0.45.1",

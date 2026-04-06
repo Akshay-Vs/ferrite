@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { FerriteConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/db.module';
 import { LoggerModule } from './logger/logger.module';
 import { ProcessorModule } from './processor/processor.module';
@@ -9,18 +9,18 @@ import { TracerModule } from './tracer/tracer.module';
 @Global()
 @Module({
 	imports: [
-		LoggerModule,
 		RequestContextModule,
+		FerriteConfigModule,
+		LoggerModule,
 		TracerModule,
-		ConfigModule,
 		DatabaseModule,
 		ProcessorModule,
 	],
 	exports: [
 		RequestContextModule,
+		FerriteConfigModule,
 		LoggerModule,
 		TracerModule,
-		ConfigModule,
 		DatabaseModule,
 		ProcessorModule,
 	],

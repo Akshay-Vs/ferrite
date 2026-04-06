@@ -9,6 +9,12 @@ import {
 	staffMembers,
 	staffPermissionOverrides,
 } from './role.schema';
+import {
+	storeMembers,
+	storeRolePermissions,
+	storeRoles,
+	stores,
+} from './store.schema';
 import { userAddresses, userPhones, users } from './user.schema';
 
 // ─────────────────────────────────────────
@@ -21,6 +27,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 	addresses: many(userAddresses),
 	notificationPreferences: many(userNotificationPreferences),
 	paymentMethods: many(userPaymentMethods),
+	createdStores: many(stores),
+	storeMemberships: many(storeMembers),
 }));
 
 export const userPhonesRelations = relations(userPhones, ({ one }) => ({
@@ -127,9 +135,61 @@ export const rolePermissionsRelations = relations(
 export const permissionsRelations = relations(permissions, ({ many }) => ({
 	rolePermissions: many(rolePermissions),
 	staffPermissionOverrides: many(staffPermissionOverrides),
+	storeRolePermissions: many(storeRolePermissions),
 }));
 
 export const rolesRelations = relations(roles, ({ many }) => ({
 	rolePermissions: many(rolePermissions),
 	staffMembers: many(staffMembers),
+}));
+
+// ─────────────────────────────────────────
+// STORE RELATIONS
+// ─────────────────────────────────────────
+
+export const storesRelations = relations(stores, ({ one, many }) => ({
+	createdBy: one(users, {
+		fields: [stores.createdBy],
+		references: [users.id],
+	}),
+	members: many(storeMembers),
+	roles: many(storeRoles),
+}));
+
+export const storeRolesRelations = relations(storeRoles, ({ one, many }) => ({
+	store: one(stores, {
+		fields: [storeRoles.storeId],
+		references: [stores.id],
+	}),
+	permissions: many(storeRolePermissions),
+	members: many(storeMembers),
+}));
+
+export const storeRolePermissionsRelations = relations(
+	storeRolePermissions,
+	({ one }) => ({
+		storeRole: one(storeRoles, {
+			fields: [storeRolePermissions.storeRoleId],
+			references: [storeRoles.id],
+		}),
+		permission: one(permissions, {
+			fields: [storeRolePermissions.permissionId],
+			references: [permissions.id],
+		}),
+	})
+);
+
+export const storeMembersRelations = relations(storeMembers, ({ one }) => ({
+	store: one(stores, {
+		fields: [storeMembers.storeId],
+		references: [stores.id],
+	}),
+	user: one(users, {
+		fields: [storeMembers.userId],
+		references: [users.id],
+	}),
+	role: one(storeRoles, {
+		fields: [storeMembers.roleId],
+		references: [storeRoles.id],
+	}),
 }));

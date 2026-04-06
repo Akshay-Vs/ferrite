@@ -6,19 +6,10 @@ import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { ferriteConfig } from './core/config/ferrite.config';
+import type { FerriteConfig } from './core/config/ferrite.schema';
 import { otelSDK } from './instrumentation';
 import { setupSwagger } from './swagger';
-
-const PORT = process.env.PORT ?? 4000;
-const VERSION = process.env.VERSION ?? 'v1';
-const ORIGIN = process.env.ORIGIN_URL?.trim()
-	? process.env.ORIGIN_URL.trim().split(/\s+/)
-	: [];
-
-NestLogger.debug(
-	`Using: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
-	'GLOBAL'
-);
 
 const logger = new NestLogger('Main');
 
@@ -34,6 +25,16 @@ async function bootstrap() {
 		bufferLogs: true,
 		rawBody: true,
 	});
+
+	const ferriteVars = app.get<FerriteConfig>(ferriteConfig.KEY);
+	const VERSION = ferriteVars.version;
+	const PORT = ferriteVars.port;
+	const ORIGIN = ferriteVars.origin;
+
+	NestLogger.debug(
+		`Using: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
+		'GLOBAL'
+	);
 
 	registerShutdownHook(app);
 
