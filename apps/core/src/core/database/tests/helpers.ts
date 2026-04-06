@@ -15,6 +15,12 @@ import type {
 	NewStaffPermissionOverride,
 } from '../schema/role.schema';
 import type {
+	NewStore,
+	NewStoreMember,
+	NewStoreRole,
+	NewStoreRolePermission,
+} from '../schema/store.schema';
+import type {
 	NewUser,
 	NewUserAddress,
 	NewUserPhone,
@@ -185,6 +191,66 @@ export function createTestStaffPermissionOverride(
 		type: 'grant',
 		overriddenBy,
 		reason: 'Test override',
+		...overrides,
+	};
+}
+
+// ── Stores ───────────────────────────────
+let storeCounter = 0;
+
+export function createTestStore(
+	createdBy: string,
+	overrides: Partial<NewStore> = {}
+): NewStore {
+	storeCounter += 1;
+	return {
+		name: `Test Store ${storeCounter} - ${Date.now()}`,
+		slug: `test-store-${storeCounter}-${Date.now()}`,
+		createdBy,
+		...overrides,
+	};
+}
+
+// ── Store Members ────────────────────────
+export function createTestStoreMember(
+	storeId: string,
+	userId: string,
+	roleId: string,
+	overrides: Partial<NewStoreMember> = {}
+): NewStoreMember {
+	return {
+		storeId,
+		userId,
+		roleId,
+		isOwner: false,
+		...overrides,
+	};
+}
+
+// ── Store Roles ──────────────────────────
+let storeRoleCounter = 0;
+
+export function createTestStoreRole(
+	storeId: string,
+	overrides: Partial<NewStoreRole> = {}
+): NewStoreRole {
+	storeRoleCounter += 1;
+	return {
+		storeId,
+		name: `Store Role ${storeRoleCounter} - ${Date.now()}`,
+		...overrides,
+	};
+}
+
+// ── Store Role Permissions ───────────────
+export function createTestStoreRolePermission(
+	storeRoleId: string,
+	permissionId: string,
+	overrides: Partial<NewStoreRolePermission> = {}
+): NewStoreRolePermission {
+	return {
+		storeRoleId,
+		permissionId,
 		...overrides,
 	};
 }
