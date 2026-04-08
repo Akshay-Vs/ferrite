@@ -1,3 +1,5 @@
+import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
+import { IS_WEBHOOK_ROUTE } from '@common/decorators/webhook-route.decorator';
 import { AuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -11,8 +13,6 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_ROUTE } from '../decorators/public-route.decorator';
-import { IS_WEBHOOK_ROUTE } from '../decorators/webhook-route.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

@@ -1,4 +1,6 @@
-import { WebhookGuard, WebhookRoute } from '@auth/index';
+import { WebhookGuard } from '@auth/index';
+import { WebhookEvent } from '@common/decorators/webhook-event.decorator';
+import { WebhookRoute } from '@common/decorators/webhook-route.decorator';
 import type { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import {
 	Controller,
@@ -13,7 +15,6 @@ import {
 	type IPersistWebhook,
 	PERSIST_WEBHOOK_UC,
 } from '@webhooks/domain/ports/webhook-usecase.port';
-import { WebhookEvent } from '../decorators/webhook-event.decorator';
 
 @Controller('webhooks')
 @WebhookRoute()

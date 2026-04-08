@@ -1,6 +1,6 @@
-import { AuthGuard, type AuthUser, AuthUserParam } from '@auth/index';
+import { AuthGuard, type AuthUser } from '@auth/index';
+import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
-
 import {
 	Body,
 	Controller,
@@ -13,9 +13,7 @@ import {
 	Patch,
 	UseGuards,
 } from '@nestjs/common';
-
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
 import {
 	GET_OWN_PROFILE_UC,
 	type IGetOwnProfileUseCase,
@@ -24,9 +22,7 @@ import {
 	INITIATE_DELETE_USER_UC,
 	INITIATE_PROFILE_UPDATE_UC,
 } from '@users/domain/ports/use-cases.port';
-
 import { UpdateProfileInputDTO } from '../dto/update-profile.dto';
-
 import {
 	DeleteOwnProfileDocs,
 	GetOwnProfileDocs,
