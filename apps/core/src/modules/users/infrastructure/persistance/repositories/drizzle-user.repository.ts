@@ -73,6 +73,25 @@ export class DrizzleUserRepository implements IUserRepository {
 		);
 	}
 
+	async findAll(): Promise<UserProfileFull[]> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findAll',
+			{
+				'db.table': 'users',
+				'db.operation': 'select',
+			},
+			async () => {
+				const rows = await this.typedDb
+					.select()
+					.from(users)
+					.where(isNull(users.deletedAt));
+
+				return rows.map(UserMapper.toUserProfile);
+			}
+		);
+	}
+
 	async findById(id: string): Promise<UserProfileFull | null> {
 		return traceDbOp(
 			this.tracer,
@@ -175,6 +194,86 @@ export class DrizzleUserRepository implements IUserRepository {
 
 					return true;
 				});
+			}
+		);
+	}
+
+	async updateRoleById(
+		id: string,
+		role: string,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateRoleById',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+			},
+			async () => {
+				return this.typedDb.transaction(async (tx) => {
+					// 1. Update platformRole
+					// Force cast to the enum type accepted by Drizzle since we validated it
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.updateRole',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									platformRole: role as any,
+									updatedAt: new Date(),
+								})
+								.where(and(eq(users.id, id), isNull(users.deletedAt)))
+								.returning()
+					);
+
+					if (result.length === 0) return null;
+
+					// 2. Write outbox event
+					await this.enqueue.execute(tx, outboxEvent);
+					return UserMapper.toUserProfile(result[0]);
+				});
+			}
+		);
+	}
+
+	async findByIdWithProviders(id: string): Promise<{
+		user: UserProfileFull;
+		providers: { provider: AuthProvider; externalAuthId: string }[];
+	} | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findByIdWithProviders',
+			{
+				'db.table': 'users,user_auth_providers',
+				'db.operation': 'select',
+			},
+			async () => {
+				const rows = await this.typedDb
+					.select({
+						user: users,
+						authProvider: userAuthProviders,
+					})
+					.from(users)
+					.leftJoin(userAuthProviders, eq(users.id, userAuthProviders.userId))
+					.where(and(eq(users.id, id), isNull(users.deletedAt)));
+
+				if (rows.length === 0) return null;
+
+				const userEntity = rows[0].user;
+				const providers = rows
+					.filter((r) => r.authProvider !== null)
+					.map((r) => ({
+						provider: r.authProvider!.provider as AuthProvider,
+						externalAuthId: r.authProvider!.externalAuthId,
+					}));
+
+				return {
+					user: UserMapper.toUserProfile(userEntity),
+					providers,
+				};
 			}
 		);
 	}
