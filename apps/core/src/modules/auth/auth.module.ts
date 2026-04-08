@@ -9,7 +9,7 @@ import {
 	WEBHOOK_AUTH,
 } from './domain/ports/auth-provider.tokens';
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
-import { ClerkAdapter } from './infrastructure/adapters/providers/clerk';
+import { ClerkAdapter } from './infrastructure/adapters/providers/clerk.adapter';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
 import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 

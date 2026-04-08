@@ -5,7 +5,7 @@ import {
 import { AuthProvider } from '@auth/domain/schemas';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ClerkAdapter } from './providers/clerk';
+import { ClerkAdapter } from './providers/clerk.adapter';
 
 type AuthAdapterInstance = ITokenAuth & IWebhookAuth;
 
