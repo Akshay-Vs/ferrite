@@ -1,17 +1,23 @@
 import { QueueModule } from '@modules/queue';
 import { Module } from '@nestjs/common';
 import { CreateUserUseCase } from './application/use-case/create-user.usecase';
+import { GetAllUsersUseCase } from './application/use-case/get-all-users.usecase';
 import { GetOwnProfileUseCase } from './application/use-case/get-own-profile.usecase';
+import { GetUserByIdUseCase } from './application/use-case/get-user-by-id.usecase';
 import { InitiateProfileUpdateUseCase } from './application/use-case/initiate-profile-update.usecase';
+import { InitiateRoleUpdateUseCase } from './application/use-case/initiate-role-update.usecase';
 import { InitiateDeleteUserUseCase } from './application/use-case/initiate-user-deletion.usecase';
 import { RouteUserEventsUsecase } from './application/use-case/route-user-events.usercase';
 import { SyncProfileUpdateUseCase } from './application/use-case/sync-profile-update.usecase';
 import { SyncUserDeletionUseCase } from './application/use-case/sync-user-deletion.usercase';
 import {
 	CREATE_USER_UC,
+	GET_ALL_USERS_UC,
 	GET_OWN_PROFILE_UC,
+	GET_USER_BY_ID_UC,
 	INITIATE_DELETE_USER_UC,
 	INITIATE_PROFILE_UPDATE_UC,
+	INITIATE_ROLE_UPDATE_UC,
 	ROUTE_USER_EVENTS_UC,
 	SYNC_USER_DELETION_UC,
 	SYNC_USER_UPDATE_UC,
@@ -66,6 +72,18 @@ import { UserSyncProcessor } from './infrastructure/queue/user-sync.processor';
 		{
 			provide: ROUTE_USER_EVENTS_UC,
 			useClass: RouteUserEventsUsecase,
+		},
+		{
+			provide: GET_ALL_USERS_UC,
+			useClass: GetAllUsersUseCase,
+		},
+		{
+			provide: GET_USER_BY_ID_UC,
+			useClass: GetUserByIdUseCase,
+		},
+		{
+			provide: INITIATE_ROLE_UPDATE_UC,
+			useClass: InitiateRoleUpdateUseCase,
 		},
 		{
 			provide: WEBHOOK_MAPPER_REGISTRY,

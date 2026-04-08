@@ -32,7 +32,7 @@ async function bootstrap() {
 	const ORIGIN = ferriteVars.origin;
 
 	NestLogger.debug(
-		`Using: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
+		`Using Env Vars: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
 		'GLOBAL'
 	);
 
