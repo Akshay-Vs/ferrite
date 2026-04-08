@@ -48,3 +48,57 @@ export const DeleteOwnProfileDocs = () =>
 			description: 'Profile successfully deleted and returned.',
 		})
 	);
+
+export const GetAllUsersDocs = () =>
+	applyDecorators(
+		ApiOperation({ summary: 'List all active users (staff+)' }),
+		ApiResponse({
+			status: 200,
+			description: 'Returns an array of all active user profiles.',
+		}),
+		ApiResponse({ status: 401, description: 'Unauthenticated.' }),
+		ApiResponse({
+			status: 403,
+			description: 'Insufficient role — requires staff or above.',
+		})
+	);
+
+export const GetUserByIdDocs = () =>
+	applyDecorators(
+		ApiOperation({ summary: 'Get a user by ID (staff+)' }),
+		ApiResponse({
+			status: 200,
+			description: 'Returns the user profile for the given UUID.',
+		}),
+		ApiResponse({ status: 401, description: 'Unauthenticated.' }),
+		ApiResponse({
+			status: 403,
+			description: 'Insufficient role — requires staff or above.',
+		}),
+		ApiResponse({ status: 404, description: 'User not found.' })
+	);
+
+export const UpdateUserRoleDocs = () =>
+	applyDecorators(
+		ApiOperation({ summary: 'Update user platform role (admin only)' }),
+		ApiBody({
+			schema: {
+				type: 'object',
+				properties: {
+					role: { type: 'string', enum: ['admin', 'staff', 'user'] },
+				},
+				required: ['role'],
+			},
+		}),
+		ApiResponse({
+			status: 200,
+			description:
+				'Platform role successfully updated and user profile returned.',
+		}),
+		ApiResponse({ status: 401, description: 'Unauthenticated.' }),
+		ApiResponse({
+			status: 403,
+			description: 'Insufficient role — requires admin.',
+		}),
+		ApiResponse({ status: 404, description: 'User not found.' })
+	);
