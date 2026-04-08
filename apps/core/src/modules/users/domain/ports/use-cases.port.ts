@@ -5,6 +5,7 @@ import { UserConflictError } from '../errors/user-conflict.error';
 import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
+import type { UpdateRoleInput } from '../schemas/update-role.zodschema';
 import type { UserProfileFull } from '../schemas/user-profile.zodschema';
 
 export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
@@ -15,6 +16,9 @@ export const INITIATE_PROFILE_UPDATE_UC = Symbol('UPDATE_OWN_PROFILE_UC');
 export const INITIATE_DELETE_USER_UC = Symbol('INITIATE_DELETE_USER_UC');
 export const SYNC_USER_UPDATE_UC = Symbol('SYNC_USER_UPDATE_UC');
 export const SYNC_USER_DELETION_UC = Symbol('SYNC_USER_DELETION_UC');
+export const GET_ALL_USERS_UC = Symbol('GET_ALL_USERS_UC');
+export const GET_USER_BY_ID_UC = Symbol('GET_USER_BY_ID_UC');
+export const INITIATE_ROLE_UPDATE_UC = Symbol('INITIATE_ROLE_UPDATE_UC');
 
 /**
  * Creates a new user.
@@ -43,6 +47,31 @@ export type ICreateUserUseCase = IUseCase<
  */
 export type IGetOwnProfileUseCase = IUseCase<
 	AuthUser,
+	UserProfileFull,
+	UserNotFoundError
+>;
+
+/**
+ * Gets all active user profiles (admin/staff only).
+ *
+ * Called by the HTTP API for privileged user listing.
+ *
+ * @input  void
+ * @output UserProfileFull[] - array of active user profiles
+ */
+export type IGetAllUsersUseCase = IUseCase<void, UserProfileFull[], never>;
+
+/**
+ * Gets a single user profile by internal UUID (admin/staff only).
+ *
+ * Called by the HTTP API for privileged user lookup.
+ *
+ * @input  string - the user's internal UUID
+ * @output UserProfileFull - the user's profile
+ * @throws UserNotFoundError - if the user does not exist
+ */
+export type IGetUserByIdUseCase = IUseCase<
+	string,
 	UserProfileFull,
 	UserNotFoundError
 >;
@@ -136,3 +165,19 @@ export type ISyncUserDeletionUseCase = IUseCase<EventPayload, void, Error>;
  */
 export interface ISyncUserProfileUpdateUseCase
 	extends IUseCase<EventPayload, void, Error> {}
+
+/**
+ * Initiates an admin role update.
+ *
+ * @input { userId: string; data: UpdateRoleInput } - the user id and new role
+ * @output UserProfileFull - the updated profile
+ * @throws UserNotFoundError - if the user does not exist
+ */
+export type IInitiateRoleUpdateUseCase = IUseCase<
+	{
+		userId: string;
+		data: UpdateRoleInput;
+	},
+	UserProfileFull,
+	UserNotFoundError
+>;

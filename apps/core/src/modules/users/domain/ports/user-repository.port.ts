@@ -31,6 +31,12 @@ export interface IUserRepository {
 	): Promise<boolean>;
 
 	/**
+	 * Find all active (non-deleted) users.
+	 * @returns An array of user profiles.
+	 */
+	findAll(): Promise<UserProfileFull[]>;
+
+	/**
 	 * Find a user by their internal UUID.
 	 * @returns The user profile, or null if not found (or soft-deleted).
 	 */
@@ -45,4 +51,23 @@ export interface IUserRepository {
 		data: UpdateProfileInput,
 		outboxEvent: QueueParams<UserUpdatedEvent>
 	): Promise<UserProfileFull | null>;
+
+	/**
+	 * Update a user's platform role and persist an outbox event in the same transaction.
+	 * @returns The updated profile, or null if user not found.
+	 */
+	updateRoleById(
+		id: string,
+		role: string,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null>;
+
+	/**
+	 * Find a user and their associated auth providers.
+	 * Required for operations needing external sync details.
+	 */
+	findByIdWithProviders(id: string): Promise<{
+		user: UserProfileFull;
+		providers: { provider: AuthProvider; externalAuthId: string }[];
+	} | null>;
 }
