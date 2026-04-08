@@ -6,6 +6,12 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const authProviderEnum = pgEnum('auth_provider', ['clerk']);
 
+export const platformRoleEnum = pgEnum('platform_role', [
+	'admin',
+	'staff',
+	'user',
+]);
+
 export const notificationChannelEnum = pgEnum('notification_channel', [
 	'email',
 	'sms',
@@ -62,17 +68,6 @@ export const permissionActionEnum = pgEnum('permission_action', [
 	'activate', // activate promotions / flash sales
 	'manage_stock', // adjust inventory levels
 	'approve', // approve purchase orders / transfers
-]);
-
-export const staffStatusEnum = pgEnum('staff_status', [
-	'active',
-	'suspended',
-	'invited', // invited but hasn't accepted yet
-]);
-
-export const overrideTypeEnum = pgEnum('override_type', [
-	'grant', // give a permission the role doesn't have
-	'revoke', // block a permission the role has
 ]);
 
 export const addressTypeEnum = pgEnum('address_type', [

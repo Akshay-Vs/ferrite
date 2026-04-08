@@ -5,7 +5,7 @@ import {
 	roles,
 	staffMembers,
 	staffPermissionOverrides,
-} from '../schema/role.schema';
+} from '../schema/permission.schema';
 import { users } from '../schema/user.schema';
 import {
 	createTestPermission,

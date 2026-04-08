@@ -11,7 +11,7 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { addressTypeEnum } from './enum';
+import { addressTypeEnum, platformRoleEnum } from './enum';
 
 // ─────────────────────────────────────────
 // USERS
@@ -34,6 +34,13 @@ export const users = pgTable(
 		isActive: boolean('is_active').notNull().default(true),
 		isBanned: boolean('is_banned').notNull().default(false),
 		banReason: varchar('ban_reason', { length: 500 }),
+		/**
+		 * Local snapshot of the platform role from Auth Provider.
+		 *
+		 *  JWT is the runtime source of truth. This column exists so that
+		 * admin queries ("list all users + roles") can be answered from the DB without calling the external API.
+		 */
+		platformRole: platformRoleEnum('platform_role').notNull().default('user'),
 		lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
 		createdAt: timestamp('created_at', { withTimezone: true })
 			.notNull()
@@ -46,6 +53,7 @@ export const users = pgTable(
 	(t) => [
 		index('idx_users_is_active').on(t.isActive),
 		index('idx_users_is_banned').on(t.isBanned),
+		index('idx_users_platform_role').on(t.platformRole),
 		index('idx_users_deleted_at')
 			.on(t.deletedAt)
 			.where(sql`deleted_at IS NOT NULL`),

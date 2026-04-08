@@ -1,14 +1,8 @@
 import { relations } from 'drizzle-orm';
 import { userAuthProviders } from './auth.schema';
 import { userPaymentMethods } from './payment.schema';
+import { permissions } from './permission.schema';
 import { userNotificationPreferences } from './preferences.schema';
-import {
-	permissions,
-	rolePermissions,
-	roles,
-	staffMembers,
-	staffPermissionOverrides,
-} from './role.schema';
 import {
 	storeMembers,
 	storeRolePermissions,
@@ -41,6 +35,7 @@ export const userPhonesRelations = relations(userPhones, ({ one }) => ({
 export const userAddressesRelations = relations(userAddresses, ({ one }) => ({
 	user: one(users, { fields: [userAddresses.userId], references: [users.id] }),
 }));
+
 export const userAuthProvidersRelations = relations(
 	userAuthProviders,
 	({ one }) => ({
@@ -71,76 +66,8 @@ export const userNotificationPreferencesRelations = relations(
 	})
 );
 
-// ─────────────────────────────────────────
-// ROLE RELATIONS
-// ─────────────────────────────────────────
-
-export const staffPermissionOverridesRelations = relations(
-	staffPermissionOverrides,
-	({ one }) => ({
-		staff: one(staffMembers, {
-			fields: [staffPermissionOverrides.staffId],
-			references: [staffMembers.id],
-			relationName: 'staffOverrides',
-		}),
-		permission: one(permissions, {
-			fields: [staffPermissionOverrides.permissionId],
-			references: [permissions.id],
-		}),
-		overriddenBy: one(staffMembers, {
-			fields: [staffPermissionOverrides.overriddenBy],
-			references: [staffMembers.id],
-			relationName: 'grantedOverrides',
-		}),
-	})
-);
-
-export const staffMembersRelations = relations(
-	staffMembers,
-	({ one, many }) => ({
-		user: one(users, { fields: [staffMembers.userId], references: [users.id] }),
-		role: one(roles, { fields: [staffMembers.roleId], references: [roles.id] }),
-		invitedByStaff: one(staffMembers, {
-			fields: [staffMembers.invitedBy],
-			references: [staffMembers.id],
-		}),
-		permissionOverrides: many(staffPermissionOverrides, {
-			relationName: 'staffOverrides',
-		}),
-		grantedOverrides: many(staffPermissionOverrides, {
-			relationName: 'grantedOverrides',
-		}),
-		grantedRolePermissions: many(rolePermissions),
-	})
-);
-
-export const rolePermissionsRelations = relations(
-	rolePermissions,
-	({ one }) => ({
-		role: one(roles, {
-			fields: [rolePermissions.roleId],
-			references: [roles.id],
-		}),
-		permission: one(permissions, {
-			fields: [rolePermissions.permissionId],
-			references: [permissions.id],
-		}),
-		grantedBy: one(staffMembers, {
-			fields: [rolePermissions.grantedBy],
-			references: [staffMembers.id],
-		}),
-	})
-);
-
 export const permissionsRelations = relations(permissions, ({ many }) => ({
-	rolePermissions: many(rolePermissions),
-	staffPermissionOverrides: many(staffPermissionOverrides),
 	storeRolePermissions: many(storeRolePermissions),
-}));
-
-export const rolesRelations = relations(roles, ({ many }) => ({
-	rolePermissions: many(rolePermissions),
-	staffMembers: many(staffMembers),
 }));
 
 // ─────────────────────────────────────────

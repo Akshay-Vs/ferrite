@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { permissions } from '../schema/role.schema';
+import { permissions } from '../schema/permission.schema';
 import {
 	storeMembers,
 	storeRolePermissions,
