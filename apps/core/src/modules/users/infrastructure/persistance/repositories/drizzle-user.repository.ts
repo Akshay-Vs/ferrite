@@ -16,7 +16,7 @@ import { UserDeletedEvent, UserUpdatedEvent } from '@users/domain/schemas';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
@@ -73,7 +73,11 @@ export class DrizzleUserRepository implements IUserRepository {
 		);
 	}
 
-	async findAll(): Promise<UserProfileFull[]> {
+	async findAll(
+		cursor?: string,
+		limit: number = 50,
+		_filters?: Partial<UserProfileFull> | Record<string, unknown> // TODO: implement filtering
+	): Promise<{ items: UserProfileFull[]; nextCursor?: string }> {
 		return traceDbOp(
 			this.tracer,
 			'db.users.findAll',
@@ -82,12 +86,24 @@ export class DrizzleUserRepository implements IUserRepository {
 				'db.operation': 'select',
 			},
 			async () => {
+				const offset = cursor ? parseInt(cursor, 10) : 0;
+				const parsedLimit = limit > 0 ? limit : 50;
+
 				const rows = await this.typedDb
 					.select()
 					.from(users)
-					.where(isNull(users.deletedAt));
+					.where(isNull(users.deletedAt))
+					.orderBy(asc(users.createdAt))
+					.limit(parsedLimit + 1)
+					.offset(offset);
 
-				return rows.map(UserMapper.toUserProfile);
+				const hasNext = rows.length > parsedLimit;
+				const items = hasNext ? rows.slice(0, parsedLimit) : rows;
+
+				return {
+					items: items.map(UserMapper.toUserProfile),
+					nextCursor: hasNext ? (offset + parsedLimit).toString() : undefined,
+				};
 			}
 		);
 	}
@@ -232,7 +248,12 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return null;
 
 					// 2. Write outbox event
-					await this.enqueue.execute(tx, outboxEvent);
+					const enqueueResult = await this.enqueue.execute(tx, outboxEvent);
+
+					if (enqueueResult.isErr()) {
+						throw new Error('Failed to enqueue role update event');
+					}
+
 					return UserMapper.toUserProfile(result[0]);
 				});
 			}
@@ -258,7 +279,8 @@ export class DrizzleUserRepository implements IUserRepository {
 					})
 					.from(users)
 					.leftJoin(userAuthProviders, eq(users.id, userAuthProviders.userId))
-					.where(and(eq(users.id, id), isNull(users.deletedAt)));
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.orderBy(asc(userAuthProviders.createdAt));
 
 				if (rows.length === 0) return null;
 
