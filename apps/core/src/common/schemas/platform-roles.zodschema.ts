@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // Define the roles as a constant for IntelliSense
 export const PlatformRoles = {
