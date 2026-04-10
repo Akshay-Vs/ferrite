@@ -1,4 +1,5 @@
 import { AuthProvider } from '@auth/index';
+import { PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import type { QueueParams } from '@modules/queue';
 import { UserDeletedEvent, UserUpdatedEvent } from '../schemas';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
@@ -34,7 +35,11 @@ export interface IUserRepository {
 	 * Find all active (non-deleted) users.
 	 * @returns An array of user profiles.
 	 */
-	findAll(): Promise<UserProfileFull[]>;
+	findAll(
+		cursor?: string,
+		limit?: number,
+		filters?: Partial<UserProfileFull> | Record<string, unknown>
+	): Promise<{ items: UserProfileFull[]; nextCursor?: string }>;
 
 	/**
 	 * Find a user by their internal UUID.
@@ -58,7 +63,7 @@ export interface IUserRepository {
 	 */
 	updateRoleById(
 		id: string,
-		role: string,
+		role: PlatformRole,
 		outboxEvent: QueueParams<UserUpdatedEvent>
 	): Promise<UserProfileFull | null>;
 

@@ -1,3 +1,4 @@
+import { InfrastructureError } from '@common/errors/infrastructure.error';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -23,18 +24,22 @@ export class GetUserByIdUseCase implements IGetUserByIdUseCase {
 
 	async execute(
 		id: string
-	): Promise<Result<UserProfileFull, UserNotFoundError>> {
+	): Promise<Result<UserProfileFull, UserNotFoundError | InfrastructureError>> {
 		return this.tracer.withSpan(
 			'use-case.get-user-by-id',
 			async () => {
-				const user = await this.repo.findById(id);
+				try {
+					const user = await this.repo.findById(id);
 
-				if (!user) {
-					this.logger.warn(`User not found: id=${id}`);
-					return err(new UserNotFoundError(id));
+					if (!user) {
+						this.logger.warn(`User not found: id=${id}`);
+						return err(new UserNotFoundError(id));
+					}
+
+					return ok(user);
+				} catch (e: any) {
+					return err(new InfrastructureError('Failed to fetch user by id', e));
 				}
-
-				return ok(user);
 			},
 			{ 'user.id': id }
 		);

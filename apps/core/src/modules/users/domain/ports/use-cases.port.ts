@@ -1,6 +1,8 @@
 import type { AuthUser } from '@auth/index';
+import { InfrastructureError } from '@common/errors/infrastructure.error';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { EventPayload } from '@common/schemas/event-payload.zodschema';
+import { MissingAuthProviderError } from '../errors/missing-auth-provider.error';
 import { UserConflictError } from '../errors/user-conflict.error';
 import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
@@ -59,7 +61,15 @@ export type IGetOwnProfileUseCase = IUseCase<
  * @input  void
  * @output UserProfileFull[] - array of active user profiles
  */
-export type IGetAllUsersUseCase = IUseCase<void, UserProfileFull[], never>;
+export type IGetAllUsersUseCase = IUseCase<
+	{
+		cursor?: string;
+		limit?: number;
+		filters?: Partial<UserProfileFull>;
+	} | void,
+	{ items: UserProfileFull[]; nextCursor?: string },
+	InfrastructureError
+>;
 
 /**
  * Gets a single user profile by internal UUID (admin/staff only).
@@ -73,7 +83,7 @@ export type IGetAllUsersUseCase = IUseCase<void, UserProfileFull[], never>;
 export type IGetUserByIdUseCase = IUseCase<
 	string,
 	UserProfileFull,
-	UserNotFoundError
+	UserNotFoundError | InfrastructureError
 >;
 
 /**
@@ -179,5 +189,5 @@ export type IInitiateRoleUpdateUseCase = IUseCase<
 		data: UpdateRoleInput;
 	},
 	UserProfileFull,
-	UserNotFoundError
+	UserNotFoundError | MissingAuthProviderError | InfrastructureError
 >;

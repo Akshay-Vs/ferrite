@@ -1,4 +1,5 @@
-import { ok, Result } from '@common/interfaces/result.interface';
+import { InfrastructureError } from '@common/errors/infrastructure.error';
+import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -20,11 +21,28 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(): Promise<Result<UserProfileFull[], never>> {
+	async execute(input?: {
+		cursor?: string;
+		limit?: number;
+		filters?: Partial<UserProfileFull>;
+	}): Promise<
+		Result<
+			{ items: UserProfileFull[]; nextCursor?: string },
+			InfrastructureError
+		>
+	> {
 		return this.tracer.withSpan('use-case.get-all-users', async () => {
-			const users = await this.repo.findAll();
-			this.logger.debug(`Fetched ${users.length} users`);
-			return ok(users);
+			try {
+				const result = await this.repo.findAll(
+					input?.cursor,
+					input?.limit,
+					input?.filters
+				);
+				this.logger.debug(`Fetched ${result.items.length} users`);
+				return ok(result);
+			} catch (e: any) {
+				return err(new InfrastructureError('Failed to fetch users', e));
+			}
 		});
 	}
 }
