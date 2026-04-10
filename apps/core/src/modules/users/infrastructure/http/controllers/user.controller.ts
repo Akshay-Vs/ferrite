@@ -1,9 +1,8 @@
-import { AuthGuard, type AuthUser } from '@auth/index';
+import { type AuthUser } from '@auth/index';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { RequireRole } from '@common/decorators/require-role.decorator';
 import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
-import { PlatformRBACGuard } from '@modules/auth/infrastructure/http/guards/platform-rbac.guard';
 import {
 	Body,
 	Controller,
@@ -15,7 +14,6 @@ import {
 	NotFoundException,
 	Param,
 	Patch,
-	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
@@ -48,7 +46,6 @@ const ME_ROUTE = 'me';
 @ApiTags('Users')
 @ApiBearerAuth('swagger-access-token')
 @Controller('users')
-@UseGuards(AuthGuard, PlatformRBACGuard)
 export class UserController {
 	constructor(
 		@Inject(GET_OWN_PROFILE_UC)
