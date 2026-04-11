@@ -1,4 +1,5 @@
 import { AuthProvider } from '@auth/index';
+import { type PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders, users } from '@core/database/schema';
@@ -216,7 +217,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
 	async updateRoleById(
 		id: string,
-		role: string,
+		role: PlatformRole,
 		outboxEvent: QueueParams<UserUpdatedEvent>
 	): Promise<UserProfileFull | null> {
 		return traceDbOp(
@@ -229,7 +230,6 @@ export class DrizzleUserRepository implements IUserRepository {
 			async () => {
 				return this.typedDb.transaction(async (tx) => {
 					// 1. Update platformRole
-					// Force cast to the enum type accepted by Drizzle since we validated it
 					const result = await traceDbOp(
 						this.tracer,
 						'db.users.updateRole',
@@ -238,7 +238,7 @@ export class DrizzleUserRepository implements IUserRepository {
 							tx
 								.update(users)
 								.set({
-									platformRole: role as any,
+									platformRole: role,
 									updatedAt: new Date(),
 								})
 								.where(and(eq(users.id, id), isNull(users.deletedAt)))
