@@ -11,7 +11,7 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { permissions } from './role.schema';
+import { permissions } from './permission.schema';
 import { users } from './user.schema';
 
 // ─────────────────────────────────────────

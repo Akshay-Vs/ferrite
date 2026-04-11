@@ -1,4 +1,5 @@
 import { AuthProvider } from '@auth/index';
+import { type PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { userAuthProviders, users } from '@core/database/schema';
@@ -16,7 +17,7 @@ import { UserDeletedEvent, UserUpdatedEvent } from '@users/domain/schemas';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
@@ -69,6 +70,41 @@ export class DrizzleUserRepository implements IUserRepository {
 
 					return inserted.id;
 				});
+			}
+		);
+	}
+
+	async findAll(
+		cursor?: string,
+		limit: number = 50,
+		_filters?: Partial<UserProfileFull> | Record<string, unknown> // TODO: implement filtering
+	): Promise<{ items: UserProfileFull[]; nextCursor?: string }> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findAll',
+			{
+				'db.table': 'users',
+				'db.operation': 'select',
+			},
+			async () => {
+				const offset = cursor ? parseInt(cursor, 10) : 0;
+				const parsedLimit = limit > 0 ? limit : 50;
+
+				const rows = await this.typedDb
+					.select()
+					.from(users)
+					.where(isNull(users.deletedAt))
+					.orderBy(asc(users.createdAt))
+					.limit(parsedLimit + 1)
+					.offset(offset);
+
+				const hasNext = rows.length > parsedLimit;
+				const items = hasNext ? rows.slice(0, parsedLimit) : rows;
+
+				return {
+					items: items.map(UserMapper.toUserProfile),
+					nextCursor: hasNext ? (offset + parsedLimit).toString() : undefined,
+				};
 			}
 		);
 	}
@@ -175,6 +211,91 @@ export class DrizzleUserRepository implements IUserRepository {
 
 					return true;
 				});
+			}
+		);
+	}
+
+	async updateRoleById(
+		id: string,
+		role: PlatformRole,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateRoleById',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+			},
+			async () => {
+				return this.typedDb.transaction(async (tx) => {
+					// 1. Update platformRole
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.updateRole',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									platformRole: role,
+									updatedAt: new Date(),
+								})
+								.where(and(eq(users.id, id), isNull(users.deletedAt)))
+								.returning()
+					);
+
+					if (result.length === 0) return null;
+
+					// 2. Write outbox event
+					const enqueueResult = await this.enqueue.execute(tx, outboxEvent);
+
+					if (enqueueResult.isErr()) {
+						throw new Error('Failed to enqueue role update event');
+					}
+
+					return UserMapper.toUserProfile(result[0]);
+				});
+			}
+		);
+	}
+
+	async findByIdWithProviders(id: string): Promise<{
+		user: UserProfileFull;
+		providers: { provider: AuthProvider; externalAuthId: string }[];
+	} | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findByIdWithProviders',
+			{
+				'db.table': 'users,user_auth_providers',
+				'db.operation': 'select',
+			},
+			async () => {
+				const rows = await this.typedDb
+					.select({
+						user: users,
+						authProvider: userAuthProviders,
+					})
+					.from(users)
+					.leftJoin(userAuthProviders, eq(users.id, userAuthProviders.userId))
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.orderBy(asc(userAuthProviders.createdAt));
+
+				if (rows.length === 0) return null;
+
+				const userEntity = rows[0].user;
+				const providers = rows
+					.filter((r) => r.authProvider !== null)
+					.map((r) => ({
+						provider: r.authProvider!.provider as AuthProvider,
+						externalAuthId: r.authProvider!.externalAuthId,
+					}));
+
+				return {
+					user: UserMapper.toUserProfile(userEntity),
+					providers,
+				};
 			}
 		);
 	}

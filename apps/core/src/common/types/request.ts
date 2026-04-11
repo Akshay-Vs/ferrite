@@ -1,4 +1,5 @@
-import { AuthUser, WebhookPayload } from '@auth/domain/schemas';
+import { AuthUser } from '@auth/domain/schemas';
+import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import { Request as ExpressRequest } from 'express';
 
 export interface Request extends ExpressRequest {
@@ -10,5 +11,5 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export interface WebhookRequest extends Request {
-	webhookPayload?: WebhookPayload;
+	webhookPayload?: WebhookEnvelope;
 }

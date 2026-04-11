@@ -3,11 +3,10 @@ CREATE TYPE "public"."auth_provider" AS ENUM('clerk');--> statement-breakpoint
 CREATE TYPE "public"."card_brand" AS ENUM('visa', 'mastercard');--> statement-breakpoint
 CREATE TYPE "public"."notification_channel" AS ENUM('email', 'sms', 'push', 'whatsapp');--> statement-breakpoint
 CREATE TYPE "public"."notification_type" AS ENUM('order_updates', 'promotions', 'restock', 'price_drop', 'support', 'security');--> statement-breakpoint
-CREATE TYPE "public"."override_type" AS ENUM('grant', 'revoke');--> statement-breakpoint
 CREATE TYPE "public"."payment_provider" AS ENUM('stripe', 'paypal');--> statement-breakpoint
 CREATE TYPE "public"."permission_action" AS ENUM('create', 'read', 'update', 'delete', 'export', 'cancel', 'refund', 'assign', 'send', 'schedule', 'activate', 'manage_stock', 'approve');--> statement-breakpoint
 CREATE TYPE "public"."permission_resource" AS ENUM('products', 'categories', 'orders', 'returns', 'customers', 'support_tickets', 'warehouse', 'inventory', 'suppliers', 'purchase_orders', 'promotions', 'messages', 'staff', 'roles', 'reports', 'store_settings');--> statement-breakpoint
-CREATE TYPE "public"."staff_status" AS ENUM('active', 'suspended', 'invited');--> statement-breakpoint
+CREATE TYPE "public"."platform_role" AS ENUM('admin', 'staff', 'user');--> statement-breakpoint
 CREATE TABLE "user_auth_providers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -18,6 +17,34 @@ CREATE TABLE "user_auth_providers" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "uq_auth_provider_external" UNIQUE("provider","external_auth_id"),
 	CONSTRAINT "uq_user_provider" UNIQUE("user_id","provider")
+);
+--> statement-breakpoint
+CREATE TABLE "inbox_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"message_id" text NOT NULL,
+	"source" text NOT NULL,
+	"queue_name" text NOT NULL,
+	"event_type" text NOT NULL,
+	"payload" jsonb NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "uq_inbox_provider_event_id" UNIQUE("source","message_id")
+);
+--> statement-breakpoint
+CREATE TABLE "outbox_events" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"event_type" text NOT NULL,
+	"queue_name" text NOT NULL,
+	"payload" jsonb NOT NULL,
+	"status" text DEFAULT 'pending' NOT NULL,
+	"retry_count" integer DEFAULT 0 NOT NULL,
+	"max_retries" integer DEFAULT 5 NOT NULL,
+	"error_detail" text,
+	"scheduled_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"locked_at" timestamp with time zone,
+	"processed_at" timestamp with time zone,
+	"notify_sent_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"trace_context" jsonb
 );
 --> statement-breakpoint
 CREATE TABLE "user_payment_methods" (
@@ -49,47 +76,47 @@ CREATE TABLE "permissions" (
 	CONSTRAINT "uq_permission_resource_action" UNIQUE("resource","action")
 );
 --> statement-breakpoint
-CREATE TABLE "role_permissions" (
+CREATE TABLE "store_members" (
+	"store_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
-	"permission_id" uuid NOT NULL,
-	"granted_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"granted_by" uuid,
-	CONSTRAINT "role_permissions_role_id_permission_id_pk" PRIMARY KEY("role_id","permission_id")
+	"is_owner" boolean DEFAULT false NOT NULL,
+	"joined_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "store_members_store_id_user_id_pk" PRIMARY KEY("store_id","user_id")
 );
 --> statement-breakpoint
-CREATE TABLE "roles" (
+CREATE TABLE "store_role_permissions" (
+	"store_role_id" uuid NOT NULL,
+	"permission_id" uuid NOT NULL,
+	"granted_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "store_role_permissions_store_role_id_permission_id_pk" PRIMARY KEY("store_role_id","permission_id")
+);
+--> statement-breakpoint
+CREATE TABLE "store_roles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"store_id" uuid NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
 	"is_system" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "uq_roles_name" UNIQUE("name")
+	CONSTRAINT "uq_store_roles_store_name" UNIQUE("store_id","name")
 );
 --> statement-breakpoint
-CREATE TABLE "staff_members" (
+CREATE TABLE "stores" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" uuid NOT NULL,
-	"role_id" uuid NOT NULL,
-	"is_owner" boolean DEFAULT false NOT NULL,
-	"status" "staff_status" DEFAULT 'invited' NOT NULL,
-	"invited_by" uuid,
-	"invited_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"joined_at" timestamp with time zone,
+	"name" varchar(150) NOT NULL,
+	"slug" varchar(150) NOT NULL,
+	"description" text,
+	"banner_url" varchar(2048),
+	"icon_url" varchar(2048),
+	"created_by" uuid NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "uq_staff_user_id" UNIQUE("user_id")
-);
---> statement-breakpoint
-CREATE TABLE "staff_permission_overrides" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"staff_id" uuid NOT NULL,
-	"permission_id" uuid NOT NULL,
-	"type" "override_type" NOT NULL,
-	"overridden_by" uuid NOT NULL,
-	"reason" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "uq_staff_permission_override" UNIQUE("staff_id","permission_id")
+	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "user_addresses" (
@@ -137,6 +164,7 @@ CREATE TABLE "users" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"is_banned" boolean DEFAULT false NOT NULL,
 	"ban_reason" varchar(500),
+	"platform_role" "platform_role" DEFAULT 'user' NOT NULL,
 	"last_login_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -147,36 +175,34 @@ CREATE TABLE "users" (
 ALTER TABLE "user_auth_providers" ADD CONSTRAINT "user_auth_providers_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_payment_methods" ADD CONSTRAINT "user_payment_methods_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_notification_preferences" ADD CONSTRAINT "user_notification_preferences_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_granted_by_staff_members_id_fk" FOREIGN KEY ("granted_by") REFERENCES "public"."staff_members"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_members" ADD CONSTRAINT "staff_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_members" ADD CONSTRAINT "staff_members_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_members" ADD CONSTRAINT "staff_members_invited_by_staff_members_id_fk" FOREIGN KEY ("invited_by") REFERENCES "public"."staff_members"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_permission_overrides" ADD CONSTRAINT "staff_permission_overrides_staff_id_staff_members_id_fk" FOREIGN KEY ("staff_id") REFERENCES "public"."staff_members"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_permission_overrides" ADD CONSTRAINT "staff_permission_overrides_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "staff_permission_overrides" ADD CONSTRAINT "staff_permission_overrides_overridden_by_staff_members_id_fk" FOREIGN KEY ("overridden_by") REFERENCES "public"."staff_members"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_members" ADD CONSTRAINT "store_members_store_id_stores_id_fk" FOREIGN KEY ("store_id") REFERENCES "public"."stores"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_members" ADD CONSTRAINT "store_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_members" ADD CONSTRAINT "store_members_role_id_store_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."store_roles"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_role_permissions" ADD CONSTRAINT "store_role_permissions_store_role_id_store_roles_id_fk" FOREIGN KEY ("store_role_id") REFERENCES "public"."store_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_role_permissions" ADD CONSTRAINT "store_role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "store_roles" ADD CONSTRAINT "store_roles_store_id_stores_id_fk" FOREIGN KEY ("store_id") REFERENCES "public"."stores"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "stores" ADD CONSTRAINT "stores_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_addresses" ADD CONSTRAINT "user_addresses_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_phones" ADD CONSTRAINT "user_phones_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_auth_providers_lookup" ON "user_auth_providers" USING btree ("provider","external_auth_id");--> statement-breakpoint
 CREATE INDEX "idx_auth_providers_user_id" ON "user_auth_providers" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "idx_outbox_pending" ON "outbox_events" USING btree ("created_at") WHERE processed_at IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_payment_methods_user_id" ON "user_payment_methods" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "uq_payment_methods_one_default_per_user" ON "user_payment_methods" USING btree ("user_id") WHERE is_default = true;--> statement-breakpoint
 CREATE INDEX "idx_payment_methods_expires_at" ON "user_payment_methods" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "idx_notif_prefs_channel_type_enabled" ON "user_notification_preferences" USING btree ("channel","type","is_enabled");--> statement-breakpoint
 CREATE INDEX "idx_permissions_resource" ON "permissions" USING btree ("resource");--> statement-breakpoint
 CREATE INDEX "idx_permissions_lookup" ON "permissions" USING btree ("resource","action");--> statement-breakpoint
-CREATE INDEX "idx_role_permissions_role_id" ON "role_permissions" USING btree ("role_id");--> statement-breakpoint
-CREATE INDEX "idx_role_permissions_permission_id" ON "role_permissions" USING btree ("permission_id");--> statement-breakpoint
-CREATE INDEX "idx_roles_created_at" ON "roles" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "idx_roles_is_system" ON "roles" USING btree ("is_system");--> statement-breakpoint
-CREATE INDEX "idx_staff_user_id" ON "staff_members" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "idx_staff_role_id" ON "staff_members" USING btree ("role_id");--> statement-breakpoint
-CREATE INDEX "idx_staff_status" ON "staff_members" USING btree ("status");--> statement-breakpoint
-CREATE UNIQUE INDEX "uq_staff_one_owner" ON "staff_members" USING btree ("is_owner") WHERE is_owner = true;--> statement-breakpoint
-CREATE INDEX "idx_overrides_staff_id" ON "staff_permission_overrides" USING btree ("staff_id");--> statement-breakpoint
-CREATE INDEX "idx_overrides_permission_id" ON "staff_permission_overrides" USING btree ("permission_id");--> statement-breakpoint
-CREATE INDEX "idx_overrides_type" ON "staff_permission_overrides" USING btree ("type");--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_store_members_one_owner_per_store" ON "store_members" USING btree ("store_id","is_owner") WHERE is_owner = true;--> statement-breakpoint
+CREATE INDEX "idx_store_members_user_id" ON "store_members" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "idx_store_members_store_role" ON "store_members" USING btree ("store_id","role_id");--> statement-breakpoint
+CREATE INDEX "idx_store_role_permissions_role_id" ON "store_role_permissions" USING btree ("store_role_id");--> statement-breakpoint
+CREATE INDEX "idx_store_role_permissions_permission_id" ON "store_role_permissions" USING btree ("permission_id");--> statement-breakpoint
+CREATE INDEX "idx_store_roles_store_id" ON "store_roles" USING btree ("store_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_stores_slug" ON "stores" USING btree ("slug");--> statement-breakpoint
+CREATE INDEX "idx_stores_created_by" ON "stores" USING btree ("created_by");--> statement-breakpoint
+CREATE INDEX "idx_stores_created_at" ON "stores" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_stores_active_created" ON "stores" USING btree ("is_active","created_at") WHERE is_active = true AND deleted_at IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_addresses_user_id" ON "user_addresses" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "uq_addresses_one_primary_per_user" ON "user_addresses" USING btree ("user_id") WHERE is_primary = true;--> statement-breakpoint
 CREATE INDEX "idx_addresses_country" ON "user_addresses" USING btree ("country");--> statement-breakpoint
@@ -185,6 +211,7 @@ CREATE INDEX "idx_phones_user_id" ON "user_phones" USING btree ("user_id");--> s
 CREATE UNIQUE INDEX "idx_phones_default" ON "user_phones" USING btree ("user_id") WHERE is_default = true;--> statement-breakpoint
 CREATE INDEX "idx_users_is_active" ON "users" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "idx_users_is_banned" ON "users" USING btree ("is_banned");--> statement-breakpoint
+CREATE INDEX "idx_users_platform_role" ON "users" USING btree ("platform_role");--> statement-breakpoint
 CREATE INDEX "idx_users_deleted_at" ON "users" USING btree ("deleted_at") WHERE deleted_at IS NOT NULL;--> statement-breakpoint
 CREATE INDEX "idx_users_created_at" ON "users" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_users_last_login_at" ON "users" USING btree ("last_login_at");

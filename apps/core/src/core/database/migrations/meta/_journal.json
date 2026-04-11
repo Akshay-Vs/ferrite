@@ -5,43 +5,8 @@
 		{
 			"idx": 0,
 			"version": "7",
-			"when": 1774117813678,
-			"tag": "0000_initial",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1774117826291,
-			"tag": "0001_outbox-wal",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1774203550230,
-			"tag": "0002_rich_talkback",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1775142951288,
-			"tag": "0003_rapid_menace",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1775210880719,
-			"tag": "0004_unique_kabuki",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1775304352362,
-			"tag": "0005_unusual_umar",
+			"when": 1775639087942,
+			"tag": "0000_grey_toro",
 			"breakpoints": true
 		}
 	]

@@ -1,6 +1,8 @@
-import { AuthGuard, type AuthUser, AuthUserParam } from '@auth/index';
+import { type AuthUser } from '@auth/index';
+import { AuthUserParam } from '@common/decorators/auth-user.decorator';
+import { RequireRole } from '@common/decorators/require-role.decorator';
+import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
-
 import {
 	Body,
 	Controller,
@@ -9,34 +11,47 @@ import {
 	HttpCode,
 	HttpStatus,
 	Inject,
+	InternalServerErrorException,
 	NotFoundException,
+	Param,
+	ParseUUIDPipe,
 	Patch,
-	UseGuards,
+	Query,
+	UnprocessableEntityException,
 } from '@nestjs/common';
-
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
+import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
+import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import {
+	GET_ALL_USERS_UC,
 	GET_OWN_PROFILE_UC,
+	GET_USER_BY_ID_UC,
+	type IGetAllUsersUseCase,
 	type IGetOwnProfileUseCase,
+	type IGetUserByIdUseCase,
 	type IInitiateDeleteUserUseCase,
 	type IInitiateProfileUpdateUseCase,
+	type IInitiateRoleUpdateUseCase,
 	INITIATE_DELETE_USER_UC,
 	INITIATE_PROFILE_UPDATE_UC,
+	INITIATE_ROLE_UPDATE_UC,
 } from '@users/domain/ports/use-cases.port';
-
 import { UpdateProfileInputDTO } from '../dto/update-profile.dto';
-
+import { UpdateRoleInputDTO } from '../dto/update-role.dto';
 import {
 	DeleteOwnProfileDocs,
+	GetAllUsersDocs,
 	GetOwnProfileDocs,
+	GetUserByIdDocs,
 	UpdateOwnProfileDocs,
+	UpdateUserRoleDocs,
 } from './docs/user.swaggerdocs';
+
+const ME_ROUTE = 'me';
 
 @ApiTags('Users')
 @ApiBearerAuth('swagger-access-token')
 @Controller('users')
-@UseGuards(AuthGuard)
 export class UserController {
 	constructor(
 		@Inject(GET_OWN_PROFILE_UC)
@@ -48,10 +63,19 @@ export class UserController {
 		@Inject(INITIATE_DELETE_USER_UC)
 		private readonly InitiatedeleteUserUseCase: IInitiateDeleteUserUseCase,
 
+		@Inject(INITIATE_ROLE_UPDATE_UC)
+		private readonly updateRoleUseCase: IInitiateRoleUpdateUseCase,
+
+		@Inject(GET_ALL_USERS_UC)
+		private readonly getAllUsersUseCase: IGetAllUsersUseCase,
+
+		@Inject(GET_USER_BY_ID_UC)
+		private readonly getUserByIdUseCase: IGetUserByIdUseCase,
+
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
-	@Get('me')
+	@Get(ME_ROUTE)
 	@GetOwnProfileDocs()
 	async getOwnProfile(@AuthUserParam() authUser: AuthUser) {
 		return this.tracer.withSpan('http.get-own-profile', async () => {
@@ -63,7 +87,7 @@ export class UserController {
 		});
 	}
 
-	@Patch()
+	@Patch(ME_ROUTE)
 	@HttpCode(HttpStatus.OK)
 	@UpdateOwnProfileDocs()
 	async updateOwnProfile(
@@ -82,7 +106,7 @@ export class UserController {
 		});
 	}
 
-	@Delete()
+	@Delete(ME_ROUTE)
 	@HttpCode(HttpStatus.OK)
 	@DeleteOwnProfileDocs()
 	async deleteOwnProfile(@AuthUserParam() authUser: AuthUser) {
@@ -90,6 +114,69 @@ export class UserController {
 			const result = await this.InitiatedeleteUserUseCase.execute(authUser);
 			if (result.isErr()) {
 				throw new NotFoundException(result.error.message);
+			}
+			return result.value;
+		});
+	}
+
+	// Privileged Admin Routes
+
+	@Get()
+	@RequireRole(PlatformRoles.STAFF)
+	@GetAllUsersDocs()
+	async getAllUsers(
+		@Query('cursor') cursor?: string,
+		@Query('limit') limit?: string
+	) {
+		return this.tracer.withSpan('http.get-all-users', async () => {
+			const result = await this.getAllUsersUseCase.execute({
+				cursor,
+				limit: limit ? parseInt(limit, 10) : undefined,
+			});
+			if (result.isErr()) {
+				throw new InternalServerErrorException(result.error.message);
+			}
+			return result.value;
+		});
+	}
+
+	@Get(':id')
+	@RequireRole(PlatformRoles.STAFF)
+	@GetUserByIdDocs()
+	async getUserById(@Param('id', ParseUUIDPipe) id: string) {
+		return this.tracer.withSpan('http.get-user-by-id', async () => {
+			const result = await this.getUserByIdUseCase.execute(id);
+			if (result.isErr()) {
+				if (result.error instanceof UserNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				throw new InternalServerErrorException(result.error.message);
+			}
+			return result.value;
+		});
+	}
+
+	@Patch(':id/role')
+	@HttpCode(HttpStatus.OK)
+	@RequireRole(PlatformRoles.ADMIN)
+	@UpdateUserRoleDocs()
+	async updateUserRole(
+		@Param('id', ParseUUIDPipe) id: string,
+		@Body() payload: UpdateRoleInputDTO
+	) {
+		return this.tracer.withSpan('http.update-user-role', async () => {
+			const result = await this.updateRoleUseCase.execute({
+				userId: id,
+				data: payload,
+			});
+			if (result.isErr()) {
+				if (result.error instanceof UserNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof MissingAuthProviderError) {
+					throw new UnprocessableEntityException(result.error.message);
+				}
+				throw new InternalServerErrorException(result.error.message);
 			}
 			return result.value;
 		});

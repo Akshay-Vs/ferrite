@@ -45,6 +45,7 @@ export class UserMapper {
 			dateOfBirth: user.dateOfBirth,
 			preferredLocale: user.preferredLocale?.toLowerCase() ?? null,
 			preferredCurrency: user.preferredCurrency?.toUpperCase() ?? null,
+			platformRole: user.platformRole,
 			isActive: user.isActive,
 			createdAt: user.createdAt,
 			updatedAt: user.updatedAt,

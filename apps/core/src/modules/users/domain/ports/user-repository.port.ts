@@ -1,4 +1,5 @@
 import { AuthProvider } from '@auth/index';
+import { PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import type { QueueParams } from '@modules/queue';
 import { UserDeletedEvent, UserUpdatedEvent } from '../schemas';
 import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
@@ -31,6 +32,16 @@ export interface IUserRepository {
 	): Promise<boolean>;
 
 	/**
+	 * Find all active (non-deleted) users.
+	 * @returns An array of user profiles.
+	 */
+	findAll(
+		cursor?: string,
+		limit?: number,
+		filters?: Partial<UserProfileFull> | Record<string, unknown>
+	): Promise<{ items: UserProfileFull[]; nextCursor?: string }>;
+
+	/**
 	 * Find a user by their internal UUID.
 	 * @returns The user profile, or null if not found (or soft-deleted).
 	 */
@@ -45,4 +56,23 @@ export interface IUserRepository {
 		data: UpdateProfileInput,
 		outboxEvent: QueueParams<UserUpdatedEvent>
 	): Promise<UserProfileFull | null>;
+
+	/**
+	 * Update a user's platform role and persist an outbox event in the same transaction.
+	 * @returns The updated profile, or null if user not found.
+	 */
+	updateRoleById(
+		id: string,
+		role: PlatformRole,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null>;
+
+	/**
+	 * Find a user and their associated auth providers.
+	 * Required for operations needing external sync details.
+	 */
+	findByIdWithProviders(id: string): Promise<{
+		user: UserProfileFull;
+		providers: { provider: AuthProvider; externalAuthId: string }[];
+	} | null>;
 }

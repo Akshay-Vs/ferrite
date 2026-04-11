@@ -6,14 +6,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { NewUserPaymentMethod } from '../schema/payment.schema';
+import type { NewPermission } from '../schema/permission.schema';
 import type { NewUserNotificationPreference } from '../schema/preferences.schema';
-import type {
-	NewPermission,
-	NewRole,
-	NewRolePermission,
-	NewStaffMember,
-	NewStaffPermissionOverride,
-} from '../schema/role.schema';
 import type {
 	NewStore,
 	NewStoreMember,
@@ -128,19 +122,6 @@ export function createTestNotificationPreference(
 	};
 }
 
-// ── Roles & Permissions ──────────────────
-let roleCounter = 0;
-
-export function createTestRole(overrides: Partial<NewRole> = {}): NewRole {
-	roleCounter += 1;
-	return {
-		name: `Test Role ${roleCounter} - ${Date.now()}`,
-		description: 'A role created for testing',
-		isSystem: false,
-		...overrides,
-	};
-}
-
 export function createTestPermission(
 	overrides: Partial<NewPermission> = {}
 ): NewPermission {
@@ -148,49 +129,6 @@ export function createTestPermission(
 		resource: 'products',
 		action: 'read',
 		description: 'Permission to read products',
-		...overrides,
-	};
-}
-
-export function createTestRolePermission(
-	roleId: string,
-	permissionId: string,
-	overrides: Partial<NewRolePermission> = {}
-): NewRolePermission {
-	return {
-		roleId,
-		permissionId,
-		...overrides,
-	};
-}
-
-// ── Staff Members ────────────────────────
-export function createTestStaffMember(
-	userId: string,
-	roleId: string,
-	overrides: Partial<NewStaffMember> = {}
-): NewStaffMember {
-	return {
-		userId,
-		roleId,
-		isOwner: false,
-		status: 'active',
-		...overrides,
-	};
-}
-
-export function createTestStaffPermissionOverride(
-	staffId: string,
-	permissionId: string,
-	overriddenBy: string,
-	overrides: Partial<NewStaffPermissionOverride> = {}
-): NewStaffPermissionOverride {
-	return {
-		staffId,
-		permissionId,
-		type: 'grant',
-		overriddenBy,
-		reason: 'Test override',
 		...overrides,
 	};
 }

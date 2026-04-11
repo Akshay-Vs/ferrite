@@ -21,6 +21,7 @@ export const userProfileFullSchema = userProfileBaseSchema.extend({
 	dateOfBirth: z.string().nullable(),
 	preferredLocale: z.string().nullable(),
 	preferredCurrency: z.string().nullable(),
+	platformRole: z.string(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });

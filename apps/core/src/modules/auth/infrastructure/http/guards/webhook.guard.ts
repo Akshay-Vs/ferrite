@@ -1,3 +1,4 @@
+import { IS_WEBHOOK_ROUTE } from '@common/decorators/webhook-route.decorator';
 import { WebhookRequest } from '@common/types/request';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
@@ -13,7 +14,6 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_WEBHOOK_ROUTE } from '../decorators/webhook-route.decorator';
 
 @Injectable()
 export class WebhookGuard implements CanActivate {
