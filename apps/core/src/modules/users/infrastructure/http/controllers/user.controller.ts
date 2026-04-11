@@ -11,11 +11,17 @@ import {
 	HttpCode,
 	HttpStatus,
 	Inject,
+	InternalServerErrorException,
 	NotFoundException,
 	Param,
+	ParseUUIDPipe,
 	Patch,
+	Query,
+	UnprocessableEntityException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
+import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import {
 	GET_ALL_USERS_UC,
 	GET_OWN_PROFILE_UC,
@@ -118,9 +124,18 @@ export class UserController {
 	@Get()
 	@RequireRole(PlatformRoles.STAFF)
 	@GetAllUsersDocs()
-	async getAllUsers() {
+	async getAllUsers(
+		@Query('cursor') cursor?: string,
+		@Query('limit') limit?: string
+	) {
 		return this.tracer.withSpan('http.get-all-users', async () => {
-			const result = await this.getAllUsersUseCase.execute();
+			const result = await this.getAllUsersUseCase.execute({
+				cursor,
+				limit: limit ? parseInt(limit, 10) : undefined,
+			});
+			if (result.isErr()) {
+				throw new InternalServerErrorException(result.error.message);
+			}
 			return result.value;
 		});
 	}
@@ -128,11 +143,14 @@ export class UserController {
 	@Get(':id')
 	@RequireRole(PlatformRoles.STAFF)
 	@GetUserByIdDocs()
-	async getUserById(@Param('id') id: string) {
+	async getUserById(@Param('id', ParseUUIDPipe) id: string) {
 		return this.tracer.withSpan('http.get-user-by-id', async () => {
 			const result = await this.getUserByIdUseCase.execute(id);
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				if (result.error instanceof UserNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				throw new InternalServerErrorException(result.error.message);
 			}
 			return result.value;
 		});
@@ -143,7 +161,7 @@ export class UserController {
 	@RequireRole(PlatformRoles.ADMIN)
 	@UpdateUserRoleDocs()
 	async updateUserRole(
-		@Param('id') id: string,
+		@Param('id', ParseUUIDPipe) id: string,
 		@Body() payload: UpdateRoleInputDTO
 	) {
 		return this.tracer.withSpan('http.update-user-role', async () => {
@@ -152,7 +170,13 @@ export class UserController {
 				data: payload,
 			});
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				if (result.error instanceof UserNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof MissingAuthProviderError) {
+					throw new UnprocessableEntityException(result.error.message);
+				}
+				throw new InternalServerErrorException(result.error.message);
 			}
 			return result.value;
 		});
