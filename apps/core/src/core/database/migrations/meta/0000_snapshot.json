@@ -1,5 +1,5 @@
 {
-	"id": "974f9cc5-2e3d-4860-9da2-8b0dc9469e53",
+	"id": "3d736381-d79a-4420-a4a5-29674056c95f",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -523,89 +523,6 @@
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.permissions": {
-			"name": "permissions",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "uuid",
-					"primaryKey": true,
-					"notNull": true,
-					"default": "gen_random_uuid()"
-				},
-				"resource": {
-					"name": "resource",
-					"type": "permission_resource",
-					"typeSchema": "public",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"action": {
-					"name": "action",
-					"type": "permission_action",
-					"typeSchema": "public",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"description": {
-					"name": "description",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				}
-			},
-			"indexes": {
-				"idx_permissions_resource": {
-					"name": "idx_permissions_resource",
-					"columns": [
-						{
-							"expression": "resource",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				},
-				"idx_permissions_lookup": {
-					"name": "idx_permissions_lookup",
-					"columns": [
-						{
-							"expression": "resource",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						},
-						{
-							"expression": "action",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {
-				"uq_permission_resource_action": {
-					"name": "uq_permission_resource_action",
-					"nullsNotDistinct": false,
-					"columns": ["resource", "action"]
-				}
-			},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
 		"public.store_members": {
 			"name": "store_members",
 			"schema": "",
@@ -767,9 +684,10 @@
 					"primaryKey": false,
 					"notNull": true
 				},
-				"permission_id": {
-					"name": "permission_id",
-					"type": "uuid",
+				"permission_key": {
+					"name": "permission_key",
+					"type": "permission_key",
+					"typeSchema": "public",
 					"primaryKey": false,
 					"notNull": true
 				},
@@ -797,11 +715,11 @@
 					"method": "btree",
 					"with": {}
 				},
-				"idx_store_role_permissions_permission_id": {
-					"name": "idx_store_role_permissions_permission_id",
+				"idx_store_role_permissions_permission_key": {
+					"name": "idx_store_role_permissions_permission_key",
 					"columns": [
 						{
-							"expression": "permission_id",
+							"expression": "permission_key",
 							"isExpression": false,
 							"asc": true,
 							"nulls": "last"
@@ -822,21 +740,12 @@
 					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
-				},
-				"store_role_permissions_permission_id_permissions_id_fk": {
-					"name": "store_role_permissions_permission_id_permissions_id_fk",
-					"tableFrom": "store_role_permissions",
-					"tableTo": "permissions",
-					"columnsFrom": ["permission_id"],
-					"columnsTo": ["id"],
-					"onDelete": "cascade",
-					"onUpdate": "no action"
 				}
 			},
 			"compositePrimaryKeys": {
-				"store_role_permissions_store_role_id_permission_id_pk": {
-					"name": "store_role_permissions_store_role_id_permission_id_pk",
-					"columns": ["store_role_id", "permission_id"]
+				"store_role_permissions_store_role_id_permission_key_pk": {
+					"name": "store_role_permissions_store_role_id_permission_key_pk",
+					"columns": ["store_role_id", "permission_key"]
 				}
 			},
 			"uniqueConstraints": {},
@@ -1669,45 +1578,55 @@
 			"schema": "public",
 			"values": ["stripe", "paypal"]
 		},
-		"public.permission_action": {
-			"name": "permission_action",
+		"public.permission_key": {
+			"name": "permission_key",
 			"schema": "public",
 			"values": [
-				"create",
-				"read",
-				"update",
-				"delete",
-				"export",
-				"cancel",
-				"refund",
-				"assign",
-				"send",
-				"schedule",
-				"activate",
-				"manage_stock",
-				"approve"
-			]
-		},
-		"public.permission_resource": {
-			"name": "permission_resource",
-			"schema": "public",
-			"values": [
-				"products",
-				"categories",
-				"orders",
-				"returns",
-				"customers",
-				"support_tickets",
-				"warehouse",
-				"inventory",
-				"suppliers",
-				"purchase_orders",
-				"promotions",
-				"messages",
-				"staff",
-				"roles",
-				"reports",
-				"store_settings"
+				"store.read",
+				"store.write",
+				"store.delete",
+				"products.create",
+				"products.read",
+				"products.update",
+				"products.delete",
+				"categories.create",
+				"categories.read",
+				"categories.update",
+				"categories.delete",
+				"orders.read",
+				"orders.update",
+				"orders.cancel",
+				"orders.refund",
+				"returns.read",
+				"returns.update",
+				"customers.read",
+				"customers.update",
+				"support_tickets.read",
+				"support_tickets.update",
+				"support_tickets.assign",
+				"warehouse.read",
+				"warehouse.update",
+				"inventory.read",
+				"inventory.manage_stock",
+				"suppliers.read",
+				"suppliers.update",
+				"purchase_orders.read",
+				"purchase_orders.approve",
+				"promotions.create",
+				"promotions.read",
+				"promotions.update",
+				"promotions.activate",
+				"messages.read",
+				"messages.send",
+				"staff.create",
+				"staff.read",
+				"staff.update",
+				"roles.create",
+				"roles.read",
+				"roles.update",
+				"roles.delete",
+				"reports.read",
+				"reports.export"
 			]
 		},
 		"public.platform_role": {

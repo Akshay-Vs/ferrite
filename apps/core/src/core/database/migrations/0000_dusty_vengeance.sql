@@ -4,8 +4,7 @@ CREATE TYPE "public"."card_brand" AS ENUM('visa', 'mastercard');--> statement-br
 CREATE TYPE "public"."notification_channel" AS ENUM('email', 'sms', 'push', 'whatsapp');--> statement-breakpoint
 CREATE TYPE "public"."notification_type" AS ENUM('order_updates', 'promotions', 'restock', 'price_drop', 'support', 'security');--> statement-breakpoint
 CREATE TYPE "public"."payment_provider" AS ENUM('stripe', 'paypal');--> statement-breakpoint
-CREATE TYPE "public"."permission_action" AS ENUM('create', 'read', 'update', 'delete', 'export', 'cancel', 'refund', 'assign', 'send', 'schedule', 'activate', 'manage_stock', 'approve');--> statement-breakpoint
-CREATE TYPE "public"."permission_resource" AS ENUM('products', 'categories', 'orders', 'returns', 'customers', 'support_tickets', 'warehouse', 'inventory', 'suppliers', 'purchase_orders', 'promotions', 'messages', 'staff', 'roles', 'reports', 'store_settings');--> statement-breakpoint
+CREATE TYPE "public"."permission_key" AS ENUM('store.read', 'store.write', 'store.delete', 'products.create', 'products.read', 'products.update', 'products.delete', 'categories.create', 'categories.read', 'categories.update', 'categories.delete', 'orders.read', 'orders.update', 'orders.cancel', 'orders.refund', 'returns.read', 'returns.update', 'customers.read', 'customers.update', 'support_tickets.read', 'support_tickets.update', 'support_tickets.assign', 'warehouse.read', 'warehouse.update', 'inventory.read', 'inventory.manage_stock', 'suppliers.read', 'suppliers.update', 'purchase_orders.read', 'purchase_orders.approve', 'promotions.create', 'promotions.read', 'promotions.update', 'promotions.activate', 'messages.read', 'messages.send', 'staff.create', 'staff.read', 'staff.update', 'roles.create', 'roles.read', 'roles.update', 'roles.delete', 'reports.read', 'reports.export');--> statement-breakpoint
 CREATE TYPE "public"."platform_role" AS ENUM('admin', 'staff', 'user');--> statement-breakpoint
 CREATE TABLE "user_auth_providers" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -68,14 +67,6 @@ CREATE TABLE "user_notification_preferences" (
 	CONSTRAINT "user_notification_preferences_user_id_channel_type_pk" PRIMARY KEY("user_id","channel","type")
 );
 --> statement-breakpoint
-CREATE TABLE "permissions" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"resource" "permission_resource" NOT NULL,
-	"action" "permission_action" NOT NULL,
-	"description" text,
-	CONSTRAINT "uq_permission_resource_action" UNIQUE("resource","action")
-);
---> statement-breakpoint
 CREATE TABLE "store_members" (
 	"store_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -89,9 +80,9 @@ CREATE TABLE "store_members" (
 --> statement-breakpoint
 CREATE TABLE "store_role_permissions" (
 	"store_role_id" uuid NOT NULL,
-	"permission_id" uuid NOT NULL,
+	"permission_key" "permission_key" NOT NULL,
 	"granted_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "store_role_permissions_store_role_id_permission_id_pk" PRIMARY KEY("store_role_id","permission_id")
+	CONSTRAINT "store_role_permissions_store_role_id_permission_key_pk" PRIMARY KEY("store_role_id","permission_key")
 );
 --> statement-breakpoint
 CREATE TABLE "store_roles" (
@@ -179,7 +170,6 @@ ALTER TABLE "store_members" ADD CONSTRAINT "store_members_store_id_stores_id_fk"
 ALTER TABLE "store_members" ADD CONSTRAINT "store_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "store_members" ADD CONSTRAINT "store_members_role_id_store_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."store_roles"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "store_role_permissions" ADD CONSTRAINT "store_role_permissions_store_role_id_store_roles_id_fk" FOREIGN KEY ("store_role_id") REFERENCES "public"."store_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "store_role_permissions" ADD CONSTRAINT "store_role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "store_roles" ADD CONSTRAINT "store_roles_store_id_stores_id_fk" FOREIGN KEY ("store_id") REFERENCES "public"."stores"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stores" ADD CONSTRAINT "stores_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_addresses" ADD CONSTRAINT "user_addresses_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -191,13 +181,11 @@ CREATE INDEX "idx_payment_methods_user_id" ON "user_payment_methods" USING btree
 CREATE UNIQUE INDEX "uq_payment_methods_one_default_per_user" ON "user_payment_methods" USING btree ("user_id") WHERE is_default = true;--> statement-breakpoint
 CREATE INDEX "idx_payment_methods_expires_at" ON "user_payment_methods" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "idx_notif_prefs_channel_type_enabled" ON "user_notification_preferences" USING btree ("channel","type","is_enabled");--> statement-breakpoint
-CREATE INDEX "idx_permissions_resource" ON "permissions" USING btree ("resource");--> statement-breakpoint
-CREATE INDEX "idx_permissions_lookup" ON "permissions" USING btree ("resource","action");--> statement-breakpoint
 CREATE UNIQUE INDEX "uq_store_members_one_owner_per_store" ON "store_members" USING btree ("store_id","is_owner") WHERE is_owner = true;--> statement-breakpoint
 CREATE INDEX "idx_store_members_user_id" ON "store_members" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "idx_store_members_store_role" ON "store_members" USING btree ("store_id","role_id");--> statement-breakpoint
 CREATE INDEX "idx_store_role_permissions_role_id" ON "store_role_permissions" USING btree ("store_role_id");--> statement-breakpoint
-CREATE INDEX "idx_store_role_permissions_permission_id" ON "store_role_permissions" USING btree ("permission_id");--> statement-breakpoint
+CREATE INDEX "idx_store_role_permissions_permission_key" ON "store_role_permissions" USING btree ("permission_key");--> statement-breakpoint
 CREATE INDEX "idx_store_roles_store_id" ON "store_roles" USING btree ("store_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "uq_stores_slug" ON "stores" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "idx_stores_created_by" ON "stores" USING btree ("created_by");--> statement-breakpoint
