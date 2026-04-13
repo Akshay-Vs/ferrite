@@ -1,7 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { userAuthProviders } from './auth.schema';
 import { userPaymentMethods } from './payment.schema';
-import { permissions } from './permission.schema';
 import { userNotificationPreferences } from './preferences.schema';
 import {
 	storeMembers,
@@ -66,10 +65,6 @@ export const userNotificationPreferencesRelations = relations(
 	})
 );
 
-export const permissionsRelations = relations(permissions, ({ many }) => ({
-	storeRolePermissions: many(storeRolePermissions),
-}));
-
 // ─────────────────────────────────────────
 // STORE RELATIONS
 // ─────────────────────────────────────────
@@ -98,10 +93,6 @@ export const storeRolePermissionsRelations = relations(
 		storeRole: one(storeRoles, {
 			fields: [storeRolePermissions.storeRoleId],
 			references: [storeRoles.id],
-		}),
-		permission: one(permissions, {
-			fields: [storeRolePermissions.permissionId],
-			references: [permissions.id],
 		}),
 	})
 );

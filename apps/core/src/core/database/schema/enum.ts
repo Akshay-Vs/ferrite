@@ -35,40 +35,9 @@ export const paymentProviderEnum = pgEnum('payment_provider', [
 	'paypal',
 ]);
 
-export const permissionResourceEnum = pgEnum('permission_resource', [
-	'products',
-	'categories',
-	'orders',
-	'returns',
-	'customers',
-	'support_tickets',
-	'warehouse',
-	'inventory',
-	'suppliers',
-	'purchase_orders',
-	'promotions',
-	'messages',
-	'staff',
-	'roles',
-	'reports',
-	'store_settings',
-]);
+import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 
-export const permissionActionEnum = pgEnum('permission_action', [
-	'create',
-	'read',
-	'update',
-	'delete',
-	'export', // download CSVs / reports
-	'cancel', // cancel orders
-	'refund', // issue refunds
-	'assign', // assign tickets / orders to staff
-	'send', // send messages / campaigns
-	'schedule', // schedule campaigns or sales
-	'activate', // activate promotions / flash sales
-	'manage_stock', // adjust inventory levels
-	'approve', // approve purchase orders / transfers
-]);
+export const permissionKeyEnum = pgEnum('permission_key', STORE_PERMISSIONS);
 
 export const addressTypeEnum = pgEnum('address_type', [
 	'home',

@@ -4,9 +4,9 @@
  * Pass `overrides` to customise specific fields.
  */
 
+import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { v4 as uuidv4 } from 'uuid';
 import type { NewUserPaymentMethod } from '../schema/payment.schema';
-import type { NewPermission } from '../schema/permission.schema';
 import type { NewUserNotificationPreference } from '../schema/preferences.schema';
 import type {
 	NewStore,
@@ -122,17 +122,6 @@ export function createTestNotificationPreference(
 	};
 }
 
-export function createTestPermission(
-	overrides: Partial<NewPermission> = {}
-): NewPermission {
-	return {
-		resource: 'products',
-		action: 'read',
-		description: 'Permission to read products',
-		...overrides,
-	};
-}
-
 // ── Stores ───────────────────────────────
 let storeCounter = 0;
 
@@ -183,12 +172,12 @@ export function createTestStoreRole(
 // ── Store Role Permissions ───────────────
 export function createTestStoreRolePermission(
 	storeRoleId: string,
-	permissionId: string,
+	permissionKey: PermissionKey,
 	overrides: Partial<NewStoreRolePermission> = {}
 ): NewStoreRolePermission {
 	return {
 		storeRoleId,
-		permissionId,
+		permissionKey,
 		...overrides,
 	};
 }
