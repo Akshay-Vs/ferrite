@@ -2,15 +2,15 @@ import { ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import type { Store } from '@core/database/schema/store.schema';
-import {
-	type IStorePermissionChecker,
-	STORE_PERMISSION_CHECKER,
-} from '@modules/auth/domain/ports/store-permission-checker.port';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
 } from '../../domain/ports/store.repository.port';
+import {
+	type IStorePermissionChecker,
+	STORE_PERMISSION_CHECKER,
+} from '../../domain/ports/store-permission-checker.port';
 import type { CreateStoreInput } from '../../domain/schemas/create-store.zodschema';
 import { AddStoreMemberUseCase } from './add-store-member.usecase';
 import { CreateStoreUseCase } from './create-store.usecase';

@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { CheckStorePermissionUseCase } from './application/use-cases/check-store-permission.usecase';
+
 import { JwtTokenUseCase } from './application/use-cases/jwt-token.usecase';
 import { VerifyWebhookUseCase } from './application/use-cases/verify-webhook.usecase';
 import {
@@ -9,13 +9,12 @@ import {
 	TOKEN_AUTH,
 	WEBHOOK_AUTH,
 } from './domain/ports/auth-provider.tokens';
-import { STORE_PERMISSION_CHECKER } from './domain/ports/store-permission-checker.port';
+
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk.adapter';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
 import { PlatformRBACGuard } from './infrastructure/http/guards/platform-rbac.guard';
 import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
-import { DrizzleStorePermissionRepository } from './infrastructure/persistance/repositories/drizzle-store-permission.repository';
 
 @Global()
 @Module({
@@ -36,12 +35,6 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 			useExisting: TOKEN_AUTH,
 		},
 
-		// Store permission checker (cached repository)
-		{
-			provide: STORE_PERMISSION_CHECKER,
-			useClass: DrizzleStorePermissionRepository,
-		},
-
 		// Global guards
 		{
 			provide: APP_GUARD,
@@ -60,7 +53,6 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 
 		JwtTokenUseCase,
 		VerifyWebhookUseCase,
-		CheckStorePermissionUseCase,
 
 		AuthGuard,
 		WebhookGuard,
@@ -71,12 +63,10 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		AuthGuard,
 		WebhookGuard,
 		AUTH_PROVIDER,
-		STORE_PERMISSION_CHECKER,
 
 		//? Resolved from AuthModule
 		JwtTokenUseCase,
 		VerifyWebhookUseCase,
-		CheckStorePermissionUseCase,
 	],
 })
 export class AuthModule {}

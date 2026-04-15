@@ -1,5 +1,4 @@
 import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
-import { StorePermissionGuard } from '@auth/index';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
@@ -29,6 +28,7 @@ import {
 import { InitializeStoreOrchestratorUseCase } from '../../../application/use-cases/initialize-store-orchestrator.usecase';
 import { UpdateStoreUseCase } from '../../../application/use-cases/update-store.usecase';
 import { CreateStoreDto, UpdateStoreDto } from '../dto/store.dto';
+import { StorePermissionGuard } from '../guards/store-permission.guard';
 
 @ApiTags('Stores')
 @ApiBearerAuth('swagger-access-token')

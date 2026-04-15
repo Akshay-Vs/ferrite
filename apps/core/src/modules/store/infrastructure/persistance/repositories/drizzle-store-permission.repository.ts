@@ -1,3 +1,4 @@
+import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import {
@@ -8,7 +9,7 @@ import {
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { IStorePermissionChecker } from '@modules/auth/domain/ports/store-permission-checker.port';
+import type { IStorePermissionChecker } from '@modules/store/domain/ports/store-permission-checker.port';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
@@ -44,7 +45,7 @@ export class DrizzleStorePermissionRepository
 		// ── Cache hit → return immediately, never touch DB ──
 		const cached = await this.cache.get<CacheEntry>(cacheKey);
 		if (cached !== undefined && cached !== null) {
-			this.tracer.withSpan('cache.storePermissions.hit', async (span) => {
+			await this.tracer.withSpan('cache.storePermissions.hit', async (span) => {
 				span.setAttributes({
 					'cache.key': cacheKey,
 					'cache.hit': true,
@@ -166,7 +167,9 @@ export class DrizzleStorePermissionRepository
 				}
 
 				// Filter out LEFT JOIN nulls (member with no granted permissions)
-				return rows.filter((r) => r.key !== null).map((r) => r.key!);
+				return rows
+					.map((r) => r.key)
+					.filter((key): key is PermissionKey => key !== null);
 			}
 		);
 	}

@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { CheckStorePermissionUseCase } from '@modules/auth/application/use-cases/check-store-permission.usecase';
+import { CheckStorePermissionUseCase } from '@modules/store/application/use-cases/check-store-permission.usecase';
 import {
 	CanActivate,
 	ExecutionContext,
