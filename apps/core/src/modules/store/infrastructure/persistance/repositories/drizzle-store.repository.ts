@@ -169,7 +169,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 				const [store] = await this.db
 					.select()
 					.from(stores)
-					.where(eq(stores.id, storeId));
+					.where(and(eq(stores.id, storeId), sql`deleted_at IS NULL`));
 				return store || null;
 			}
 		);
