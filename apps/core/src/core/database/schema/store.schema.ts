@@ -11,7 +11,7 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
-import { permissions } from './permission.schema';
+import { permissionKeyEnum } from './enum';
 import { users } from './user.schema';
 
 // ─────────────────────────────────────────
@@ -94,19 +94,17 @@ export const storeRolePermissions = pgTable(
 		storeRoleId: uuid('store_role_id')
 			.notNull()
 			.references(() => storeRoles.id, { onDelete: 'cascade' }),
-		permissionId: uuid('permission_id')
-			.notNull()
-			.references(() => permissions.id, { onDelete: 'cascade' }),
+		permissionKey: permissionKeyEnum('permission_key').notNull(),
 		grantedAt: timestamp('granted_at', { withTimezone: true })
 			.notNull()
 			.defaultNow(),
 	},
 	(t) => [
-		primaryKey({ columns: [t.storeRoleId, t.permissionId] }),
+		primaryKey({ columns: [t.storeRoleId, t.permissionKey] }),
 		// "What can this store role do?"
 		index('idx_store_role_permissions_role_id').on(t.storeRoleId),
 		// "Which store roles have this permission?"
-		index('idx_store_role_permissions_permission_id').on(t.permissionId),
+		index('idx_store_role_permissions_permission_key').on(t.permissionKey),
 	]
 );
 

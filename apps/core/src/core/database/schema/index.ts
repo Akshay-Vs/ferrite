@@ -3,7 +3,7 @@ export * from './enum';
 export * from './inbox.schema';
 export * from './outbox.schema';
 export * from './payment.schema';
-export * from './permission.schema';
+
 export * from './preferences.schema';
 export * from './relations';
 export * from './store.schema';
