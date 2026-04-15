@@ -5,5 +5,17 @@
 	"testRegex": ".e2e-spec.ts$",
 	"transform": {
 		"^.+\\.(t|j)s$": "ts-jest"
+	},
+	"moduleNameMapper": {
+		"^@auth/(.*)$": "<rootDir>/../src/modules/auth/$1",
+		"^@health/(.*)$": "<rootDir>/../src/modules/health/$1",
+		"^@users/(.*)$": "<rootDir>/../src/modules/users/$1",
+		"^@webhooks/(.*)$": "<rootDir>/../src/modules/webhooks/$1",
+		"^@core/(.*)$": "<rootDir>/../src/core/$1",
+		"^@modules/(.*)$": "<rootDir>/../src/modules/$1",
+		"^@common/(.*)$": "<rootDir>/../src/common/$1",
+		"^@database/(.*)$": "<rootDir>/../src/core/database/$1",
+		"^@libs/(.*)$": "<rootDir>/../src/libs/$1",
+		"^uuid$": "<rootDir>/uuid.mock.ts"
 	}
 }

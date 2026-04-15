@@ -1,10 +1,15 @@
+import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
-import { storeMembers, storeRolePermissions } from '@core/database/schema';
+import {
+	storeMembers,
+	storeRolePermissions,
+	storeRoles,
+} from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { IStorePermissionChecker } from '@modules/auth/domain/ports/store-permission-checker.port';
+import type { IStorePermissionChecker } from '@modules/store/domain/ports/store-permission-checker.port';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
@@ -40,7 +45,7 @@ export class DrizzleStorePermissionRepository
 		// ── Cache hit → return immediately, never touch DB ──
 		const cached = await this.cache.get<CacheEntry>(cacheKey);
 		if (cached !== undefined && cached !== null) {
-			this.tracer.withSpan('cache.storePermissions.hit', async (span) => {
+			await this.tracer.withSpan('cache.storePermissions.hit', async (span) => {
 				span.setAttributes({
 					'cache.key': cacheKey,
 					'cache.hit': true,
@@ -75,20 +80,50 @@ export class DrizzleStorePermissionRepository
 		);
 	}
 
+	async invalidatePermissionsByRole(
+		storeId: string,
+		roleId: string
+	): Promise<void> {
+		await this.tracer.withSpan(
+			'cache.storePermissions.invalidateByRole',
+			async (span) => {
+				span.setAttributes({
+					'cache.store_id': storeId,
+					'cache.role_id': roleId,
+					'cache.operation': 'invalidateByRole',
+				});
+
+				const members = await this.db
+					.select({ userId: storeMembers.userId })
+					.from(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId)
+						)
+					);
+
+				await Promise.all(
+					members.map((m) => this.invalidatePermissions(m.userId, storeId))
+				);
+			}
+		);
+	}
+
 	/**
 	 * Single-query permission resolution:
 	 *
 	 * ```sql
-	 * SELECT sm.role_id, p.key
+	 * SELECT sm.role_id, srp.permission_key
 	 * FROM   store_members sm
-	 * LEFT JOIN store_role_permissions srp ON sm.role_id = srp.store_role_id
-	 * LEFT JOIN permissions             p  ON srp.permission_id = p.id
+	 * INNER JOIN store_roles sr ON sm.role_id = sr.id AND sm.store_id = sr.store_id
+	 * LEFT JOIN store_role_permissions srp ON sr.id = srp.store_role_id
 	 * WHERE  sm.user_id = :userId AND sm.store_id = :storeId
 	 * ```
 	 *
 	 * - 0 rows  → user is **not a member** → `null`
-	 * - rows with `p.key IS NULL` → member, but role has **no permissions** → `[]`
-	 * - rows with values → map to `"resource:action"` strings
+	 * - rows with `srp.permission_key IS NULL` → member, but role has **no permissions** → `[]`
+	 * - rows with values → map to `permission_key` strings (e.g. "products.create")
 	 */
 	private async queryPermissions(
 		userId: string,
@@ -98,7 +133,7 @@ export class DrizzleStorePermissionRepository
 			this.tracer,
 			'db.storePermissions.getByMember',
 			{
-				'db.table': 'store_members,store_role_permissions',
+				'db.table': 'store_members,store_roles,store_role_permissions',
 				'db.operation': 'select',
 			},
 			async () => {
@@ -108,9 +143,16 @@ export class DrizzleStorePermissionRepository
 						key: storeRolePermissions.permissionKey,
 					})
 					.from(storeMembers)
+					.innerJoin(
+						storeRoles,
+						and(
+							eq(storeMembers.roleId, storeRoles.id),
+							eq(storeMembers.storeId, storeRoles.storeId)
+						)
+					)
 					.leftJoin(
 						storeRolePermissions,
-						eq(storeMembers.roleId, storeRolePermissions.storeRoleId)
+						eq(storeRoles.id, storeRolePermissions.storeRoleId)
 					)
 					.where(
 						and(
@@ -125,7 +167,9 @@ export class DrizzleStorePermissionRepository
 				}
 
 				// Filter out LEFT JOIN nulls (member with no granted permissions)
-				return rows.filter((r) => r.key !== null).map((r) => r.key!);
+				return rows
+					.map((r) => r.key)
+					.filter((key): key is PermissionKey => key !== null);
 			}
 		);
 	}

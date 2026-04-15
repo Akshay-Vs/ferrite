@@ -33,5 +33,4 @@ export {
 // Guards
 export { AuthGuard } from './infrastructure/http/guards/auth.guard';
 export { PlatformRBACGuard } from './infrastructure/http/guards/platform-rbac.guard';
-export { StorePermissionGuard } from './infrastructure/http/guards/store-permission.guard';
 export { WebhookGuard } from './infrastructure/http/guards/webhook.guard';

@@ -23,4 +23,11 @@ export interface IStorePermissionChecker {
 	 * permissions (role assignment, role update, member removal, etc.).
 	 */
 	invalidatePermissions(userId: string, storeId: string): Promise<void>;
+
+	/**
+	 * Evicts the cached permission set for all users assigned to a specific role.
+	 *
+	 * Must be called when a role's permissions are updated.
+	 */
+	invalidatePermissionsByRole(storeId: string, roleId: string): Promise<void>;
 }
