@@ -3,7 +3,15 @@
 import { cn } from '@core/utils/utils';
 import { Slash } from '@presentation/shapes/slash';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+	memo,
+	useCallback,
+	useEffect,
+	useId,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 
 export type TabItem = {
 	id: string | number;
@@ -113,6 +121,7 @@ export const TabBar = memo(
 		const maskX = useMotionValue(0);
 		const maskWidth = useMotionValue(0);
 		const patternX = useTransform(maskX, (x) => -x);
+		const patternId = useId();
 
 		useEffect(() => {
 			if (!containerRef.current) return;
@@ -227,7 +236,7 @@ export const TabBar = memo(
 							className="absolute top-0 bottom-0 w-500 pointer-events-none"
 							style={{ x: patternX }}
 						>
-							<Slash gap={gap} />
+							<Slash gap={gap} id={patternId} />
 						</motion.div>
 					</motion.div>
 				)}

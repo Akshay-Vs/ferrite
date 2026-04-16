@@ -1,4 +1,4 @@
-export const Slash = ({ gap = 10 }: { gap?: number }) => {
+export const Slash = ({ gap = 10, id }: { gap?: number; id: string }) => {
 	return (
 		<svg
 			width="100%"
@@ -8,7 +8,7 @@ export const Slash = ({ gap = 10 }: { gap?: number }) => {
 		>
 			<defs>
 				<pattern
-					id="navPattern"
+					id={id}
 					width={gap}
 					height="100%"
 					patternUnits="userSpaceOnUse"
@@ -31,7 +31,7 @@ export const Slash = ({ gap = 10 }: { gap?: number }) => {
 					</svg>
 				</pattern>
 			</defs>
-			<rect width="100%" height="100%" fill="url(#navPattern)" />
+			<rect width="100%" height="100%" fill={`url(#${id})`} />
 		</svg>
 	);
 };
