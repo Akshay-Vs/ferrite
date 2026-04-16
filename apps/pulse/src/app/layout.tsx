@@ -1,12 +1,12 @@
+import { inter } from '@app/(config)/fonts';
+import { appMetadata } from '@app/(config)/metadata';
 import { ClerkProvider } from '@clerk/nextjs';
+import { cn } from '@core/utils/utils';
 import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
-import { inter } from '@/app/(config)/fonts';
-import { cn } from '@/core/utils/utils';
-import { appMetadata } from './(config)/metadata';
 
-import '@/presentation/styles/tailwind.css';
-import '@/presentation/styles/globals.scss';
+import '@presentation/styles/tailwind.css';
+import '@presentation/styles/globals.scss';
 
 export const metadata: Metadata = appMetadata;
 

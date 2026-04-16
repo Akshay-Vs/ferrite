@@ -1,4 +1,4 @@
-export const Slash = ({ gap = 10 }: { gap: number }) => {
+export const Slash = ({ gap = 10 }: { gap?: number }) => {
 	return (
 		<svg
 			width="100%"

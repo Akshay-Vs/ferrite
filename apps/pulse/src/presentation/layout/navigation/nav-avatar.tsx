@@ -5,8 +5,8 @@ import {
 	Avatar,
 	AvatarFallback,
 	AvatarImage,
-} from '@/presentation/primitives/avatar';
-import { Skeleton } from '@/presentation/primitives/skeleton';
+} from '@presentation/primitives/avatar';
+import { Skeleton } from '@presentation/primitives/skeleton';
 
 export const NavAvatar = () => {
 	const { isLoaded, isSignedIn, user } = useUser();

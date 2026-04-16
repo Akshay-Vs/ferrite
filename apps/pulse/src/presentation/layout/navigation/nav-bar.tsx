@@ -1,4 +1,4 @@
-import { Logo } from '@/presentation/primitives/logo';
+import { Logo } from '@presentation/primitives/logo';
 import { NavAction } from './nav-actions';
 import { NavAvatar } from './nav-avatar';
 import { NavLinks } from './nav-links';

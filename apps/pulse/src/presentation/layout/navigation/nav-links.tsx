@@ -1,8 +1,8 @@
 'use client';
 
+import { TabBar } from '@presentation/primitives/tab-bar';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
-import { TabBar } from '@/presentation/primitives/tab-bar';
 import { NavRoutes } from './nav-routes';
 
 export const NavLinks = () => {

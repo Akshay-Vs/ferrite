@@ -1,9 +1,9 @@
 'use client';
 
+import { cn } from '@core/utils/utils';
+import { Slash } from '@presentation/shapes/slash';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { cn } from '@/core/utils/utils';
-import { Slash } from '@/presentation/shapes/slash';
 
 export type TabItem = {
 	id: string | number;
