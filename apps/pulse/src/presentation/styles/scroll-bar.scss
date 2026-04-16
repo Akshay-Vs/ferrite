@@ -1,0 +1,25 @@
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+* {
+  -ms-overflow-style: auto;
+  -moz-scrollbar-width: 4px;
+  scrollbar-width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background: #a0a0a0;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cacaca;
+  cursor: pointer;
+}

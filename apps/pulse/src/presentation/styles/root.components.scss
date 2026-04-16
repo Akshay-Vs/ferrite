@@ -1,0 +1,79 @@
+@reference "./tailwind.css";
+
+@layer components {
+  .container {
+    @apply w-full max-w-170 p-6;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-2xl p-8 flex flex-col gap-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_24px_64px_rgba(0,0,0,0.5)];
+  }
+
+  .card-header {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .header-row {
+    @apply flex items-center justify-between;
+  }
+
+  .badge {
+    @apply inline-flex items-center bg-accent-glow border border-[rgba(108,99,255,0.4)] text-[#a09aff] font-mono text-[0.65rem] tracking-[0.12em] px-2.5 py-1 rounded w-fit;
+  }
+
+  h1 {
+    @apply text-2xl font-semibold tracking-tight text-white;
+  }
+
+  .subtitle {
+    @apply text-muted text-[0.9rem];
+  }
+
+  .token-box {
+    @apply bg-[#0d0d14] border border-border rounded-[10px] py-5 px-6 min-h-25 flex flex-col gap-2 overflow-hidden relative;
+  }
+
+  .token-box::before {
+    @apply content-[''] absolute inset-0 rounded-[inherit] bg-[linear-gradient(135deg,rgba(108,99,255,0.04)_0%,transparent_60%)] pointer-events-none;
+  }
+
+  .prefix {
+    @apply font-mono text-[0.72rem] text-[#6c63ff] tracking-[0.08em] font-medium uppercase;
+  }
+
+  .token-value {
+    @apply font-mono text-[0.78rem] text-[#c8c5ff] break-all leading-[1.65] bg-none border-none whitespace-pre-wrap;
+  }
+
+  .state-msg {
+    @apply flex items-center gap-2.5 text-muted text-[0.88rem] m-auto;
+  }
+
+  .state-msg.warn {
+    @apply text-warn;
+  }
+
+  .state-msg-col {
+    @apply flex flex-col items-center gap-4 m-auto text-center;
+  }
+
+  .warn-text {
+    @apply text-muted text-[0.88rem];
+  }
+
+  .signin-btn {
+    @apply inline-flex items-center gap-2 bg-accent text-white no-underline shrink-0 rounded-lg px-5 py-2.5 font-sans text-sm font-medium transition-[background,transform,box-shadow] duration-150 shadow-[0_4px_16px_rgba(108,99,255,0.3)] hover:bg-[#7c74ff] hover:shadow-[0_6px_24px_rgba(108,99,255,0.4)] active:scale-95;
+  }
+
+  .spinner {
+    @apply w-3.5 h-3.5 border-2 border-border border-t-accent rounded-full animate-[spin_0.75s_linear_infinite] shrink-0;
+  }
+
+  .copy-btn {
+    @apply inline-flex items-center gap-2 bg-accent text-white border-none rounded-lg px-5 py-2.5 font-sans text-sm font-medium cursor-pointer transition-[background,transform,box-shadow] duration-150 shadow-[0_4px_16px_rgba(108,99,255,0.3)] self-start hover:bg-[#7c74ff] hover:shadow-[0_6px_24px_rgba(108,99,255,0.4)] active:scale-95;
+  }
+
+  .copy-btn.copied {
+    @apply bg-green-600 shadow-[0_4px_16px_rgba(34,197,94,0.3)];
+  }
+}

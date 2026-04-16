@@ -1,0 +1,10 @@
+@use "root.components.scss";
+@use "scroll-bar.scss";
+@use "debug-mode.scss";
+
+body {
+  min-height: 100vh;
+  // background-image:
+  //   radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.1), transparent),
+  //   radial-gradient(ellipse 60% 40% at 80% 110%, rgba(99, 179, 255, 0.01), transparent);
+}
