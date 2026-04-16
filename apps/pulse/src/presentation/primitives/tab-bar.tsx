@@ -102,7 +102,10 @@ export const TabBar = memo(
 		const [tappedId, setTappedId] = useState<string | number | null>(null);
 
 		const activeIndex = useMemo(
-			() => items.findIndex((item) => item.id === activeId) ?? 0,
+			() => {
+				const index = items.findIndex((item) => item.id === activeId);
+				return index === -1 ? 0 : index;
+			},
 			[items, activeId]
 		);
 		const prevIndex = useRef(-1);
