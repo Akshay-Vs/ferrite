@@ -20,7 +20,7 @@ export default function RootLayout({
 			<html lang="en" className={cn('font-sans', inter.variable)}>
 				<body className={`antialiased bg-bg`}>
 					<div className="min-h-dvh w-dvw p-6">
-						<NextTopLoader color="#A68BF8FA" height={2} showSpinner={false} />
+						<NextTopLoader color="#A68BF8FA" height={3} showSpinner={false} />
 						{children}
 					</div>
 				</body>
