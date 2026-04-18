@@ -22,7 +22,7 @@
 		"db:studio": "drizzle-kit studio --verbose"
 	},
 	"dependencies": {
-		"@clerk/backend": "^2.33.0",
+		"@clerk/backend": "^3.2.8",
 		"@nestjs/bullmq": "^11.0.4",
 		"@nestjs/cache-manager": "^3.1.0",
 		"@nestjs/common": "^11.0.1",
