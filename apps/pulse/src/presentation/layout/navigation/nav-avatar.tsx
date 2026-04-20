@@ -25,7 +25,7 @@ export const NavAvatar = () => {
 		`${user.firstName?.[0] ?? 'x'}${user.lastName?.[0] ?? 'x'}`.toUpperCase();
 
 	return (
-		<Avatar className="w-16 h-16">
+		<Avatar className="w-16 h-16 border-2 border-transparent">
 			<AvatarImage src={user.imageUrl || ''} alt={initials} />
 			<AvatarFallback>{initials || '?'}</AvatarFallback>
 		</Avatar>
