@@ -7,4 +7,5 @@ export const CAMPAIGNS = '/campaigns';
 export const LOGIN = '/auth/login';
 export const SIGNUP = '/auth/sign-up';
 export const FORGOT_PASSWORD = '/auth/forgot-password';
-export const VERIFY_EMAIL = '/auth/verify-email';
+export const LOGIN_EMAIL_VERIFY = '/auth/login/verify-email';
+export const SIGNUP_EMAIL_VERIFY = '/auth/sign-up/verify-email';

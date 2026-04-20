@@ -2,7 +2,10 @@ import { useSignIn } from '@clerk/nextjs';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { OVERVIEW, VERIFY_EMAIL } from '@/core/constants/routes.constrains';
+import {
+	LOGIN_EMAIL_VERIFY,
+	OVERVIEW,
+} from '@/core/constants/routes.constrains';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { loginSchema } from '../schemas/signin-form.zodschema';
 
@@ -44,7 +47,7 @@ export const useLoginForm = () => {
 							emailAddressId: emailCodeFactor.emailAddressId,
 						});
 
-						router.push(VERIFY_EMAIL);
+						router.push(LOGIN_EMAIL_VERIFY);
 					}
 				}
 
@@ -60,7 +63,7 @@ export const useLoginForm = () => {
 							emailAddressId: emailCodeFactor.emailAddressId,
 						});
 
-						router.push(VERIFY_EMAIL);
+						router.push(LOGIN_EMAIL_VERIFY);
 					}
 				}
 

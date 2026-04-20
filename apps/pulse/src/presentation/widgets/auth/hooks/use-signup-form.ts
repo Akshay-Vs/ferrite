@@ -2,7 +2,7 @@ import { useSignUp } from '@clerk/nextjs';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { SIGNUP_VERIFY_EMAIL } from '@/core/constants/routes.constrains';
+import { SIGNUP_EMAIL_VERIFY } from '@/core/constants/routes.constrains';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { signupSchema } from '../schemas/login-form.zodschema';
 
@@ -37,7 +37,7 @@ export const useSignUpForm = () => {
 					strategy: 'email_code',
 				});
 
-				router.push(SIGNUP_VERIFY_EMAIL);
+				router.push(SIGNUP_EMAIL_VERIFY);
 			} catch (error: unknown) {
 				setFormError(resolveClerkError(error));
 			}

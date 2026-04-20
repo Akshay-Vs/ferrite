@@ -1,6 +1,7 @@
 'use client';
 
 import { useSignIn } from '@clerk/nextjs';
+import type { SignInResource } from '@clerk/types';
 import { redirect } from 'next/navigation';
 import type z from 'zod/v4';
 import { OVERVIEW } from '@/core/constants/routes.constrains';
