@@ -20,7 +20,7 @@ export default function RootLayout({
 		<html lang="en" className={cn('font-sans', inter.variable)}>
 			<body className="antialiased bg-background text-content">
 				<ClerkProvider>
-					<div className="min-h-dvh w-dvw flex flex-col">
+					<div className="min-h-dvh max-w-dvw flex flex-col">
 						<ThemeProvider
 							attribute="class"
 							defaultTheme="dark"
