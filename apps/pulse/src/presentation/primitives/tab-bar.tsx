@@ -1,8 +1,15 @@
 'use client';
 
+import { useLowFPS } from '@core/hooks/use-low-fps';
 import { cn } from '@core/utils/utils';
 import { Slash } from '@presentation/shapes/slash';
-import { animate, motion, useMotionValue, useTransform } from 'motion/react';
+import {
+	animate,
+	motion,
+	useMotionValue,
+	useReducedMotion,
+	useTransform,
+} from 'motion/react';
 import {
 	memo,
 	useCallback,
@@ -37,6 +44,8 @@ interface TabBarButtonProps {
 	item: TabItem;
 	isActive: boolean;
 	isHovered: boolean;
+	isPending: boolean;
+	disableAnimations?: boolean;
 	onHoverStart: (id: string | number) => void;
 	onHoverEnd: () => void;
 	onClick: (id: string | number) => void;
@@ -49,6 +58,8 @@ const TabBarButton = memo(
 		item,
 		isActive,
 		isHovered,
+		isPending,
+		disableAnimations,
 		onHoverStart,
 		onHoverEnd,
 		onClick,
@@ -69,15 +80,29 @@ const TabBarButton = memo(
 				onPointerUp={onTapEnd}
 				onPointerLeave={onTapEnd}
 				onPointerCancel={onTapEnd}
-				whileTap={{ scale: 0.95 }}
+				whileTap={{ scale: disableAnimations ? 1 : 0.95 }}
 			>
 				{/* Layer 1: Hover indicator */}
-				{isHovered && (
+				{isHovered && !isPending && (
 					<motion.div
 						layoutId="nav-hover-mask"
 						className="absolute inset-px rounded-full pointer-events-none -z-10"
 						style={{ backgroundColor: 'rgba(62, 60, 72, 0.4)' }}
-						transition={springTransition}
+						transition={disableAnimations ? { duration: 0 } : springTransition}
+					/>
+				)}
+
+				{/* Layer 1.5: Pending indicator */}
+				{isPending && (
+					<motion.div
+						className="absolute inset-px rounded-full pointer-events-none -z-10 bg-active"
+						initial={{ opacity: 0.23 }}
+						animate={{ opacity: disableAnimations ? 0.5 : [0.23, 0.5, 0.23] }}
+						transition={
+							disableAnimations
+								? { duration: 0 }
+								: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+						}
 					/>
 				)}
 
@@ -93,7 +118,12 @@ TabBarButton.displayName = 'TabBarButton';
 
 export const TabBar = memo(
 	({ items, activeId, onChange, className, gap = 16 }: TabBarProps) => {
+		const shouldReduceMotion = useReducedMotion();
+		const isLowFPS = useLowFPS();
+		const disableAnimations = shouldReduceMotion || isLowFPS;
+
 		const [hoveredId, setHoveredId] = useState<string | number | null>(null);
+		const [pendingId, setPendingId] = useState<string | number | null>(null);
 
 		const [navRects, setNavRects] = useState<{ left: number; width: number }[]>(
 			[]
@@ -122,6 +152,18 @@ export const TabBar = memo(
 		const maskWidth = useMotionValue(0);
 		const patternX = useTransform(maskX, (x) => -x);
 		const patternId = useId();
+
+		useEffect(() => {
+			setPendingId(null);
+		}, []);
+
+		const handleClick = useCallback(
+			(id: string | number) => {
+				setPendingId(id);
+				onChange(id);
+			},
+			[onChange]
+		);
 
 		useEffect(() => {
 			if (!containerRef.current) return;
@@ -172,23 +214,33 @@ export const TabBar = memo(
 
 					const sequence = async () => {
 						// 1. Anticipation stretch: expand edge towards the target
-						await Promise.all([
-							animate(
-								maskX,
-								moveRight ? prev.left : prev.left - stretchAmount,
-								{ duration: 0.1, ease: 'easeOut' }
-							),
-							animate(maskWidth, prev.width + stretchAmount, {
-								duration: 0.1,
-								ease: 'easeOut',
-							}),
-						]);
+						if (!disableAnimations) {
+							await Promise.all([
+								animate(
+									maskX,
+									moveRight ? prev.left : prev.left - stretchAmount,
+									{ duration: 0.1, ease: 'easeOut' }
+								),
+								animate(maskWidth, prev.width + stretchAmount, {
+									duration: 0.1,
+									ease: 'easeOut',
+								}),
+							]);
+						}
 
 						if (cancelled) return;
 
 						// 2. Main translation: snap to target seamlessly
-						animate(maskX, current.left, springTransition);
-						animate(maskWidth, current.width, springTransition);
+						animate(
+							maskX,
+							current.left,
+							disableAnimations ? { duration: 0 } : springTransition
+						);
+						animate(
+							maskWidth,
+							current.width,
+							disableAnimations ? { duration: 0 } : springTransition
+						);
 					};
 					void sequence();
 				} else {
@@ -205,7 +257,7 @@ export const TabBar = memo(
 			return () => {
 				cancelled = true;
 			};
-		}, [activeIndex, navRects, maskX, maskWidth]);
+		}, [activeIndex, navRects, maskX, maskWidth, disableAnimations]);
 
 		const resolvedHoverId = hoveredId ?? activeId;
 
@@ -227,9 +279,9 @@ export const TabBar = memo(
 						className="absolute top-0 bottom-0 bg-active overflow-hidden rounded-full pointer-events-none z-0"
 						style={{ x: maskX, width: maskWidth }}
 						animate={{
-							scale: tappedId === activeId ? 0.95 : 1,
+							scale: disableAnimations ? 1 : tappedId === activeId ? 0.95 : 1,
 						}}
-						transition={springTransition}
+						transition={disableAnimations ? { duration: 0 } : springTransition}
 					>
 						{/* Inverse translating static inner pattern */}
 						<motion.div
@@ -247,9 +299,11 @@ export const TabBar = memo(
 						item={item}
 						isActive={activeId === item.id}
 						isHovered={resolvedHoverId === item.id}
+						isPending={pendingId === item.id}
+						disableAnimations={disableAnimations}
 						onHoverStart={handleHoverStart}
 						onHoverEnd={handleHoverEnd}
-						onClick={onChange}
+						onClick={handleClick}
 						onTapStart={handleTapStart}
 						onTapEnd={handleTapEnd}
 					/>
