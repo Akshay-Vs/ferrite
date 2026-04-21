@@ -112,7 +112,7 @@ function SelectItem({
 			className={cn(
 				'relative flex h-13 w-full items-center gap-2.5 border border-transparent rounded-full px-6 text-sm font-medium outline-none select-none transition-colors cursor-pointer',
 				// Hover/Focus states
-				'focus:bg-active/30 hover:border-border-gradientfocus:text-accent-foreground',
+				'focus:bg-active/30 hover:border-border-gradient focus:text-accent-foreground',
 				'data-disabled:pointer-events-none data-disabled:opacity-50',
 				"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				className
