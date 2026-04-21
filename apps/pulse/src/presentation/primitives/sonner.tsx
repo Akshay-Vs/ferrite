@@ -48,7 +48,7 @@ export function HeadlessToast({
 	cancel,
 }: CustomToastProps) {
 	return (
-		<div className="group relative flex w-full md:w-100 items-start gap-4 overflow-hidden rounded-[2rem]  px-8 py-6 shadow-2xl backdrop-blur-xl bg-surface/90 border-2 border-border-gradient outline-none select-none cursor-pointer pointer-events-auto">
+		<div className="group relative flex w-full md:w-100 items-start gap-4 overflow-hidden rounded-[2rem] px-8 py-6 shadow-2xl backdrop-blur-xl bg-surface/90 border-2 border-border-gradient outline-none select-none cursor-pointer pointer-events-auto">
 			{/* Content Topology */}
 			<div className="flex flex-1 flex-col gap-1.5">
 				<div className="flex items-center gap-3 text-base font-semibold text-foreground">
@@ -155,7 +155,7 @@ export const toast = {
 	dismiss: (id?: string | number) => sonnerToast.dismiss(id),
 
 	/**
-	 * Advanced Promise Orchestration with Retry Capabilities
+	 * Advanced Promise Orchestration with Conditional Retry Capabilities
 	 */
 	promise: <T,>(
 		promiseGenerator: Promise<T> | (() => Promise<T>),
@@ -170,7 +170,7 @@ export const toast = {
 				| Omit<CustomToastProps, 'id' | 'type'>
 				| ((
 						error: unknown,
-						retry: () => void
+						retry?: () => void // Modified to specify retry as optional
 				  ) => string | Omit<CustomToastProps, 'id' | 'type'>);
 		}
 	) => {
@@ -183,12 +183,12 @@ export const toast = {
 			return typeof resolved === 'string' ? { title: resolved } : resolved;
 		};
 
-		// 1. Generate a stable ID to anchor the component across state transitions
+		// Generate a stable ID to anchor the component across state transitions
 		const toastId = sonnerToast.custom((t) => (
 			<HeadlessToast id={t} type="loading" {...resolveProps(options.loading)} />
 		));
 
-		// 2. Define the execution matrix, enabling recursive retries
+		// Define the execution matrix, enabling conditional recursive retries
 		const execute = () => {
 			// Re-hydrate the loading state (critical for subsequent retry invocations)
 			sonnerToast.custom(
@@ -204,10 +204,8 @@ export const toast = {
 
 			// Evaluate the promise. If a raw promise is passed, it evaluates immediately;
 			// if a closure is passed, it spawns a fresh execution context (required for retries).
-			const p =
-				typeof promiseGenerator === 'function'
-					? promiseGenerator()
-					: promiseGenerator;
+			const isFactory = typeof promiseGenerator === 'function';
+			const p = isFactory ? promiseGenerator() : promiseGenerator;
 
 			p.then((data) => {
 				sonnerToast.custom(
@@ -223,10 +221,12 @@ export const toast = {
 			}).catch((err) => {
 				sonnerToast.custom(
 					(t) => {
-						// Specialized resolution for error to inject the retry closure
+						// Specialized resolution for error to conditionally inject the retry closure
 						const errorProps =
 							typeof options.error === 'function'
-								? options.error(err, execute)
+								? isFactory
+									? options.error(err, execute)
+									: options.error(err)
 								: typeof options.error === 'string'
 									? { title: options.error }
 									: options.error;

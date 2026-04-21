@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import type { PropsWithChildren } from 'react';
-import { OVERVIEW } from '@/core/constants/routes.constrains';
+import { OVERVIEW } from '@/core/constants/routes.constants';
 import { Card, CardContent, CardHeader } from '@/presentation/primitives/card';
 import { Logo } from '@/presentation/primitives/logo';
 

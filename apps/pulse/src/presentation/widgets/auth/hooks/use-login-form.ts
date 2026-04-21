@@ -5,7 +5,7 @@ import { useState } from 'react';
 import {
 	LOGIN_EMAIL_VERIFY,
 	OVERVIEW,
-} from '@/core/constants/routes.constrains';
+} from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { loginSchema } from '../schemas/signin-form.zodschema';
 
@@ -23,9 +23,11 @@ export const useLoginForm = () => {
 			onChange: loginSchema,
 		},
 		onSubmit: async ({ value }) => {
+			if (!signIn) return;
+
 			setFormError(null);
 
-			// 1. Instantiate the authentication attempt
+			// Instantiate the authentication attempt
 			const { error: createError } = await signIn.create({
 				identifier: value.email,
 			});
@@ -35,7 +37,7 @@ export const useLoginForm = () => {
 				return;
 			}
 
-			// 2. Submit cryptographic proof via the explicit Signal API
+			// Submit cryptographic proof via the explicit Signal API
 			const { error: passwordError } = await signIn.password({
 				password: value.password,
 			});
@@ -45,7 +47,7 @@ export const useLoginForm = () => {
 				return;
 			}
 
-			// 3. Evaluate operational status and route accordingly
+			// Evaluate operational status and route accordingly
 			if (signIn.status === 'needs_first_factor') {
 				const { error: sendError } = await signIn.emailCode.sendCode();
 				if (sendError) {
@@ -69,7 +71,7 @@ export const useLoginForm = () => {
 				return;
 			}
 
-			// 4. Finalize session realization upon complete status
+			// Finalize session realization upon complete status
 			if (signIn.status === 'complete') {
 				await signIn.finalize({
 					navigate: () => router.push(OVERVIEW),

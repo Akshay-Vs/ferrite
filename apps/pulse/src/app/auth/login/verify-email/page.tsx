@@ -4,7 +4,7 @@ import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import type z from 'zod/v4';
-import { OVERVIEW } from '@/core/constants/routes.constrains';
+import { OVERVIEW } from '@/core/constants/routes.constants';
 import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 import type { otpFormSchema } from '@/presentation/widgets/auth/schemas/otp-form.zodschema';

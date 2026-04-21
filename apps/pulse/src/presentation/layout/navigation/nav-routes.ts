@@ -4,7 +4,7 @@ import {
 	ORDERS,
 	OVERVIEW,
 	USERS,
-} from '@/core/constants/routes.constrains';
+} from '@/core/constants/routes.constants';
 
 export const NavRoutes = [
 	{ id: 'overview-link', label: 'Overview', href: OVERVIEW },

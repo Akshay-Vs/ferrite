@@ -29,8 +29,11 @@ export default function OnboardingCreateStoreForm() {
 							field.state.meta.isTouched && !!field.state.meta.errors.length;
 						return (
 							<Field data-invalid={isInvalid}>
-								<FieldLabel className="ml-1">Store Name</FieldLabel>
+								<FieldLabel htmlFor={field.name} className="ml-1">
+									Store Name
+								</FieldLabel>
 								<Input
+									id={field.name}
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
@@ -50,8 +53,11 @@ export default function OnboardingCreateStoreForm() {
 							field.state.meta.isTouched && !!field.state.meta.errors.length;
 						return (
 							<Field data-invalid={isInvalid}>
-								<FieldLabel className="ml-1">Store Description</FieldLabel>
+								<FieldLabel htmlFor={field.name} className="ml-1">
+									Store Description
+								</FieldLabel>
 								<Textarea
+									id={field.name}
 									name={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}

@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'nextjs-toploader/app';
-import { ONBOARDING_CONFIGURE_STORE } from '@/core/constants/routes.constrains';
+import { ONBOARDING_CONFIGURE_STORE } from '@/core/constants/routes.constants';
 import { storeCreateSchema } from '../schemas/onboarding-store.zodschema';
 import { useStoreCreationStore } from '../stores/onboarding.store';
 
