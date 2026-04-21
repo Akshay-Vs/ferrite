@@ -85,7 +85,7 @@ const VerificationPage = () => {
 				highlightedText="Email"
 				description="We sent a 6-digit code to your email"
 			/>
-			<OTPForm onFormSubmit={onSubmit} onResend={onResend} />;
+			<OTPForm onFormSubmit={onSubmit} onResend={onResend} />
 		</div>
 	);
 };
