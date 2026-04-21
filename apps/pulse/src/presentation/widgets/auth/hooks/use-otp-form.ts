@@ -6,12 +6,13 @@ import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { otpFormSchema } from '../schemas/otp-form.zodschema';
 
 interface Props {
-	isReady: boolean;
-	onFormSubmit: (values: z.infer<typeof otpFormSchema>) => Promise<void>;
-	onResend: () => Promise<void>;
+	onFormSubmit: (
+		values: z.infer<typeof otpFormSchema>
+	) => Promise<{ error?: unknown } | undefined>;
+	onResend: () => Promise<{ error?: unknown } | undefined>;
 }
 
-export const useOtpForm = ({ isReady, onFormSubmit, onResend }: Props) => {
+export const useOtpForm = ({ onFormSubmit, onResend }: Props) => {
 	const [formError, setFormError] = useState<string | null>(null);
 	const [formSuccess, setFormSuccess] = useState<string | null>(null);
 	const { timeLeft, isTimeDue, restartTimer } = useCountdown();
@@ -28,15 +29,23 @@ export const useOtpForm = ({ isReady, onFormSubmit, onResend }: Props) => {
 			onSubmit: otpFormSchema,
 		},
 		onSubmit: async ({ value }) => {
-			if (!isReady) return;
-
 			setFormError(null);
 			setFormSuccess(null);
 
 			try {
-				await onFormSubmit(value);
+				const result = await onFormSubmit(value);
+
+				// Evaluate deterministic error payloads from the Core 3 API
+				if (result?.error) {
+					form.reset();
+					setOtpValue('');
+					setFormError(resolveClerkError(result.error));
+					return;
+				}
+
 				setFormSuccess('Email verified successfully!');
 			} catch (error: unknown) {
+				// Failsafe for unhandled network exceptions
 				form.reset();
 				setOtpValue('');
 				setFormError(resolveClerkError(error));
@@ -47,7 +56,6 @@ export const useOtpForm = ({ isReady, onFormSubmit, onResend }: Props) => {
 	useEffect(() => {
 		if (
 			otpValue?.length === 6 &&
-			isReady &&
 			!form.state.isSubmitting &&
 			!hasAutoSubmitted.current
 		) {
@@ -58,18 +66,15 @@ export const useOtpForm = ({ isReady, onFormSubmit, onResend }: Props) => {
 		if (otpValue?.length < 6) {
 			hasAutoSubmitted.current = false;
 		}
-	}, [otpValue, isReady, form.state.isSubmitting, form.handleSubmit]);
+	}, [otpValue, form.state.isSubmitting, form.handleSubmit]);
 
-	// Focus the input field on load
+	// Focus the input field on load synchronously
 	useEffect(() => {
-		if (isReady) {
-			// Small timeout ensures the element is fully mounted and ready to be focused
-			setTimeout(() => inputRef.current?.focus(), 50);
-		}
-	}, [isReady]);
+		setTimeout(() => inputRef.current?.focus(), 50);
+	}, []);
 
 	const resendCode = async () => {
-		if (!isReady || !isTimeDue || isResending) return;
+		if (!isTimeDue || isResending) return;
 
 		setIsResending(true);
 		setFormError(null);
@@ -77,8 +82,13 @@ export const useOtpForm = ({ isReady, onFormSubmit, onResend }: Props) => {
 
 		try {
 			restartTimer();
-			await onResend();
-			setFormSuccess('Verification code sent');
+			const result = await onResend();
+
+			if (result?.error) {
+				setFormError(resolveClerkError(result.error));
+			} else {
+				setFormSuccess('Verification code sent');
+			}
 		} catch (error: unknown) {
 			setFormError(resolveClerkError(error));
 		} finally {

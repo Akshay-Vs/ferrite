@@ -1,74 +1,83 @@
 'use client';
 
 import { useSignIn } from '@clerk/nextjs';
-import type { SignInResource } from '@clerk/types';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import type z from 'zod/v4';
 import { OVERVIEW } from '@/core/constants/routes.constrains';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 import type { otpFormSchema } from '@/presentation/widgets/auth/schemas/otp-form.zodschema';
 
 const VerificationPage = () => {
-	const { isLoaded, setActive, signIn: login } = useSignIn();
+	const { signIn } = useSignIn();
+	const router = useRouter();
+
+	useEffect(() => {
+		// Client-side intercept: Ensure an active authentication cycle exists
+		if (!signIn?.status) {
+			router.replace(OVERVIEW);
+		}
+	}, [signIn?.status, router]);
 
 	const onSubmit = async (
 		values: z.infer<typeof otpFormSchema>
-	): Promise<void> => {
-		if (!isLoaded) return;
+	): Promise<{ error?: unknown } | undefined> => {
+		if (!signIn) return;
 
-		let result: SignInResource | undefined;
+		let errorResult: unknown;
 
-		if (login.status === 'needs_first_factor') {
-			result = await login.attemptFirstFactor({
-				strategy: 'email_code',
+		// 1. Primary verification logic
+		if (signIn.status === 'needs_first_factor') {
+			const { error } = await signIn.emailCode.verifyCode({
 				code: values.otp,
 			});
-		} else if (login.status === 'needs_second_factor') {
-			result = await login.attemptSecondFactor({
-				strategy: 'email_code',
+			errorResult = error;
+		}
+		// 2. Secondary MFA / Security mitigation logic
+		else if (
+			signIn.status === 'needs_second_factor' ||
+			signIn.status === 'needs_client_trust'
+		) {
+			const { error } = await signIn.mfa.verifyEmailCode({
 				code: values.otp,
 			});
+			errorResult = error;
 		}
 
-		if (result?.status === 'complete') {
-			await setActive({ session: login.createdSessionId });
+		if (errorResult) {
+			return { error: errorResult };
+		}
+
+		// 3. Finalize execution state upon successful cryptographic proof
+		if (signIn.status === 'complete') {
+			await signIn.finalize({
+				navigate: () => router.push(OVERVIEW),
+			});
 		}
 	};
 
-	const onResend = async () => {
-		if (!isLoaded || !login.identifier) return;
-		if (login.status === 'needs_first_factor') {
-			const emailCodeFactor = login.supportedFirstFactors?.find(
-				(factor) => factor.strategy === 'email_code'
-			);
+	const onResend = async (): Promise<{ error?: unknown } | undefined> => {
+		if (!signIn) return;
 
-			if (emailCodeFactor) {
-				await login.prepareFirstFactor({
-					strategy: 'email_code',
-					emailAddressId: emailCodeFactor.emailAddressId,
-				});
-			}
-		} else if (login.status === 'needs_second_factor') {
-			const emailCodeFactor = login.supportedSecondFactors?.find(
-				(factor) => factor.strategy === 'email_code'
-			);
-
-			if (emailCodeFactor) {
-				await login.prepareSecondFactor({
-					strategy: 'email_code',
-					emailAddressId: emailCodeFactor.emailAddressId,
-				});
-			}
+		// The explicit extraction of emailAddressId is bypassed entirely
+		if (signIn.status === 'needs_first_factor') {
+			const { error } = await signIn.emailCode.sendCode();
+			if (error) return { error };
+		} else if (
+			signIn.status === 'needs_second_factor' ||
+			signIn.status === 'needs_client_trust'
+		) {
+			const { error } = await signIn.mfa.sendEmailCode();
+			if (error) return { error };
 		}
 	};
 
-	if (isLoaded && !login.status) {
-		redirect(OVERVIEW);
+	// Prevent pre-render visual jitter prior to potential redirect evaluation
+	if (!signIn?.status) {
+		return null;
 	}
 
-	return (
-		<OTPForm isReady={isLoaded} onFormSubmit={onSubmit} onResend={onResend} />
-	);
+	return <OTPForm onFormSubmit={onSubmit} onResend={onResend} />;
 };
 
 export default VerificationPage;

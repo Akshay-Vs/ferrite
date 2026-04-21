@@ -18,12 +18,13 @@ import { useOtpForm } from '../hooks/use-otp-form';
 import type { otpFormSchema } from '../schemas/otp-form.zodschema';
 
 interface OTPFormProps {
-	isReady: boolean;
-	onFormSubmit: (values: z.infer<typeof otpFormSchema>) => Promise<void>;
-	onResend: () => Promise<void>;
+	onFormSubmit: (
+		values: z.infer<typeof otpFormSchema>
+	) => Promise<{ error?: unknown } | undefined>;
+	onResend: () => Promise<{ error?: unknown } | undefined>;
 }
 
-export const OTPForm = ({ onFormSubmit, onResend, isReady }: OTPFormProps) => {
+export const OTPForm = ({ onFormSubmit, onResend }: OTPFormProps) => {
 	const {
 		form,
 		formError,
@@ -34,7 +35,7 @@ export const OTPForm = ({ onFormSubmit, onResend, isReady }: OTPFormProps) => {
 		timeLeft,
 		inputRef,
 		setOtpValue,
-	} = useOtpForm({ isReady, onFormSubmit, onResend });
+	} = useOtpForm({ onFormSubmit, onResend });
 	return (
 		<div className="flex flex-col w-100 gap-12 flex-1 h-full">
 			<form
@@ -101,7 +102,7 @@ export const OTPForm = ({ onFormSubmit, onResend, isReady }: OTPFormProps) => {
 							)}
 							<Button
 								type="submit"
-								disabled={!canSubmit || Boolean(isSubmitting) || !isReady}
+								disabled={!canSubmit || Boolean(isSubmitting)}
 								isLoading={Boolean(isSubmitting)}
 								className="w-full h-15 rounded-full font-normal text-base"
 							>
