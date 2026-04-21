@@ -10,8 +10,7 @@
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.4.0",
-		"@clerk/elements": "^0.24.13",
-		"@clerk/nextjs": "^6.39.1",
+		"@clerk/nextjs": "^7.2.1",
 		"@clerk/types": "^4.101.20",
 		"@tanstack/react-form": "^1.29.0",
 		"@tanstack/zod-form-adapter": "^0.42.1",
