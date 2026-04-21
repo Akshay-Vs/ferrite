@@ -13,7 +13,7 @@ import { Input } from '@/presentation/primitives/input';
 import { PasswordInput } from '@/presentation/primitives/password-input';
 import ContinueWithSSO from '../components/continue-with-sso';
 import { RedirectToSignup } from '../components/form-redirect';
-import { useLoginForm } from '../hooks/use-login';
+import { useLoginForm } from '../hooks/use-login-form';
 
 export const LoginForm = () => {
 	const { form, formError } = useLoginForm();
