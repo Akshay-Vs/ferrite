@@ -1,6 +1,5 @@
-import PulseIcon from '@public/assets/images/pulse.svg';
 import { cva, type VariantProps } from 'class-variance-authority';
-import Image from 'next/image';
+import PulseIcon from '@/presentation/shapes/pulse-icon';
 
 const logoVariants = cva('object-center object-cover', {
 	variants: {
@@ -8,6 +7,9 @@ const logoVariants = cva('object-center object-cover', {
 			default: 'h-12 w-12',
 			sm: 'h-8 w-8',
 			lg: 'h-14 w-14',
+			xl: 'h-18 w-18',
+			'2xl': 'h-24 w-24',
+			'3xl': 'h-26 w-26',
 		},
 	},
 	defaultVariants: {
@@ -17,16 +19,11 @@ const logoVariants = cva('object-center object-cover', {
 
 export const Logo = ({
 	size = 'default',
-}: VariantProps<typeof logoVariants>) => {
+	strokeWidth = 2,
+}: VariantProps<typeof logoVariants> & { strokeWidth?: number }) => {
 	return (
-		<div className="flex items-center justify-center bg-background h-fit w-fit">
-			<Image
-				src={PulseIcon}
-				alt="ferrite pulse logo"
-				width={100}
-				height={100}
-				className={logoVariants({ size })}
-			/>
+		<div className="flex items-center justify-center bg-transparent h-fit w-fit">
+			<PulseIcon className={logoVariants({ size })} strokeWidth={strokeWidth} />
 		</div>
 	);
 };

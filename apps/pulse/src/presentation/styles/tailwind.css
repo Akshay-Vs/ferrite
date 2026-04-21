@@ -4,16 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-
-	body {
-		@apply bg-background text-foreground;
-	}
-}
-
 @layer utilities {
 	.center {
 		@apply flex justify-center items-center;
@@ -46,8 +36,27 @@
 	.gradient-border {
 		border: 1.2px solid transparent;
 		background:
-			linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+			linear-gradient(
+				color-mix(
+					in srgb,
+					var(--color-surface) 60%,
+					var(--color-background) 40%
+				),
+				color-mix(
+					in srgb,
+					var(--color-surface) 60%,
+					var(--color-background) 40%
+				)
+			)
+			padding-box,
 			var(--color-border-gradient) border-box;
+	}
+
+	.gradient-border-glow {
+		border: 1.2px solid transparent;
+		background:
+			linear-gradient(var(--color-active), var(--color-active)) padding-box,
+			var(--color-gradient-glow) border-box;
 	}
 }
 
@@ -69,12 +78,14 @@
 	--color-surface: #211f27;
 	--color-active: #3e3c48;
 	--color-accent: #a68bf8;
-	--color-border-gradient: linear-gradient(110deg, #666571df, #444347aa);
+	--color-border-gradient: linear-gradient(110deg, #666571df, #444347da);
+	--color-gradient-glow: linear-gradient(110deg, #837ea4, #51497c);
 	--color-accent-glow: rgba(108, 99, 255, 0.25);
 	--color-success: #22c55e;
 	--color-warn: #f59e0b;
-	--color-bg: #141316;
-	--color-text: #e8e8f0;
+	--color-background: #141317;
+	--color-content: #e8e8f0;
+	--color-input: #211f27;
 
 	--font-heading: var(--font-sans);
 	--font-heading: var(--font-sans);
@@ -108,7 +119,7 @@
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
-	--color-background: var(--background);
+	--radius: 0.5rem;
 	--radius-sm: calc(var(--radius) * 0.6);
 	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
@@ -119,7 +130,6 @@
 }
 
 .dark {
-	--background: oklch(0.1892 0.0062 300.97);
 	--foreground: oklch(0.985 0 0);
 	--card: oklch(0.205 0 0);
 	--card-foreground: oklch(0.985 0 0);
@@ -135,7 +145,6 @@
 	--accent-foreground: oklch(0.985 0 0);
 	--destructive: oklch(0.704 0.191 22.216);
 	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);

@@ -6,7 +6,7 @@
   }
 
   .card {
-    @apply bg-surface border border-border rounded-2xl p-8 flex flex-col gap-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_24px_64px_rgba(0,0,0,0.5)];
+    @apply bg-surface border border-border rounded-4xl p-8 flex flex-col gap-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_24px_64px_rgba(0,0,0,0.5)];
   }
 
   .card-header {
