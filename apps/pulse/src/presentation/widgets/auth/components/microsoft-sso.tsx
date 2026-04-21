@@ -1,15 +1,14 @@
-import ClerkSSO, { GlobalLoading } from './clerk-sso';
 import MicrosoftIcon from '@/presentation/shapes/microsoft-icon';
+import SSO from './sso';
 
-const MicrosoftSSO = ({ isGlobalLoading }: GlobalLoading) => {
-  return (
-    <ClerkSSO
-      isGlobalLoading={isGlobalLoading}
-      provider="microsoft"
-      label="Continue with Microsoft"
-      icon={<MicrosoftIcon />}
-    />
-  );
+const MicrosoftSSO = () => {
+	return (
+		<SSO
+			provider="oauth_microsoft"
+			label="Continue with Microsoft"
+			icon={<MicrosoftIcon />}
+		/>
+	);
 };
 
 export default MicrosoftSSO;
