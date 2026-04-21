@@ -8,7 +8,7 @@ import { signupSchema } from '../schemas/login-form.zodschema';
 
 export const useSignUpForm = () => {
 	const router = useRouter();
-	const { signUp, isLoaded } = useSignUp();
+	const { signUp } = useSignUp();
 	const [formError, setFormError] = useState<string | null>(null);
 
 	const form = useForm({
@@ -21,26 +21,29 @@ export const useSignUpForm = () => {
 			onChange: signupSchema,
 		},
 		onSubmit: async ({ value }) => {
-			if (!isLoaded || !signUp) {
+			setFormError(null);
+
+			// 1. Instantiate the sign-up entity with credentials
+			const { error: createError } = await signUp.create({
+				emailAddress: value.email,
+				password: value.password,
+			});
+
+			if (createError) {
+				setFormError(resolveClerkError(createError));
 				return;
 			}
 
-			setFormError(null);
+			// 2. Dispatch the cryptographic verification challenge
+			const { error: sendError } = await signUp.verifications.sendEmailCode();
 
-			try {
-				await signUp.create({
-					emailAddress: value.email,
-					password: value.password,
-				});
-
-				await signUp.prepareEmailAddressVerification({
-					strategy: 'email_code',
-				});
-
-				router.push(SIGNUP_EMAIL_VERIFY);
-			} catch (error: unknown) {
-				setFormError(resolveClerkError(error));
+			if (sendError) {
+				setFormError(resolveClerkError(sendError));
+				return;
 			}
+
+			// 3. Route client to the OTP validation view
+			router.push(SIGNUP_EMAIL_VERIFY);
 		},
 	});
 
