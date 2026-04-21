@@ -69,6 +69,7 @@ export function IconSelector({
 								<Button
 									key={iconName}
 									onClick={() => onChange?.(iconName)}
+									aria-label={`Select ${iconName} icon`}
 									aria-pressed={isSelected}
 									variant="secondary"
 									className={cn(
