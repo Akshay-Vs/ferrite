@@ -87,4 +87,4 @@ const OverviewPage = () => {
 	);
 };
 
-export default overviewPage;
+export default OverviewPage;
