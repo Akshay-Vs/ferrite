@@ -18,8 +18,8 @@ export const useOnboardingStoreConfigure = () => {
 
 	const form = useForm({
 		defaultValues: {
-			storeCurrency: 'USD',
-			StoreIcon: data.StoreIcon ?? '',
+			storeCurrency: data.storeCurrency ?? 'USD',
+			storeIcon: data.storeIcon ?? '',
 		},
 		validators: {
 			onSubmit: storeConfigureSchema,

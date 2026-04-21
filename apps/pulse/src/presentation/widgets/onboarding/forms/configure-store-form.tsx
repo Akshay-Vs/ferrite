@@ -64,7 +64,7 @@ export default function OnboardingConfigureStoreForm() {
 						);
 					}}
 				</form.Field>
-				<form.Field name="StoreIcon">
+				<form.Field name="storeIcon">
 					{(field) => {
 						const isInvalid =
 							field.state.meta.isTouched && !!field.state.meta.errors.length;

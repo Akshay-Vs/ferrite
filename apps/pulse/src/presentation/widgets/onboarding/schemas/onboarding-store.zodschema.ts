@@ -29,7 +29,7 @@ export const storeCreateSchema = onboardingStoreCreateSchema.pick({
 // Step 2
 export const storeConfigureSchema = onboardingStoreCreateSchema.pick({
 	storeCurrency: true,
-	StoreIcon: true,
+	storeIcon: true,
 });
 
 export type OnboardingStoreCreate = z.infer<typeof onboardingStoreCreateSchema>;

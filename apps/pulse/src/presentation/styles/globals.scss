@@ -16,17 +16,16 @@ body {
 */
 #nprogress .bar,
 #nprogress .spinner {
-`#nprogress` .bar,
-`#nprogress` .spinner {
-    opacity: 0;
-    animation: nprogress-smooth-reveal 346ms ease-in-out 346ms forwards;
+  opacity: 0;
+  animation: nprogress-smooth-reveal 346ms ease-in-out 346ms forwards;
 }
-}
+
 @keyframes nprogress-smooth-reveal {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
