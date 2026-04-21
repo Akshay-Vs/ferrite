@@ -10,10 +10,10 @@ export const onboardingStoreCreateSchema = z.object({
 
 	// Step 2
 	storeCurrency: z.enum(['USD', 'INR', 'EUR', 'JPY']),
-	StoreIcon: z
+	storeIcon: z
 		.string()
 		.min(1, {
-			message: 'Select and icon for your store, search for more icons',
+			message: 'Select an icon for your store, search for more icons',
 		})
 		.max(24),
 });
