@@ -1,6 +1,6 @@
 import { useSignIn } from '@clerk/nextjs';
 import { useForm } from '@tanstack/react-form';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
 import {
 	LOGIN_EMAIL_VERIFY,

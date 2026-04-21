@@ -4,7 +4,7 @@ import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { OVERVIEW } from '@/core/constants/routes.constrains';
-import GradientText from '@/presentation/primitives/gradient-text';
+import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 
 export default function VerifyEmailPage() {
@@ -59,14 +59,11 @@ export default function VerifyEmailPage() {
 
 	return (
 		<div className="flex flex-col items-center gap-16 w-full">
-			<div className="col-center gap-4">
-				<h1 className="text-4xl font-extralight tracking-[0.012rem]">
-					Verify your <GradientText text="Email" className="font-light" />
-				</h1>
-				<p className="text-lg font-light">
-					We sent a 6-digit code to your email
-				</p>
-			</div>
+			<FormHeading
+				title="Verify your"
+				highlightedText="Email"
+				description="We sent a 6-digit code to your email"
+			/>
 
 			<OTPForm onFormSubmit={handleVerify} onResend={handleResend} />
 		</div>

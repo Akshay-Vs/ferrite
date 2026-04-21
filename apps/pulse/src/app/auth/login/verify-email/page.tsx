@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import type z from 'zod/v4';
 import { OVERVIEW } from '@/core/constants/routes.constrains';
+import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 import type { otpFormSchema } from '@/presentation/widgets/auth/schemas/otp-form.zodschema';
 
@@ -77,7 +78,16 @@ const VerificationPage = () => {
 		return null;
 	}
 
-	return <OTPForm onFormSubmit={onSubmit} onResend={onResend} />;
+	return (
+		<div className="flex flex-col items-center gap-16 w-full">
+			<FormHeading
+				title="Verify your"
+				highlightedText="Email"
+				description="We sent a 6-digit code to your email"
+			/>
+			<OTPForm onFormSubmit={onSubmit} onResend={onResend} />;
+		</div>
+	);
 };
 
 export default VerificationPage;

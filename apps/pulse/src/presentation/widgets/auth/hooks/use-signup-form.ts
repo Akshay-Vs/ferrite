@@ -1,6 +1,6 @@
 import { useSignUp } from '@clerk/nextjs';
 import { useForm } from '@tanstack/react-form';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
 import { SIGNUP_EMAIL_VERIFY } from '@/core/constants/routes.constrains';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';

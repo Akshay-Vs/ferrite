@@ -8,6 +8,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 import '@presentation/styles/tailwind.css';
 import '@presentation/styles/globals.scss';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = appMetadata;
 
@@ -28,6 +29,7 @@ export default function RootLayout({
 							disableTransitionOnChange
 						>
 							<NextTopLoader color="#A68BF8FA" height={3} showSpinner={false} />
+							<Toaster />
 
 							{children}
 						</ThemeProvider>
