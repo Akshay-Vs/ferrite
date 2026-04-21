@@ -53,7 +53,7 @@
 		"helmet": "^8.1.0",
 		"nestjs-zod": "^5.1.1",
 		"pg": "^8.20.0",
-		"pg-logical-replication": "^2.3.1",
+		"pg-logical-replication": "^2.4.0",
 		"pino": "^10.3.1",
 		"pino-opentelemetry-transport": "^3.0.0",
 		"prom-client": "^15.1.3",
