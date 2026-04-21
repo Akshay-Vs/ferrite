@@ -1,7 +1,7 @@
 'use client';
 
 import { useSignIn } from '@clerk/nextjs';
-import type { OAuthStrategy } from '@clerk/types';
+import type { OAuthStrategy } from '@clerk/shared/types';
 import { useState } from 'react';
 import { OVERVIEW, SSO_CALLBACK } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
