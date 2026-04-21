@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
 	ONBOARDING_CONNECT_STORE,
 	ONBOARDING_CREATE_STORE,
-} from '@/core/constants/routes.constrains';
+} from '@/core/constants/routes.constants';
 import {
 	onboardingStoreCreateSchema,
 	storeConfigureSchema,
@@ -18,7 +18,7 @@ export const useOnboardingStoreConfigure = () => {
 
 	const form = useForm({
 		defaultValues: {
-			storeCurrency: data.storeCurrency ?? '',
+			storeCurrency: 'USD',
 			StoreIcon: data.StoreIcon ?? '',
 		},
 		validators: {
