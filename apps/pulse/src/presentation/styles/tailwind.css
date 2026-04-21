@@ -4,16 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-
-	body {
-		@apply bg-background text-foreground;
-	}
-}
-
 @layer utilities {
 	.center {
 		@apply flex justify-center items-center;
@@ -46,8 +36,27 @@
 	.gradient-border {
 		border: 1.2px solid transparent;
 		background:
-			linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+			linear-gradient(
+				color-mix(
+					in srgb,
+					var(--color-surface) 60%,
+					var(--color-background) 40%
+				),
+				color-mix(
+					in srgb,
+					var(--color-surface) 60%,
+					var(--color-background) 40%
+				)
+			)
+			padding-box,
 			var(--color-border-gradient) border-box;
+	}
+
+	.gradient-border-glow {
+		border: 1.2px solid transparent;
+		background:
+			linear-gradient(var(--color-active), var(--color-active)) padding-box,
+			var(--color-gradient-glow) border-box;
 	}
 }
 
@@ -69,7 +78,8 @@
 	--color-surface: #211f27;
 	--color-active: #3e3c48;
 	--color-accent: #a68bf8;
-	--color-border-gradient: linear-gradient(110deg, #666571df, #444347aa);
+	--color-border-gradient: linear-gradient(110deg, #666571df, #444347da);
+	--color-gradient-glow: linear-gradient(110deg, #837ea4, #51497c);
 	--color-accent-glow: rgba(108, 99, 255, 0.25);
 	--color-success: #22c55e;
 	--color-warn: #f59e0b;
