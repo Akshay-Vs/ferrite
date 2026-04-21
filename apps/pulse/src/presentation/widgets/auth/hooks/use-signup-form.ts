@@ -2,7 +2,7 @@ import { useSignUp } from '@clerk/nextjs';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
-import { SIGNUP_EMAIL_VERIFY } from '@/core/constants/routes.constrains';
+import { SIGNUP_EMAIL_VERIFY } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { signupSchema } from '../schemas/login-form.zodschema';
 
