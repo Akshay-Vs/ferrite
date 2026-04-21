@@ -1,4 +1,4 @@
-import type { ClerkAPIError } from '@clerk/types';
+import type { ClerkAPIError } from '@clerk/shared/types';
 
 export const resolveClerkError = (error: unknown) => {
 	if (error && typeof error === 'object' && 'errors' in error) {
