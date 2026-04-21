@@ -4,7 +4,7 @@ import { Button } from '@/presentation/primitives/button';
 import { toast } from '@/presentation/primitives/sonner';
 import { TabBar } from '@/presentation/primitives/tab-bar';
 
-const overviewPage = () => {
+const OverviewPage = () => {
 	const [activeId, setActiveId] = useState('1');
 	const initializeInfrastructure = async () => {
 		// Simulating a volatile API dispatch with a 50% failure rate
