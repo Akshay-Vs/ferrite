@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FORGOT_PASSWORD } from '@/core/constants/routes.constrains';
+import { FORGOT_PASSWORD } from '@/core/constants/routes.constants';
 import { Button } from '@/presentation/primitives/button';
 import {
 	Field,

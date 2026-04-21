@@ -3,7 +3,7 @@
 import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { OVERVIEW } from '@/core/constants/routes.constrains';
+import { OVERVIEW } from '@/core/constants/routes.constants';
 import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 

@@ -1,5 +1,7 @@
 'use client';
+import { useClerk } from '@clerk/nextjs';
 import { useState } from 'react';
+import { LOGIN } from '@/core/constants/routes.constants';
 import { Button } from '@/presentation/primitives/button';
 import { toast } from '@/presentation/primitives/sonner';
 import { TabBar } from '@/presentation/primitives/tab-bar';
@@ -17,8 +19,44 @@ const overviewPage = () => {
 		});
 	};
 
+	const { signOut } = useClerk();
+	const handleSubmission = () => {
+		// 2. Pass the closure (not the executed promise) to the orchestrator
+		toast.promise(initializeInfrastructure, {
+			// Transient State
+			loading: {
+				title: 'Provisioning Infrastructure',
+				description: 'Allocating database shards and initializing assets.',
+			},
+
+			// Resolution State
+			success: (data) => ({
+				title: 'Initialization Complete',
+				description: `Successfully provisioned environment`,
+			}),
+
+			// Rejection State with Retry Injection
+			error: (err, retry) => ({
+				title: 'Provisioning Anomaly',
+				description:
+					err instanceof Error ? err.message : 'An unknown exception occurred.',
+				// Conditionally render the retry action if the internal closure is provided
+				action: retry
+					? {
+							label: 'Retry Allocation',
+							onClick: retry,
+						}
+					: undefined,
+				cancel: {
+					label: 'Dismiss',
+					onClick: () => console.log('Failure acknowledged by user.'),
+				},
+			}),
+		});
+	};
+
 	return (
-		<div className="full center min-h-[87vh]">
+		<div className="full col-center gap-8 min-h-[87vh]">
 			<TabBar
 				className="mx-7"
 				gap={16}
@@ -34,48 +72,16 @@ const overviewPage = () => {
 				}}
 			/>
 
+			<Button onClick={handleSubmission} variant="secondary" size="lg">
+				Send Toast
+			</Button>
+
 			<Button
-				onClick={() =>
-					toast.promise(initializeInfrastructure, {
-						// 1. Rich Transient State: Supplying a full object for the loading phase
-						loading: {
-							title: 'Provisioning Infrastructure...',
-							description:
-								'Allocating database shards. This process may take several moments.',
-							cancel: {
-								label: 'Cancel',
-								onClick: () => console.log('Abort signal dispatched to API.'),
-							},
-						},
-
-						// 2. Success Resolution
-						success: () => ({
-							title: 'Initialization Complete',
-							description: 'Infrastructure is fully operational.',
-						}),
-
-						// 3. Error Resolution with Retry Injection
-						error: (err, retry) => ({
-							title: 'Provisioning Anomaly',
-							description:
-								err instanceof Error
-									? err.message
-									: 'Unknown network failure occurred.',
-							action: {
-								label: 'Retry Connection',
-								onClick: retry, // Maps directly to the recursive execute closure
-							},
-							cancel: {
-								label: 'Dismiss',
-								onClick: () => console.log('Failure acknowledged.'),
-							},
-						}),
-					})
-				}
+				onClick={() => signOut({ redirectUrl: LOGIN })}
 				variant="secondary"
 				size="lg"
 			>
-				Send Toast
+				Logout
 			</Button>
 		</div>
 	);

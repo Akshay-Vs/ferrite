@@ -5,7 +5,7 @@ import { useClerk, useSignIn, useSignUp } from '@clerk/nextjs';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { OVERVIEW } from '@/core/constants/routes.constrains';
+import { OVERVIEW } from '@/core/constants/routes.constants';
 
 export default function SSOCallbackPage() {
 	const clerk = useClerk();

@@ -1,6 +1,7 @@
 import { Button as ButtonPrimitive } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { cn } from '@/core/utils/utils';
 
 const buttonVariants = cva(
@@ -41,7 +42,7 @@ type ButtonProps = ButtonPrimitive.Props &
 	VariantProps<typeof buttonVariants> & {
 		isLoading?: boolean;
 		loadingText?: string;
-		children?: React.ReactNode;
+		children?: ReactNode;
 	};
 
 function Button({
@@ -59,7 +60,12 @@ function Button({
 	let content: React.ReactNode;
 
 	if (isLoading) {
-		content = loadingText ?? <Loader2 className="animate-spin" />;
+		content = loadingText ?? (
+			<>
+				<Loader2 className="animate-spin" />
+				<span className="sr-only">Loading...</span>
+			</>
+		);
 	} else {
 		content = children;
 	}

@@ -3,7 +3,7 @@
 import { useSignIn } from '@clerk/nextjs';
 import type { OAuthStrategy } from '@clerk/types';
 import { useState } from 'react';
-import { OVERVIEW, SSO_CALLBACK } from '@/core/constants/routes.constrains';
+import { OVERVIEW, SSO_CALLBACK } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 
 export const useOAuth = () => {
@@ -14,20 +14,11 @@ export const useOAuth = () => {
 	const handleOAuthDelegation = async (strategy: OAuthStrategy) => {
 		if (!signIn) return;
 
+		await signIn.reset();
 		setError(null);
 		setIsLoading(true);
 
 		try {
-			// Evaluate if the state machine is contaminated with an aborted attempt.
-			// If the status is anything other than null, an old cache exists.
-			if (signIn.status !== null) {
-				console.log(`[OAuth] Purging aborted state: ${signIn.status}`);
-				// Synchronously destroy the hanging attempt to ensure a clean slate
-				signIn.reset();
-			}
-
-			console.log(`[OAuth] Initiating fresh handshake for: ${strategy}`);
-
 			const origin =
 				typeof window !== 'undefined' ? window.location.origin : '';
 			const absoluteCallbackUrl = `${origin}${SSO_CALLBACK}`;

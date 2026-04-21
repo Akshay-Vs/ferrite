@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { LOGIN, SIGNUP } from '@/core/constants/routes.constrains';
+import { LOGIN, SIGNUP } from '@/core/constants/routes.constants';
 
 type RedirectProps = {
 	label: string;
