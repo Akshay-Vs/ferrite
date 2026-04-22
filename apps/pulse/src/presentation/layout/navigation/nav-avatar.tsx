@@ -7,6 +7,17 @@ import {
 	AvatarImage,
 } from '@presentation/primitives/avatar';
 import { Skeleton } from '@presentation/primitives/skeleton';
+import { ReceiptText, UserCog2, Users2 } from 'lucide-react';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/presentation/primitives/dropdown-menu';
+import LogoutMenuAction from './logout-menu-action';
 
 export const NavAvatar = () => {
 	const { isLoaded, isSignedIn, user } = useUser();
@@ -25,9 +36,36 @@ export const NavAvatar = () => {
 		`${user.firstName?.[0] ?? 'x'}${user.lastName?.[0] ?? 'x'}`.toUpperCase();
 
 	return (
-		<Avatar className="w-16 h-16 border-2 border-transparent">
-			<AvatarImage src={user.imageUrl || ''} alt={initials} />
-			<AvatarFallback>{initials || '?'}</AvatarFallback>
-		</Avatar>
+		<DropdownMenu>
+			<DropdownMenuTrigger className="size-16 border-2 border-transparent rounded-full">
+				<Avatar className="full">
+					<AvatarImage src={user.imageUrl || ''} alt={initials} />
+					<AvatarFallback>{initials || '?'}</AvatarFallback>
+				</Avatar>
+			</DropdownMenuTrigger>
+
+			<DropdownMenuContent className="w-fit">
+				<DropdownMenuGroup>
+					<DropdownMenuLabel>My Account</DropdownMenuLabel>
+					<DropdownMenuItem>
+						<UserCog2 />
+						Profile Settings
+					</DropdownMenuItem>
+					<DropdownMenuItem>
+						<ReceiptText />
+						Billing Settings
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem>
+						<Users2 />
+						Team
+					</DropdownMenuItem>
+
+					<LogoutMenuAction />
+				</DropdownMenuGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 };
