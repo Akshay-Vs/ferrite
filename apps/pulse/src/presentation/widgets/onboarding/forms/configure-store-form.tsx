@@ -94,6 +94,7 @@ export default function OnboardingConfigureStoreForm() {
 					{([canSubmit]) => (
 						<Button
 							type="submit"
+							variant="secondary"
 							disabled={!canSubmit || isSubmittingToAPI}
 							isLoading={isSubmittingToAPI}
 							className="w-full"

@@ -71,7 +71,6 @@ export function IconSelector({
 									onClick={() => onChange?.(iconName)}
 									aria-label={`Select ${iconName} icon`}
 									aria-pressed={isSelected}
-									variant="secondary"
 									className={cn(
 										'h-16! w-16!',
 										isSelected

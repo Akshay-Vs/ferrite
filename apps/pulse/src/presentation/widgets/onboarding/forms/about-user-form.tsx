@@ -146,6 +146,7 @@ const OnboardingAboutUserForm = () => {
 							)}
 							<Button
 								type="submit"
+								variant="secondary"
 								disabled={!canSubmit}
 								isLoading={isSubmitting}
 								loadingText="Submitting..."

@@ -74,7 +74,12 @@ export default function OnboardingCreateStoreForm() {
 
 			<form.Subscribe selector={(state) => [state.canSubmit]}>
 				{([canSubmit]) => (
-					<Button type="submit" disabled={!canSubmit} className="mt-4 w-full">
+					<Button
+						type="submit"
+						variant="secondary"
+						disabled={!canSubmit}
+						className="mt-4 w-full"
+					>
 						Next
 					</Button>
 				)}
