@@ -103,6 +103,7 @@ export const LoginForm = () => {
 							)}
 							<Button
 								type="submit"
+								variant="secondary"
 								disabled={!canSubmit}
 								isLoading={isSubmitting}
 								loadingText="Logging in..."
