@@ -1,6 +1,7 @@
 'use client';
 
 import FormHeading from '@/presentation/primitives/form-heading';
+import ConnectStoreForm from '@/presentation/widgets/onboarding/forms/connect-store-form';
 
 const OnboardingConnectStorePage = () => {
 	return (
@@ -10,6 +11,8 @@ const OnboardingConnectStorePage = () => {
 				highlightedText="Storefront"
 				description="Link your storefront to Ferrite core"
 			/>
+
+			<ConnectStoreForm />
 		</div>
 	);
 };
