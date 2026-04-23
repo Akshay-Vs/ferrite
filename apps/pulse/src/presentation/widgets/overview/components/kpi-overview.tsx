@@ -1,8 +1,9 @@
+import FadeInItem from '@/presentation/animations/fade-in-item';
 import MetricCard from './metric-card';
 
-const KPISummery = () => {
+const KPIOverview = () => {
 	return (
-		<div className="flex items-center gap-12">
+		<FadeInItem className="flex items-center gap-12">
 			<MetricCard
 				label="Products Sold"
 				currentValue={21511}
@@ -19,8 +20,8 @@ const KPISummery = () => {
 			/>
 
 			<MetricCard label="Campaigns" currentValue={16} />
-		</div>
+		</FadeInItem>
 	);
 };
 
-export default KPISummery;
+export default KPIOverview;
