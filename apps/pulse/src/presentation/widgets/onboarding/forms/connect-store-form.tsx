@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'nextjs-toploader/app';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { SALES_OVERVIEW } from '@/core/constants/routes.constants';
 import { Button } from '@/presentation/primitives/button';
 
 const ConnectStoreForm = () => {
@@ -12,7 +12,7 @@ const ConnectStoreForm = () => {
 			type="submit"
 			variant="secondary"
 			className="w-full"
-			onClick={() => push(OVERVIEW)}
+			onClick={() => push(SALES_OVERVIEW)}
 		>
 			Go to dashboard
 		</Button>

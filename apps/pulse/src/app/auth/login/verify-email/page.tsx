@@ -4,7 +4,7 @@ import { useSignIn } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import type z from 'zod/v4';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { SALES_OVERVIEW } from '@/core/constants/routes.constants';
 import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 import type { otpFormSchema } from '@/presentation/widgets/auth/schemas/otp-form.zodschema';
@@ -16,7 +16,7 @@ const VerificationPage = () => {
 	useEffect(() => {
 		// Client-side intercept: Ensure an active authentication cycle exists
 		if (!signIn?.status) {
-			router.replace(OVERVIEW);
+			router.replace(SALES_OVERVIEW);
 		}
 	}, [signIn?.status, router]);
 
@@ -52,7 +52,7 @@ const VerificationPage = () => {
 		// 3. Finalize execution state upon successful cryptographic proof
 		if (signIn.status === 'complete') {
 			await signIn.finalize({
-				navigate: () => router.push(OVERVIEW),
+				navigate: () => router.push(SALES_OVERVIEW),
 			});
 		}
 	};

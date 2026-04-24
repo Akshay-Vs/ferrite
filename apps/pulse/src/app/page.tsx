@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { SALES_OVERVIEW } from '@/core/constants/routes.constants';
 
 const rootPage = () => {
-	return redirect(OVERVIEW);
+	return redirect(SALES_OVERVIEW);
 };
 
 export default rootPage;
