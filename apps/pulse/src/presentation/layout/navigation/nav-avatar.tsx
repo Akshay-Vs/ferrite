@@ -35,9 +35,8 @@ export const NavAvatar = () => {
 		<DropdownMenu>
 			<DropdownMenuTrigger
 				className="h-16 w-16! border-2 border-transparent rounded-full"
-				aria-label="User Avatar"
-				aria-haspopup="true"
-				aria-description="Opens a menu with options to view user profile"
+				aria-label="Open user menu"
+				aria-haspopup="menu"
 			>
 				<Avatar className="full">
 					<AvatarImage

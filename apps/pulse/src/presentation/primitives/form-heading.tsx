@@ -1,4 +1,4 @@
-import FadeInItem from '../animations/fade-in-item';
+import FadeInItem from '@/presentation/animations/fade-in-item';
 import GradientText from './gradient-text';
 
 interface FormHeadingProps {
