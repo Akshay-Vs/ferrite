@@ -77,7 +77,9 @@ const TabBarButton = memo(
     return (
       <motion.button
         type="button"
-        aria-current={isActive ? 'page' : undefined}
+        role="tab"
+        aria-selected={isActive}
+        tabIndex={isActive ? 0 : -1}
         className="relative z-10 h-full w-fit px-8 rounded-none border-none bg-transparent cursor-pointer outline-none transition-colors"
         onMouseEnter={() => onHoverStart(item.id)}
         onMouseLeave={onHoverEnd}

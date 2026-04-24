@@ -9,6 +9,7 @@ import NextTopLoader from 'nextjs-toploader';
 import '@presentation/styles/tailwind.css';
 import '@presentation/styles/globals.scss';
 import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/presentation/primitives/tooltip';
 
 export const metadata: Metadata = appMetadata;
 
@@ -27,11 +28,17 @@ export default function RootLayout({
 						enableSystem={false}
 						disableTransitionOnChange
 					>
-						<div className="min-h-dvh max-w-dvw flex flex-col">
-							<NextTopLoader color="#A68BF8FA" height={3} showSpinner={false} />
-							<Toaster />
-							{children}
-						</div>
+						<TooltipProvider>
+							<div className="min-h-dvh max-w-dvw flex flex-col">
+								<NextTopLoader
+									color="#A68BF8FA"
+									height={3}
+									showSpinner={false}
+								/>
+								<Toaster />
+								{children}
+							</div>
+						</TooltipProvider>
 					</ThemeProvider>
 				</ClerkProvider>
 			</body>

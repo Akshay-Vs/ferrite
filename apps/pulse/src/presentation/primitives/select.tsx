@@ -84,7 +84,7 @@ function SelectContent({
 					data-slot="select-content"
 					data-align-trigger={alignItemWithTrigger}
 					className={cn(
-						'relative isolate z-50 max-h-(--available-height) w-(--anchor-width) min-w-40 origin-(--transform-origin) overflow-hidden rounded-[2rem] border border-border-gradient bg-surface/90 text-popover-foreground shadow-2xl shadow-accent/5 backdrop-blur-2xl duration-100',
+						'relative isolate z-50 max-h-(--available-height) w-(--anchor-width) min-w-40 origin-(--transform-origin) overflow-hidden rounded-container border border-border-gradient bg-surface/90 text-popover-foreground shadow-2xl shadow-accent/5 backdrop-blur-2xl duration-100',
 						'data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
 						className
 					)}
@@ -110,10 +110,17 @@ function SelectItem({
 		<SelectPrimitive.Item
 			data-slot="select-item"
 			className={cn(
-				'relative flex h-13 w-full items-center gap-2.5 border border-transparent rounded-full px-6 text-sm font-medium outline-none select-none transition-colors cursor-pointer',
-				// Hover/Focus states
-				'focus:bg-active/30 hover:border-border-gradient focus:text-accent-foreground',
+				'relative flex h-13 w-full items-center gap-2.5 border border-transparent rounded-full px-6 text-sm font-base outline-none select-none transition-colors cursor-pointer',
+
+				'focus:bg-active/30  focus:border-border focus:text-accent-foreground',
+				'hover:border-border-gradient',
+
+				// Do not replace with data-selected
+				'data-[selected]:font-medium',
+
+				// Disabled State
 				'data-disabled:pointer-events-none data-disabled:opacity-50',
+
 				"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
 				className
 			)}

@@ -42,7 +42,7 @@ const StockWarning = () => {
 					/>
 				))}
 			</div>
-			<p className="text-xl tracking-tight flex items-center gap-2">
+			<p className="text-lg flex items-center gap-2">
 				6 Items running low on stock
 				<ChevronRight />
 			</p>

@@ -1,24 +1,19 @@
+/* width */
 ::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
+  width: 2px;
 }
 
-* {
-  -ms-overflow-style: auto;
-  scrollbar-width: thin;
-}
-
+/* Track */
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: #211f27;
 }
 
-
+/* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #a0a0a0;
-  border-radius: 0px;
+  background: #a1a1a1;
 }
 
+/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #cacaca;
-  cursor: pointer;
+  background: #51497c;
 }

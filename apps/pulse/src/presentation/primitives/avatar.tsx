@@ -1,8 +1,8 @@
 'use client';
 
 import { Avatar as AvatarPrimitive } from '@base-ui/react/avatar';
+import Image from 'next/image';
 import type * as React from 'react';
-
 import { cn } from '@/core/utils/utils';
 
 function Avatar({
@@ -25,7 +25,15 @@ function Avatar({
 	);
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarImage({
+	className,
+	...props
+}: AvatarPrimitive.Image.Props & {
+	height?: number;
+	width?: number;
+	alt: string;
+	src: string;
+}) {
 	return (
 		<AvatarPrimitive.Image
 			data-slot="avatar-image"
@@ -33,6 +41,19 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 				'aspect-square size-full rounded-full object-cover',
 				className
 			)}
+			render={
+				<Image
+					height={props.height}
+					width={props.width}
+					alt={props.alt}
+					src={props.src}
+					data-slot="avatar-image"
+					className={cn(
+						'aspect-square size-full rounded-full object-cover',
+						className
+					)}
+				/>
+			}
 			{...props}
 		/>
 	);

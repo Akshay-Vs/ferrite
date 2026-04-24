@@ -1,11 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
-} from '@presentation/primitives/avatar';
+import { Avatar, AvatarImage } from '@presentation/primitives/avatar';
 import { Skeleton } from '@presentation/primitives/skeleton';
 import { ReceiptText, UserCog2, Users2 } from 'lucide-react';
 import {
@@ -37,10 +33,18 @@ export const NavAvatar = () => {
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger className="size-16 border-2 border-transparent rounded-full">
+			<DropdownMenuTrigger
+				className="h-16 w-16! border-2 border-transparent rounded-full"
+				aria-label="Open user menu"
+				aria-haspopup="menu"
+			>
 				<Avatar className="full">
-					<AvatarImage src={user.imageUrl || ''} alt={initials} />
-					<AvatarFallback>{initials || '?'}</AvatarFallback>
+					<AvatarImage
+						src={user.imageUrl || ''}
+						alt={initials}
+						height={60}
+						width={60}
+					/>
 				</Avatar>
 			</DropdownMenuTrigger>
 
