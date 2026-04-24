@@ -34,8 +34,8 @@ const StockWarning = () => {
 						key={item.id}
 						src={item.imageSrc}
 						alt="Stock Warning"
-						width={46}
-						height={46}
+						width={48}
+						height={48}
 						className={`rounded-full object-center object-cover border h-12 w-12
                 ${index === 0 ? 'border-border' : '-ml-8 border-content/60'}
               `}
