@@ -16,7 +16,7 @@ const KPIOverview = () => {
 				valuePrefix="$"
 				currentValue={62192}
 				deltaPercent={17}
-				trend="up"
+				trend="down"
 			/>
 
 			<MetricCard label="Campaigns" currentValue={16} />
