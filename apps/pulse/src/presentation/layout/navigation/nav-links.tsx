@@ -14,7 +14,6 @@ export const NavLinks = () => {
 
 	return (
 		<TabBar
-			className="mx-7"
 			gap={16}
 			activeId={activeId}
 			items={NavRoutes.map((link) => ({

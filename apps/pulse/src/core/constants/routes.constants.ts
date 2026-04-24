@@ -1,4 +1,9 @@
-export const OVERVIEW = '/overview';
+export const OVERVIEW = '/overview/sales';
+export const SALES_OVERVIEW = '/overview/sales';
+export const REVENUE_OVERVIEW = '/overview/revenue';
+export const TRAFFIC_OVERVIEW = '/overview/traffic';
+
+
 export const ORDERS = '/orders';
 export const INVENTORY = '/inventory';
 export const USERS = '/users';
