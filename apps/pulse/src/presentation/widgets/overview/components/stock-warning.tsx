@@ -34,15 +34,15 @@ const StockWarning = () => {
 						key={item.id}
 						src={item.imageSrc}
 						alt="Stock Warning"
-						width={48}
-						height={48}
+						width={46}
+						height={46}
 						className={`rounded-full object-center object-cover border h-12 w-12
                 ${index === 0 ? 'border-border' : '-ml-8 border-content/60'}
               `}
 					/>
 				))}
 			</div>
-			<p className="text-xl tracking-tight flex items-center gap-2">
+			<p className="text-lg flex items-center gap-2">
 				6 Items running low on stock
 				<ChevronRight />
 			</p>
