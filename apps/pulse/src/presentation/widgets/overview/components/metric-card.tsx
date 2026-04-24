@@ -18,7 +18,7 @@ const MetricCard = ({
 }: MetricCardProps) => {
 	return (
 		<div className="flex gap-2">
-			{deltaPercent === undefined && (
+			{deltaPercent !== undefined && (
 				<div className="flex gap-2 -translate-y-4 translate-x-4">
 					<p>{deltaPercent}%</p>
 					{trend === 'up' ? (
