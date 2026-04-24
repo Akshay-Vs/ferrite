@@ -26,14 +26,25 @@ const Greetings = () => {
 				</FadeInItem>
 			) : (
 				<FadeInItem>
-					<h1 className="text-[2.42rem] font-[250]">
+					<h1 className="text-[2.42rem] font-extralight">
 						{greeting}
 						{', '}
-						<GradientText className="font-[280]" text={fullName} />
+						<GradientText
+							className="font-light mix-blend-plus-darker"
+							text={fullName}
+						/>
 					</h1>
 
 					<p className="font-light text-base">
-						You have <span className="text-orange-100">2 assigned tasks</span>.
+						You have{' '}
+						<span className="text-orange-100 font-normal">
+							2 assigned tasks
+						</span>
+						, and{' '}
+						<span className="text-amber-100 font-normal">
+							64 unread messages
+						</span>
+						.
 					</p>
 				</FadeInItem>
 			)}

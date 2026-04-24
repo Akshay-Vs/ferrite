@@ -3,7 +3,7 @@
 import { useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { SALES_OVERVIEW } from '@/core/constants/routes.constants';
 import FormHeading from '@/presentation/primitives/form-heading';
 import { OTPForm } from '@/presentation/widgets/auth/forms/otp-form';
 
@@ -14,7 +14,7 @@ export default function VerifyEmailPage() {
 	useEffect(() => {
 		// Client-side intercept: Enforce the presence of an active sign-up cycle
 		if (!signUp?.status) {
-			router.replace(OVERVIEW);
+			router.replace(SALES_OVERVIEW);
 		}
 	}, [signUp?.status, router]);
 
@@ -36,7 +36,7 @@ export default function VerifyEmailPage() {
 		// 2. Finalize session realization upon complete status
 		if (signUp.status === 'complete') {
 			await signUp.finalize({
-				navigate: () => router.push(OVERVIEW),
+				navigate: () => router.push(SALES_OVERVIEW),
 			});
 		}
 	};

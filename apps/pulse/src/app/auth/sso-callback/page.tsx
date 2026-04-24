@@ -5,7 +5,7 @@ import { useClerk, useSignIn, useSignUp } from '@clerk/nextjs';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { SALES_OVERVIEW } from '@/core/constants/routes.constants';
 
 export default function SSOCallbackPage() {
 	const clerk = useClerk();
@@ -23,7 +23,7 @@ export default function SSOCallbackPage() {
 	const finalizeSession = useCallback(
 		async (authObject: typeof signIn | typeof signUp) => {
 			await authObject.finalize({
-				navigate: () => router.push(OVERVIEW),
+				navigate: () => router.push(SALES_OVERVIEW),
 			});
 		},
 		[router]
@@ -93,7 +93,7 @@ export default function SSOCallbackPage() {
 					if (sessionId) {
 						await clerk.setActive({
 							session: sessionId,
-							navigate: () => router.push(OVERVIEW),
+							navigate: () => router.push(SALES_OVERVIEW),
 						});
 						return;
 					}

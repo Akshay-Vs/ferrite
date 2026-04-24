@@ -40,7 +40,7 @@ export const NavAvatar = () => {
 			>
 				<Avatar className="full">
 					<AvatarImage
-						src={user.imageUrl || ''}
+						src={user.imageUrl}
 						alt={initials}
 						height={60}
 						width={60}

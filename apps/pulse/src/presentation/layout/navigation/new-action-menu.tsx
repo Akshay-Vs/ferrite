@@ -21,8 +21,6 @@ const NewActionMenu = () => {
 				<Button
 					size="icon"
 					aria-label="Create New"
-					aria-haspopup="true"
-					aria-description="Opens a menu with options to create new items"
 					render={
 						<TooltipTrigger
 							render={

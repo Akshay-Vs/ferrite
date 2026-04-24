@@ -3,7 +3,10 @@
 import { useSignIn } from '@clerk/nextjs';
 import type { OAuthStrategy } from '@clerk/shared/types';
 import { useState } from 'react';
-import { OVERVIEW, SSO_CALLBACK } from '@/core/constants/routes.constants';
+import {
+	SALES_OVERVIEW,
+	SSO_CALLBACK,
+} from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 
 export const useOAuth = () => {
@@ -22,7 +25,7 @@ export const useOAuth = () => {
 			const origin =
 				typeof window !== 'undefined' ? window.location.origin : '';
 			const absoluteCallbackUrl = `${origin}${SSO_CALLBACK}`;
-			const absoluteRedirectUrl = `${origin}${OVERVIEW}`;
+			const absoluteRedirectUrl = `${origin}${SALES_OVERVIEW}`;
 
 			const { error: clerkError } = await signIn.sso({
 				strategy,

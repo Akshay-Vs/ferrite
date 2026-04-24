@@ -4,7 +4,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
 import {
 	LOGIN_EMAIL_VERIFY,
-	OVERVIEW,
+	SALES_OVERVIEW,
 } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
 import { loginSchema } from '../schemas/login-form.zodschema';
@@ -74,7 +74,7 @@ export const useLoginForm = () => {
 			// Finalize session realization upon complete status
 			if (signIn.status === 'complete') {
 				await signIn.finalize({
-					navigate: () => router.push(OVERVIEW),
+					navigate: () => router.push(SALES_OVERVIEW),
 				});
 			}
 		},

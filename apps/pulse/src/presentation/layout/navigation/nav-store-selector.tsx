@@ -42,25 +42,22 @@ const NavStoreSelector = () => {
 		setIsMounted(true);
 		let isActive = true;
 
-		const initializeData = async () => {
-			const data = await fetchStoresAsync();
-			if (isActive) {
-				setStores(data);
-				setIsLoading(false);
-			}
+		const runFetch = () => {
+			setIsLoading(true);
+			fetchStoresAsync()
+				.then((data) => {
+					if (!isActive) return;
+					setStores(data);
+					setIsLoading(false);
+				})
+				.catch(() => {
+					if (!isActive) return;
+					toast.error('Failed to load stores. Please try again.', {
+						action: { label: 'Retry', onClick: runFetch },
+					});
+				});
 		};
-
-		initializeData().catch((_error) => {
-			toast.error('Failed to load stores. Please try again.', {
-				action: {
-					label: 'Retry',
-					onClick: () => {
-						setIsLoading(true);
-						void initializeData();
-					},
-				},
-			});
-		});
+		runFetch();
 
 		return () => {
 			isActive = false;
@@ -90,12 +87,7 @@ const NavStoreSelector = () => {
 			onValueChange={handleChange}
 			disabled={!isReady}
 		>
-			<SelectTrigger
-				className="w-58"
-				aria-label="Select Store"
-				aria-haspopup="true"
-				aria-description="Opens a menu with options to select a store"
-			>
+			<SelectTrigger className="w-58" aria-label="Select Store">
 				<SelectValue placeholder={!isReady ? 'Loading...' : 'Select Store'}>
 					{selectedStore && (
 						<span className="flex gap-2.5 items-center text-foreground">
