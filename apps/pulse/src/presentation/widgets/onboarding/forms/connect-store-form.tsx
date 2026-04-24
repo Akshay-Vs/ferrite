@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'nextjs-toploader/app';
-import { OVERVIEW } from '@/core/constants/routes.constants';
+import { OVERVIEW } from '@core/constants/routes.constants';
 import { Button } from '@/presentation/primitives/button';
 
 const ConnectStoreForm = () => {
