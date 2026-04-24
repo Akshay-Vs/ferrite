@@ -2,7 +2,7 @@
 
 import { icons, type LucideProps } from 'lucide-react';
 import { useMemo } from 'react';
-import { cn } from '@/core/utils/utils';
+import { cn } from '@core/utils/utils';
 
 interface IconRendererProps extends LucideProps {
 	/** Identifier for the icon asset. */
