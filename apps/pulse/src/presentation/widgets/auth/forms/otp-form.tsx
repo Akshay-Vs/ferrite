@@ -101,6 +101,7 @@ export const OTPForm = ({ onFormSubmit, onResend }: OTPFormProps) => {
 								</div>
 							)}
 							<Button
+								variant="secondary"
 								type="submit"
 								disabled={!canSubmit || Boolean(isSubmitting)}
 								isLoading={Boolean(isSubmitting)}

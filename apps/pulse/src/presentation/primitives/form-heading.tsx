@@ -1,3 +1,4 @@
+import FadeInItem from '@/presentation/animations/fade-in-item';
 import GradientText from './gradient-text';
 
 interface FormHeadingProps {
@@ -12,12 +13,12 @@ const FormHeading = ({
 	description,
 }: FormHeadingProps) => {
 	return (
-		<div className="col-center gap-4">
+		<FadeInItem className="col-center gap-4">
 			<h1 className="text-4xl font-extralight tracking-[0.012rem]">
 				{title} <GradientText text={highlightedText} className="font-light" />
 			</h1>
-			<p className="text-lg font-light">{description}</p>
-		</div>
+			<p className="text-lg font-light text-center">{description}</p>
+		</FadeInItem>
 	);
 };
 

@@ -21,19 +21,18 @@ export default function RootLayout({
 		<html lang="en" className={cn('font-sans', inter.variable)}>
 			<body className="antialiased bg-background text-content">
 				<ClerkProvider>
-					<div className="min-h-dvh max-w-dvw flex flex-col">
-						<ThemeProvider
-							attribute="class"
-							defaultTheme="dark"
-							enableSystem={false}
-							disableTransitionOnChange
-						>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="dark"
+						enableSystem={false}
+						disableTransitionOnChange
+					>
+						<div className="min-h-dvh max-w-dvw flex flex-col">
 							<NextTopLoader color="#A68BF8FA" height={3} showSpinner={false} />
 							<Toaster />
-
 							{children}
-						</ThemeProvider>
-					</div>
+						</div>
+					</ThemeProvider>
 				</ClerkProvider>
 			</body>
 		</html>

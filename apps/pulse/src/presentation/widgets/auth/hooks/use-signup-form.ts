@@ -4,7 +4,7 @@ import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
 import { SIGNUP_EMAIL_VERIFY } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
-import { signupSchema } from '../schemas/login-form.zodschema';
+import { signupSchema } from '../schemas/signup-form.zodschema';
 
 export const useSignUpForm = () => {
 	const router = useRouter();

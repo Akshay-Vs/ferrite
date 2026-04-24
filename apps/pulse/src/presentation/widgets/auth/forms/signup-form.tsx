@@ -119,6 +119,7 @@ export const SignupForm = () => {
 								</div>
 							)}
 							<Button
+								variant="secondary"
 								type="submit"
 								disabled={!canSubmit}
 								isLoading={isSubmitting}

@@ -10,6 +10,11 @@
 			"source": "JuliusBrussee/caveman",
 			"sourceType": "github",
 			"computedHash": "2fb5ecec2f71badbd51cdc0ad4a5a4887fd98c2bb36c24f1adcbbeb57f9f1851"
+		},
+		"shadcn": {
+			"source": "shadcn/ui",
+			"sourceType": "github",
+			"computedHash": "2bc6cf38ec7b4a5778a43fabb3e87642c9897ad45e9eb42438b57fd2def6cca8"
 		}
 	}
 }

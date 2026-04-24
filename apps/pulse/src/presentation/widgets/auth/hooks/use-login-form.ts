@@ -7,7 +7,7 @@ import {
 	OVERVIEW,
 } from '@/core/constants/routes.constants';
 import { resolveClerkError } from '@/core/utils/resolve-clerk-error';
-import { loginSchema } from '../schemas/signin-form.zodschema';
+import { loginSchema } from '../schemas/login-form.zodschema';
 
 export const useLoginForm = () => {
 	const router = useRouter();
