@@ -9,7 +9,7 @@
 		"lint": "biome check --fix ."
 	},
 	"dependencies": {
-		"@base-ui/react": "^1.4.0",
+		"@base-ui/react": "^1.4.1",
 		"@clerk/nextjs": "^7.2.1",
 		"@clerk/shared": "^4.8.2",
 		"@tanstack/react-form": "^1.29.0",
