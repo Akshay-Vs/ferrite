@@ -44,3 +44,9 @@ export const addressTypeEnum = pgEnum('address_type', [
 	'work',
 	'other',
 ]);
+
+export const onboardingStateEnum = pgEnum('onboarding_state', [
+	'ABOUT_ME',
+	'STORE_CREATION',
+	'COMPLETED',
+]);
