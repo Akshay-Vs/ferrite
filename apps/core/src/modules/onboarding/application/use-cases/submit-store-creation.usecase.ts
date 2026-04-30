@@ -55,44 +55,80 @@ export class SubmitStoreCreationUseCase
 		return this.tracer.withSpan(
 			'use-case.submit-store-creation',
 			async () => {
-				const userId = input.authUser.id;
+				try {
+					const userId = input.authUser.id;
 
-				// 1. Fetch current state
-				const session = await this.onboardingRepo.findByUserId(userId);
-				if (!session) {
-					return err(new Error(`No onboarding session for user ${userId}`));
-				}
+					// 1. Fetch current state
+					let session: OnboardingSession | null;
+					try {
+						session = await this.onboardingRepo.findByUserId(userId);
+					} catch (error) {
+						return err(
+							error instanceof Error ? error : new Error(String(error))
+						);
+					}
 
-				// 2. Guard: already completed
-				if (session.isCompleted) {
-					return err(new OnboardingAlreadyCompletedError(userId));
-				}
+					if (!session) {
+						return err(new Error(`No onboarding session for user ${userId}`));
+					}
 
-				// 3. Guard: must be at STORE_CREATION step
-				if (session.currentStep !== 'STORE_CREATION') {
-					return err(
-						new InvalidStepTransitionError(
-							session.currentStep,
-							'STORE_CREATION'
-						)
+					// 2. Guard: already completed
+					if (session.isCompleted) {
+						return err(new OnboardingAlreadyCompletedError(userId));
+					}
+
+					// 3. Guard: must be at STORE_CREATION step
+					if (session.currentStep !== 'STORE_CREATION') {
+						return err(
+							new InvalidStepTransitionError(
+								session.currentStep,
+								'STORE_CREATION'
+							)
+						);
+					}
+
+					// 4. Atomic: create store + role + member + complete onboarding
+					try {
+						await this.uow.execute(async (tx) => {
+							try {
+								await this.storeDelegate.createStoreWithOwner(
+									input.data,
+									userId,
+									tx
+								);
+							} catch (error) {
+								// We must re-throw here to ensure the Unit of Work rolls back the transaction.
+								// It will be caught by the outer try-catch which returns an Err.
+								throw error;
+							}
+
+							await this.onboardingRepo.updateState(userId, 'COMPLETED', tx);
+							await this.onboardingRepo.markCompleted(userId, tx);
+						});
+					} catch (error) {
+						return err(
+							error instanceof Error ? error : new Error(String(error))
+						);
+					}
+
+					this.logger.log(
+						`Store creation step completed for user ${userId}, onboarding finished`
 					);
+
+					// 5. Return completed session
+					let completedSession: OnboardingSession | null;
+					try {
+						completedSession = await this.onboardingRepo.findByUserId(userId);
+					} catch (error) {
+						return err(
+							error instanceof Error ? error : new Error(String(error))
+						);
+					}
+
+					return ok(completedSession!);
+				} catch (error) {
+					return err(error instanceof Error ? error : new Error(String(error)));
 				}
-
-				// 4. Atomic: create store + role + member + complete onboarding
-				await this.uow.execute(async (tx) => {
-					await this.storeDelegate.createStoreWithOwner(input.data, userId, tx);
-					await this.onboardingRepo.updateState(userId, 'COMPLETED', tx);
-					await this.onboardingRepo.markCompleted(userId, tx);
-				});
-
-				this.logger.log(
-					`Store creation step completed for user ${userId}, onboarding finished`
-				);
-
-				// 5. Return completed session
-				const completedSession = await this.onboardingRepo.findByUserId(userId);
-
-				return ok(completedSession!);
 			},
 			{ 'use-case.userId': input.authUser.id }
 		);
