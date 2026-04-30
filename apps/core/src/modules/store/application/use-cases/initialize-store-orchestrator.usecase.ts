@@ -1,12 +1,13 @@
 import { ok, type Result } from '@common/interfaces/result.interface';
+import {
+	type ITransactionContext,
+	type IUnitOfWork,
+	UNIT_OF_WORK,
+} from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import type { Store } from '@core/database/schema/store.schema';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-	type IStoreRepository,
-	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
 import {
 	type IStorePermissionChecker,
 	STORE_PERMISSION_CHECKER,
@@ -24,7 +25,7 @@ export interface InitializeStoreInput {
 	 * When provided, the orchestrator runs all steps in this transaction
 	 * instead of starting its own via `repo.transaction()`.
 	 */
-	tx?: unknown;
+	tx?: ITransactionContext;
 }
 
 export const INITIALIZE_STORE_ORCHESTRATOR_UC = Symbol(
@@ -36,8 +37,8 @@ export class InitializeStoreOrchestratorUseCase
 	implements IUseCase<InitializeStoreInput, Store, Error>
 {
 	constructor(
-		@Inject(STORE_REPOSITORY)
-		private readonly repo: IStoreRepository,
+		@Inject(UNIT_OF_WORK)
+		private readonly uow: IUnitOfWork,
 		@Inject(STORE_PERMISSION_CHECKER)
 		private readonly permissionChecker: IStorePermissionChecker,
 		private readonly createStoreUc: CreateStoreUseCase,
@@ -46,7 +47,9 @@ export class InitializeStoreOrchestratorUseCase
 	) {}
 
 	async execute(payload: InitializeStoreInput): Promise<Result<Store, Error>> {
-		const runSteps = async (tx: unknown): Promise<Result<Store, Error>> => {
+		const runSteps = async (
+			tx: ITransactionContext
+		): Promise<Result<Store, Error>> => {
 			// 1. Create the store
 			const storeRes = await this.createStoreUc.execute({
 				tx,
@@ -82,7 +85,7 @@ export class InitializeStoreOrchestratorUseCase
 		// Use external tx if provided, otherwise start our own
 		const result = payload.tx
 			? await runSteps(payload.tx)
-			: await this.repo.transaction(runSteps);
+			: await this.uow.execute(runSteps);
 
 		// Invalidate permission cache after commit
 		if (result.isOk()) {

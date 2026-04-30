@@ -29,7 +29,7 @@ export class UpdateStoreUseCase
 		payload: UpdateStorePayload
 	): Promise<Result<Store, StoreNotFoundError>> {
 		const store = await this.repo.updateStore(
-			null, // No tx needed
+			undefined, // No tx needed
 			payload.storeId,
 			payload.data
 		);

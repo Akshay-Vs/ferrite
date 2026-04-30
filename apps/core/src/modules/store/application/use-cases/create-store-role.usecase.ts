@@ -1,4 +1,5 @@
 import { ok, type Result } from '@common/interfaces/result.interface';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import type { StoreRole } from '@core/database/schema/store.schema';
@@ -9,7 +10,7 @@ import {
 } from '../../domain/ports/store.repository.port';
 
 export interface CreateStoreRoleInput {
-	tx: unknown;
+	tx?: ITransactionContext;
 	storeId: string;
 	name: string;
 	description: string | null;
