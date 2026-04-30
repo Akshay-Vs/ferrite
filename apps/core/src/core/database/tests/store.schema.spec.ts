@@ -457,8 +457,8 @@ describe('Store tables', () => {
 					'Should have thrown on deleting role with active members'
 				);
 			} catch (e: any) {
-				// 23001 = restrict_violation (ON DELETE RESTRICT)
-				expect(e.cause?.code).toBe('23001');
+				// 23503 = foreign_key_violation (ON DELETE RESTRICT)
+				expect(e.cause?.code).toBe('23503');
 			}
 		});
 	});
