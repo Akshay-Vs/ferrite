@@ -1,4 +1,5 @@
 import { ok, type Result } from '@common/interfaces/result.interface';
+import { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import type { Store } from '@core/database/schema/store.schema';
@@ -24,7 +25,7 @@ export interface InitializeStoreInput {
 	 * When provided, the orchestrator runs all steps in this transaction
 	 * instead of starting its own via `repo.transaction()`.
 	 */
-	tx?: unknown;
+	tx?: ITransactionContext;
 }
 
 export const INITIALIZE_STORE_ORCHESTRATOR_UC = Symbol(
@@ -46,7 +47,9 @@ export class InitializeStoreOrchestratorUseCase
 	) {}
 
 	async execute(payload: InitializeStoreInput): Promise<Result<Store, Error>> {
-		const runSteps = async (tx: unknown): Promise<Result<Store, Error>> => {
+		const runSteps = async (
+			tx: ITransactionContext
+		): Promise<Result<Store, Error>> => {
 			// 1. Create the store
 			const storeRes = await this.createStoreUc.execute({
 				tx,
