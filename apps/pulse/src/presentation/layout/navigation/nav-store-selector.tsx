@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useStoreSelection } from '@/application/store/selected-store.store';
+import {
+	setSelectedStore,
+	useStoreSelection,
+} from '@/application/store/selected-store.store';
 import { IconRenderer } from '@/presentation/primitives/icon-renderer';
 import {
 	Select,
@@ -15,9 +18,8 @@ import { Skeleton } from '@/presentation/primitives/skeleton';
 import { toast } from '@/presentation/primitives/sonner';
 
 const MOCK_STORES = [
-	{ id: '123', name: 'Nebula Novelties', icon: 'Rocket' },
-	{ id: '2', name: 'The Velvet Vault', icon: 'Gem' },
-	{ id: '3', name: 'Evergreen Edibles', icon: 'Citrus' },
+	{ id: '1', name: 'The Velvet Vault', icon: 'Gem' },
+	{ id: '2', name: 'Evergreen Edibles', icon: 'Citrus' },
 	{ id: '4', name: 'Circuit Cityscape', icon: 'Cpu' },
 	{ id: '5', name: 'Urban Umbrella', icon: 'CloudRain' },
 	{ id: '6', name: 'Midnight Muse', icon: 'Moon' },
@@ -32,7 +34,7 @@ const fetchStoresAsync = async (): Promise<typeof MOCK_STORES> => {
 };
 
 const NavStoreSelector = () => {
-	const { selectedStoreId, setSelectedStore } = useStoreSelection();
+	const { selectedStoreId } = useStoreSelection();
 	const [stores, setStores] = useState<typeof MOCK_STORES>([]);
 
 	const [isMounted, setIsMounted] = useState(false);
@@ -49,6 +51,20 @@ const NavStoreSelector = () => {
 					if (!isActive) return;
 					setStores(data);
 					setIsLoading(false);
+
+					const currentSelection = useStoreSelection.getState().selectedStoreId;
+					const isSelectionValid = data.some(
+						(store) => store.id === currentSelection
+					);
+
+					// Execute assignment and notify if the cached store is obsolete or null
+					if ((!currentSelection || !isSelectionValid) && data.length > 0) {
+						const fallbackStore = data[0];
+						setSelectedStore(fallbackStore.id);
+
+						// Deploy an informational toast denoting system-initiated state mutation
+						toast.info(`Switched store to ${fallbackStore.name}`);
+					}
 				})
 				.catch(() => {
 					if (!isActive) return;
@@ -74,14 +90,11 @@ const NavStoreSelector = () => {
 	const isReady = !isLoading;
 	const selectedStore = stores.find((s) => s.id === selectedStoreId);
 
-	// Derives the active value only if the store exists in the fetched payload
 	const activeValue =
 		isReady && selectedStore ? String(selectedStore.id) : undefined;
 
 	return (
 		<Select
-			// dynamic key forces a complete component remount
-			// when the data transitions from pending to resolved.
 			key={isReady ? 'resolved' : 'pending'}
 			value={activeValue}
 			onValueChange={handleChange}
