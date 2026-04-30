@@ -19,7 +19,7 @@ export class DeleteStoreUseCase
 	) {}
 
 	async execute(storeId: string): Promise<Result<void, StoreNotFoundError>> {
-		const success = await this.repo.softDeleteStore(null, storeId);
+		const success = await this.repo.softDeleteStore(undefined, storeId);
 
 		if (!success) {
 			return err(new StoreNotFoundError(storeId));

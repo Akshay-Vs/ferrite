@@ -1,3 +1,4 @@
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import type { Store, StoreRole } from '@core/database/schema/store.schema';
 import type { CreateStoreInput } from '../schemas/create-store.zodschema';
@@ -10,7 +11,7 @@ export interface IStoreRepository {
 	 * Creates a new Store.
 	 */
 	createStore(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		input: CreateStoreInput,
 		createdBy: string
 	): Promise<Store>;
@@ -18,13 +19,16 @@ export interface IStoreRepository {
 	/**
 	 * Soft deletes a store by its ID.
 	 */
-	softDeleteStore(tx: unknown, storeId: string): Promise<boolean>;
+	softDeleteStore(
+		tx: ITransactionContext | undefined,
+		storeId: string
+	): Promise<boolean>;
 
 	/**
 	 * Updates a store by its ID.
 	 */
 	updateStore(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		payload: UpdateStoreInput
 	): Promise<Store | null>;
@@ -33,7 +37,7 @@ export interface IStoreRepository {
 	 * Creates a store role with specific permissions.
 	 */
 	createStoreRole(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		name: string,
 		description: string | null,
@@ -45,7 +49,7 @@ export interface IStoreRepository {
 	 * Adds a user as a member of a store with a specific role.
 	 */
 	addStoreMember(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		userId: string,
 		roleId: string,
@@ -65,5 +69,5 @@ export interface IStoreRepository {
 	/**
 	 * Execute queries inside a transaction.
 	 */
-	transaction<T>(cb: (tx: unknown) => Promise<T>): Promise<T>;
+	transaction<T>(cb: (tx: ITransactionContext) => Promise<T>): Promise<T>;
 }

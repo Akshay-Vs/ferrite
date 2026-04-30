@@ -1,5 +1,4 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { IStoreDelegate } from '@modules/onboarding/domain/ports/store-delegate.port';
@@ -38,9 +37,6 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 		return this.tracer.withSpan(
 			'StoreDelegateAdapter.createStoreWithOwner',
 			async () => {
-				// Unwrap the UoW context to a raw Drizzle tx that the store repo understands
-				const rawTx = tx ? DrizzleUnitOfWork.unwrap(tx) : undefined;
-
 				const result = await this.initializeStoreUc.execute({
 					input: {
 						name: input.name,
@@ -50,7 +46,7 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 						iconUrl: input.iconUrl,
 					},
 					createdBy,
-					tx: rawTx,
+					tx,
 				});
 
 				if (result.isErr()) {

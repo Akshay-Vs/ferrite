@@ -1,4 +1,5 @@
 import { ok, type Result } from '@common/interfaces/result.interface';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { Store } from '@core/database/schema/store.schema';
 import { Inject, Injectable } from '@nestjs/common';
@@ -9,7 +10,7 @@ import {
 import type { CreateStoreInput } from '../../domain/schemas/create-store.zodschema';
 
 export interface CreateStoreInputWithContext {
-	tx: unknown;
+	tx?: ITransactionContext;
 	input: CreateStoreInput;
 	createdBy: string;
 }

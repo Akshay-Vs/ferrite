@@ -1,4 +1,5 @@
 import { ok, type Result } from '@common/interfaces/result.interface';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { Inject, Injectable } from '@nestjs/common';
 import {
@@ -7,7 +8,7 @@ import {
 } from '../../domain/ports/store.repository.port';
 
 export interface AddStoreMemberInput {
-	tx: unknown;
+	tx?: ITransactionContext;
 	storeId: string;
 	userId: string;
 	roleId: string;

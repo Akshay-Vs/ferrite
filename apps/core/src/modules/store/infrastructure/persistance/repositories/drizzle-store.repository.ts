@@ -1,6 +1,12 @@
+import {
+	type ITransactionContext,
+	type IUnitOfWork,
+	UNIT_OF_WORK,
+} from '@common/interfaces/unit-of-work.interface';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
+import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import {
 	storeMembers,
 	storeRolePermissions,
@@ -21,19 +27,23 @@ import type { UpdateStoreInput } from '../../../domain/schemas/update-store.zods
 export class DrizzleStoreRepository implements IStoreRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
-		@Inject(OTEL_TRACER) private readonly tracer: ITracer
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork
 	) {}
 
-	private getExecutor(tx: unknown): TDatabase {
-		return tx ? (tx as TDatabase) : this.db;
+	private getExecutor(tx?: ITransactionContext): TDatabase {
+		if (tx) return DrizzleUnitOfWork.unwrap(tx) as unknown as TDatabase;
+		return this.db;
 	}
 
-	async transaction<T>(cb: (tx: unknown) => Promise<T>): Promise<T> {
-		return this.db.transaction(cb);
+	async transaction<T>(
+		cb: (tx: ITransactionContext) => Promise<T>
+	): Promise<T> {
+		return this.uow.execute(cb);
 	}
 
 	async createStore(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		input: CreateStoreInput,
 		createdBy: string
 	): Promise<Store> {
@@ -53,12 +63,16 @@ export class DrizzleStoreRepository implements IStoreRepository {
 						createdBy,
 					})
 					.returning();
-				return store!;
+				if (!store) throw new Error('Failed to create store');
+				return store;
 			}
 		);
 	}
 
-	async softDeleteStore(tx: unknown, storeId: string): Promise<boolean> {
+	async softDeleteStore(
+		tx: ITransactionContext | undefined,
+		storeId: string
+	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
 			'db.stores.softDelete',
@@ -75,7 +89,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	}
 
 	async updateStore(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		payload: UpdateStoreInput
 	): Promise<Store | null> {
@@ -98,7 +112,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	}
 
 	async createStoreRole(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		name: string,
 		description: string | null,
@@ -123,23 +137,25 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					})
 					.returning();
 
+				if (!role) throw new Error('Failed to create store role');
+
 				// 2. Map permissions and insert directly
 				if (permissionKeys.length > 0) {
 					await executor.insert(storeRolePermissions).values(
 						permissionKeys.map((key) => ({
-							storeRoleId: role!.id,
+							storeRoleId: role.id,
 							permissionKey: key,
 						}))
 					);
 				}
 
-				return role!;
+				return role;
 			}
 		);
 	}
 
 	async addStoreMember(
-		tx: unknown,
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		userId: string,
 		roleId: string,

@@ -90,17 +90,11 @@ export class SubmitStoreCreationUseCase
 					// 4. Atomic: create store + role + member + complete onboarding
 					try {
 						await this.uow.execute(async (tx) => {
-							try {
-								await this.storeDelegate.createStoreWithOwner(
-									input.data,
-									userId,
-									tx
-								);
-							} catch (error) {
-								// We must re-throw here to ensure the Unit of Work rolls back the transaction.
-								// It will be caught by the outer try-catch which returns an Err.
-								throw error;
-							}
+							await this.storeDelegate.createStoreWithOwner(
+								input.data,
+								userId,
+								tx
+							);
 
 							await this.onboardingRepo.updateState(userId, 'COMPLETED', tx);
 							await this.onboardingRepo.markCompleted(userId, tx);
