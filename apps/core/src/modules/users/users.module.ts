@@ -100,6 +100,6 @@ import { UserSyncProcessor } from './infrastructure/queue/user-sync.processor';
 		// Queue worker
 		UserSyncProcessor,
 	],
-	exports: [],
+	exports: [USER_REPOSITORY],
 })
 export class UsersModule {}
