@@ -43,6 +43,7 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		STORE_PERMISSION_CHECKER,
 		CheckStorePermissionUseCase,
 		StorePermissionGuard,
+		InitializeStoreOrchestratorUseCase,
 	],
 })
 export class StoreModule {}
