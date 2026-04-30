@@ -40,7 +40,7 @@
 		"@opentelemetry/resources": "^2.6.0",
 		"@opentelemetry/sdk-metrics": "^2.6.0",
 		"@opentelemetry/sdk-node": "^0.213.0",
-		"@opentelemetry/sdk-trace-base": "^2.6.0",
+		"@opentelemetry/sdk-trace-base": "^2.7.0",
 		"@opentelemetry/semantic-conventions": "^1.40.0",
 		"bullmq": "^5.74.1",
 		"cache-manager": "^7.2.8",
