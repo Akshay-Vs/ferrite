@@ -338,12 +338,15 @@ export class DrizzleUserRepository implements IUserRepository {
 				if (rows.length === 0) return null;
 
 				const userEntity = rows[0].user;
-				const providers = rows
-					.filter((r) => r.authProvider !== null)
-					.map((r) => ({
-						provider: r.authProvider!.provider as AuthProvider,
-						externalAuthId: r.authProvider!.externalAuthId,
-					}));
+				const providers = rows.flatMap((r) => {
+					if (!r.authProvider) return [];
+					return [
+						{
+							provider: r.authProvider.provider as AuthProvider,
+							externalAuthId: r.authProvider.externalAuthId,
+						},
+					];
+				});
 
 				return {
 					user: UserMapper.toUserProfile(userEntity),

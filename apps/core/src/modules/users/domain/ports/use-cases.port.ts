@@ -62,11 +62,12 @@ export type IGetOwnProfileUseCase = IUseCase<
  * @output UserProfileFull[] - array of active user profiles
  */
 export type IGetAllUsersUseCase = IUseCase<
-	{
-		cursor?: string;
-		limit?: number;
-		filters?: Partial<UserProfileFull>;
-	} | void,
+	| {
+			cursor?: string;
+			limit?: number;
+			filters?: Partial<UserProfileFull>;
+	  }
+	| undefined,
 	{ items: UserProfileFull[]; nextCursor?: string },
 	InfrastructureError
 >;

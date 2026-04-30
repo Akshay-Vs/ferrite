@@ -30,7 +30,7 @@ export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 
 	protected async handle(
 		payload: EventPayload,
-		helpers?: JobHelpers
+		_helpers?: JobHelpers
 	): Promise<Result<void, Error>> {
 		const validatedEvent = eventPayloadSchema.safeParse(payload);
 
