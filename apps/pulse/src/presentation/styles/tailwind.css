@@ -33,6 +33,15 @@
 		@apply w-screen h-screen;
 	}
 
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+
+	.scrollbar-hide {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+
 	.gradient-border {
 		border: 1.2px solid transparent;
 		background:

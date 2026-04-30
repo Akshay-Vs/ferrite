@@ -7,7 +7,7 @@ import StockWarning from '@/presentation/widgets/overview/components/stock-warni
 
 const layout = ({ children }: PropsWithChildren) => {
 	return (
-		<FadeInItem className="full col gap-8 mt-14">
+		<FadeInItem className="full col gap-6 mt-13">
 			<div className="flex items-end justify-between px-2">
 				<Greetings />
 				<KPIOverview />

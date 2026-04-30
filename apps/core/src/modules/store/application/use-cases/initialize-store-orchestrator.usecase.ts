@@ -19,6 +19,12 @@ import { CreateStoreRoleUseCase } from './create-store-role.usecase';
 export interface InitializeStoreInput {
 	input: CreateStoreInput;
 	createdBy: string;
+	/**
+	 * Optional external transaction context.
+	 * When provided, the orchestrator runs all steps in this transaction
+	 * instead of starting its own via `repo.transaction()`.
+	 */
+	tx?: unknown;
 }
 
 export const INITIALIZE_STORE_ORCHESTRATOR_UC = Symbol(
@@ -40,7 +46,7 @@ export class InitializeStoreOrchestratorUseCase
 	) {}
 
 	async execute(payload: InitializeStoreInput): Promise<Result<Store, Error>> {
-		const result = await this.repo.transaction(async (tx) => {
+		const runSteps = async (tx: unknown): Promise<Result<Store, Error>> => {
 			// 1. Create the store
 			const storeRes = await this.createStoreUc.execute({
 				tx,
@@ -71,9 +77,14 @@ export class InitializeStoreOrchestratorUseCase
 			if (memberRes.isErr()) throw memberRes.error;
 
 			return ok(storeRes.value);
-		});
+		};
 
-		// 4. Invalidate permission cache after commit
+		// Use external tx if provided, otherwise start our own
+		const result = payload.tx
+			? await runSteps(payload.tx)
+			: await this.repo.transaction(runSteps);
+
+		// Invalidate permission cache after commit
 		if (result.isOk()) {
 			await this.permissionChecker.invalidatePermissions(
 				payload.createdBy,

@@ -1,5 +1,4 @@
 import { eq } from 'drizzle-orm';
-import { permissions } from '../schema/permission.schema';
 import {
 	storeMembers,
 	storeRolePermissions,
@@ -8,7 +7,6 @@ import {
 } from '../schema/store.schema';
 import { users } from '../schema/user.schema';
 import {
-	createTestPermission,
 	createTestStore,
 	createTestStoreMember,
 	createTestStoreRole,
@@ -89,21 +87,6 @@ describe('Store tables', () => {
 				.returning();
 
 			expect(softDeleted.deletedAt).toEqual(now);
-		});
-
-		it('should store metadata as jsonb', async () => {
-			const [user] = await db
-				.insert(users)
-				.values(createTestUser())
-				.returning();
-
-			const meta = { theme: 'dark', features: ['chat', 'analytics'] };
-			const [store] = await db
-				.insert(stores)
-				.values(createTestStore(user.id, { metadata: meta }))
-				.returning();
-
-			expect(store.metadata).toEqual(meta);
 		});
 	});
 
@@ -204,7 +187,7 @@ describe('Store tables', () => {
 	});
 
 	describe('store_role_permissions table', () => {
-		it('should assign a permission to a store role', async () => {
+		it('should assign a permission key to a store role', async () => {
 			const [user] = await db
 				.insert(users)
 				.values(createTestUser())
@@ -217,23 +200,42 @@ describe('Store tables', () => {
 				.insert(storeRoles)
 				.values(createTestStoreRole(store.id, { name: 'Editor' }))
 				.returning();
-			const [perm] = await db
-				.insert(permissions)
-				.values(
-					createTestPermission({
-						resource: 'products',
-						action: 'create',
-					})
-				)
-				.returning();
 
 			const [rp] = await db
 				.insert(storeRolePermissions)
-				.values(createTestStoreRolePermission(role.id, perm.id))
+				.values(createTestStoreRolePermission(role.id, 'products.create'))
 				.returning();
 
 			expect(rp.storeRoleId).toBe(role.id);
-			expect(rp.permissionId).toBe(perm.id);
+			expect(rp.permissionKey).toBe('products.create');
+		});
+
+		it('should enforce unique (store_role_id, permission_key) composite PK', async () => {
+			const [user] = await db
+				.insert(users)
+				.values(createTestUser())
+				.returning();
+			const [store] = await db
+				.insert(stores)
+				.values(createTestStore(user.id))
+				.returning();
+			const [role] = await db
+				.insert(storeRoles)
+				.values(createTestStoreRole(store.id, { name: 'Editor' }))
+				.returning();
+
+			await db
+				.insert(storeRolePermissions)
+				.values(createTestStoreRolePermission(role.id, 'orders.read'));
+
+			try {
+				await db
+					.insert(storeRolePermissions)
+					.values(createTestStoreRolePermission(role.id, 'orders.read'));
+				throw new Error('Should have thrown on duplicate role+permission key');
+			} catch (e: any) {
+				expect(e.cause?.code).toBe('23505');
+			}
 		});
 
 		it('should cascade delete permissions when store role is deleted', async () => {
@@ -249,19 +251,10 @@ describe('Store tables', () => {
 				.insert(storeRoles)
 				.values(createTestStoreRole(store.id, { name: 'Editor' }))
 				.returning();
-			const [perm] = await db
-				.insert(permissions)
-				.values(
-					createTestPermission({
-						resource: 'orders',
-						action: 'read',
-					})
-				)
-				.returning();
 
 			await db
 				.insert(storeRolePermissions)
-				.values(createTestStoreRolePermission(role.id, perm.id));
+				.values(createTestStoreRolePermission(role.id, 'orders.read'));
 
 			await db.delete(storeRoles).where(eq(storeRoles.id, role.id));
 
@@ -464,8 +457,8 @@ describe('Store tables', () => {
 					'Should have thrown on deleting role with active members'
 				);
 			} catch (e: any) {
-				// 23503 = foreign key violation
-				expect(e.cause?.code).toBe('23503');
+				// 23001 = restrict_violation (ON DELETE RESTRICT)
+				expect(e.cause?.code).toBe('23001');
 			}
 		});
 	});

@@ -98,10 +98,27 @@
 		"transform": {
 			"^.+\\.(t|j)s$": "ts-jest"
 		},
+		"moduleNameMapper": {
+			"^@auth/(.*)$": "<rootDir>/modules/auth/$1",
+			"^@health/(.*)$": "<rootDir>/modules/health/$1",
+			"^@users/(.*)$": "<rootDir>/modules/users/$1",
+			"^@webhooks/(.*)$": "<rootDir>/modules/webhooks/$1",
+			"^@core/(.*)$": "<rootDir>/core/$1",
+			"^@modules/(.*)$": "<rootDir>/modules/$1",
+			"^@common/(.*)$": "<rootDir>/common/$1",
+			"^@database/(.*)$": "<rootDir>/core/database/$1",
+			"^@libs/(.*)$": "<rootDir>/libs/$1"
+		},
 		"collectCoverageFrom": [
 			"**/*.(t|j)s"
 		],
 		"coverageDirectory": "../coverage",
-		"testEnvironment": "node"
+		"testEnvironment": "node",
+		"setupFiles": [
+			"dotenv/config"
+		],
+		"transformIgnorePatterns": [
+			"node_modules/(?!(\\.bun/.*?/node_modules/)?uuid)"
+		]
 	}
 }

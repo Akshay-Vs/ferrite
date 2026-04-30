@@ -64,8 +64,10 @@ export class SyncProfileUpdateUseCase implements ISyncUserProfileUpdateUseCase {
 
 				return ok();
 			} catch (error) {
-				this.logger.error(`Failed to update user: ${error.message}`);
-				return err(error);
+				const errObj =
+					error instanceof Error ? error : new Error(String(error));
+				this.logger.error(`Failed to update user: ${errObj.message}`);
+				return err(errObj);
 			}
 		});
 	}

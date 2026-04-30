@@ -8,6 +8,13 @@
 			"when": 1776108455660,
 			"tag": "0000_dusty_vengeance",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1777526422739,
+			"tag": "0001_red_vermin",
+			"breakpoints": true
 		}
 	]
 }

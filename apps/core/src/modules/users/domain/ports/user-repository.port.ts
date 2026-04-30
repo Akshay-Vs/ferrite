@@ -1,4 +1,5 @@
 import { AuthProvider } from '@auth/index';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import type { QueueParams } from '@modules/queue';
 import { UserDeletedEvent, UserUpdatedEvent } from '../schemas';
@@ -49,12 +50,30 @@ export interface IUserRepository {
 
 	/**
 	 * Update a user's profile and persist an outbox event in the same transaction.
+	 * @param tx Optional external transaction context (UoW). When provided, the
+	 *           repository uses this transaction instead of starting its own.
 	 * @returns The updated profile, or null if user not found.
 	 */
 	updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: QueueParams<UserUpdatedEvent>
+		outboxEvent: QueueParams<UserUpdatedEvent>,
+		tx?: ITransactionContext
+	): Promise<UserProfileFull | null>;
+
+	/**
+	 * Update a user's profile fields within an external transaction.
+	 *
+	 * Unlike `updateProfileById`, this does NOT write an outbox event —
+	 * designed for orchestrated flows (e.g., onboarding) where the
+	 * caller manages the transaction boundary.
+	 *
+	 * @returns The updated profile, or null if user not found.
+	 */
+	updateProfileFieldsById(
+		id: string,
+		data: UpdateProfileInput,
+		tx?: ITransactionContext
 	): Promise<UserProfileFull | null>;
 
 	/**

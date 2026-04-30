@@ -1,10 +1,12 @@
 // src/db/db.module.ts
+import { UNIT_OF_WORK } from '@common/interfaces/unit-of-work.interface';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { createPool, DB, DB_CLIENT, POOL } from './db.provider';
 import { DatabaseShutdownService } from './db.shutdown';
+import { DrizzleUnitOfWork } from './drizzle-unit-of-work';
 import * as schema from './schema';
 
 @Global()
@@ -27,8 +29,12 @@ import * as schema from './schema';
 			useFactory: (config: ConfigService) =>
 				createPool(config.getOrThrow<string>('DATABASE_URL')),
 		},
+		{
+			provide: UNIT_OF_WORK,
+			useClass: DrizzleUnitOfWork,
+		},
 		DatabaseShutdownService,
 	],
-	exports: [DB, DB_CLIENT],
+	exports: [DB, DB_CLIENT, UNIT_OF_WORK],
 })
 export class DatabaseModule {}

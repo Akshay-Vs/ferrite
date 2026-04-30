@@ -3,7 +3,7 @@ import { NavBar } from '@/presentation/layout/navigation/nav-bar';
 
 const layout = ({ children }: PropsWithChildren) => {
 	return (
-		<main className="p-6">
+		<main className="py-4 px-5">
 			<NavBar />
 			{children}
 		</main>

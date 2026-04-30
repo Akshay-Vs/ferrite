@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { userAuthProviders } from './auth.schema';
+import { userOnboarding } from './onboarding.schema';
 import { userPaymentMethods } from './payment.schema';
 import { userNotificationPreferences } from './preferences.schema';
 import {
@@ -14,7 +15,8 @@ import { userAddresses, userPhones, users } from './user.schema';
 // USER RELATIONS
 // ─────────────────────────────────────────
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
+	onboarding: one(userOnboarding),
 	authProviders: many(userAuthProviders),
 	phones: many(userPhones),
 	addresses: many(userAddresses),
@@ -22,6 +24,13 @@ export const usersRelations = relations(users, ({ many }) => ({
 	paymentMethods: many(userPaymentMethods),
 	createdStores: many(stores),
 	storeMemberships: many(storeMembers),
+}));
+
+export const userOnboardingRelations = relations(userOnboarding, ({ one }) => ({
+	user: one(users, {
+		fields: [userOnboarding.userId],
+		references: [users.id],
+	}),
 }));
 
 export const userPhonesRelations = relations(userPhones, ({ one }) => ({
