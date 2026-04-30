@@ -3,6 +3,7 @@ import { HttpExceptionFilter } from '@common/filters/http-error-filter';
 import { CoreModules } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
+import { OnboardingModule } from '@modules/onboarding/onboarding.module';
 import { QueueModule } from '@modules/queue';
 import { StoreModule } from '@modules/store';
 import { UsersModule } from '@modules/users/users.module';
@@ -32,6 +33,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		AuthModule,
 		StoreModule,
 		UsersModule,
+		OnboardingModule,
 	],
 	providers: [
 		// Guards
