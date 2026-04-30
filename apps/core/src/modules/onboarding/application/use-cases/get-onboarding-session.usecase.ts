@@ -24,24 +24,33 @@ export class GetOnboardingSessionUseCase
 		this.logger.setContext(this.constructor.name);
 	}
 
+import { err, ok, type Result } from '@common/interfaces/result.interface';
+// ... other imports ...
+
 	async execute(authUser: AuthUser): Promise<Result<OnboardingSession, Error>> {
 		return this.tracer.withSpan(
 			'use-case.get-onboarding-session',
 			async () => {
-				const userId = authUser.id;
+				try {
+					const userId = authUser.id;
+					let session = await this.onboardingRepo.findByUserId(userId);
 
-				// Try to find existing session
-				let session = await this.onboardingRepo.findByUserId(userId);
+					if (!session) {
+						this.logger.log('Creating onboarding session');
+						session = await this.onboardingRepo.upsert(userId);
+					}
 
-				if (!session) {
-					// Lazy initialization — idempotent upsert
-					this.logger.log(`Creating onboarding session for user ${userId}`);
-					session = await this.onboardingRepo.upsert(userId);
+					return ok(session);
+				} catch (cause) {
+					return err(
+						cause instanceof Error
+							? cause
+							: new Error('Failed to get onboarding session')
+					);
 				}
-
-				return ok(session);
 			},
 			{ 'use-case.userId': authUser.id }
 		);
+	}
 	}
 }
