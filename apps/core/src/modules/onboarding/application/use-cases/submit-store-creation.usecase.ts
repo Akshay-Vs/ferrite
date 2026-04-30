@@ -59,7 +59,15 @@ export class SubmitStoreCreationUseCase
 					const userId = input.authUser.id;
 
 					// 1. Fetch current state
-					const session = await this.onboardingRepo.findByUserId(userId);
+					let session: OnboardingSession | null;
+					try {
+						session = await this.onboardingRepo.findByUserId(userId);
+					} catch (error) {
+						return err(
+							error instanceof Error ? error : new Error(String(error))
+						);
+					}
+
 					if (!session) {
 						return err(new Error(`No onboarding session for user ${userId}`));
 					}
@@ -80,31 +88,46 @@ export class SubmitStoreCreationUseCase
 					}
 
 					// 4. Atomic: create store + role + member + complete onboarding
-					await this.uow.execute(async (tx) => {
-						await this.storeDelegate.createStoreWithOwner(input.data, userId, tx);
-						await this.onboardingRepo.updateState(userId, 'COMPLETED', tx);
-						await this.onboardingRepo.markCompleted(userId, tx);
-					});
+					try {
+						await this.uow.execute(async (tx) => {
+							try {
+								await this.storeDelegate.createStoreWithOwner(
+									input.data,
+									userId,
+									tx
+								);
+							} catch (error) {
+								// We must re-throw here to ensure the Unit of Work rolls back the transaction.
+								// It will be caught by the outer try-catch which returns an Err.
+								throw error;
+							}
+
+							await this.onboardingRepo.updateState(userId, 'COMPLETED', tx);
+							await this.onboardingRepo.markCompleted(userId, tx);
+						});
+					} catch (error) {
+						return err(
+							error instanceof Error ? error : new Error(String(error))
+						);
+					}
 
 					this.logger.log(
 						`Store creation step completed for user ${userId}, onboarding finished`
 					);
 
 					// 5. Return completed session
-					const completedSession = await this.onboardingRepo.findByUserId(userId);
-					if (!completedSession) {
+					let completedSession: OnboardingSession | null;
+					try {
+						completedSession = await this.onboardingRepo.findByUserId(userId);
+					} catch (error) {
 						return err(
-							new Error(`No onboarding session for user ${userId} after completion`)
+							error instanceof Error ? error : new Error(String(error))
 						);
 					}
 
-					return ok(completedSession);
+					return ok(completedSession!);
 				} catch (error) {
-					return err(
-						error instanceof Error
-							? error
-							: new Error('Failed to submit store creation')
-					);
+					return err(error instanceof Error ? error : new Error(String(error)));
 				}
 			},
 			{ 'use-case.userId': input.authUser.id }
