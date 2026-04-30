@@ -24,9 +24,6 @@ export class GetOnboardingSessionUseCase
 		this.logger.setContext(this.constructor.name);
 	}
 
-import { err, ok, type Result } from '@common/interfaces/result.interface';
-// ... other imports ...
-
 	async execute(authUser: AuthUser): Promise<Result<OnboardingSession, Error>> {
 		return this.tracer.withSpan('use-case.get-onboarding-session', async () => {
 			const userId = authUser.id;
@@ -53,6 +50,5 @@ import { err, ok, type Result } from '@common/interfaces/result.interface';
 				return err(error instanceof Error ? error : new Error(errorMsg));
 			}
 		});
-	}
 	}
 }
