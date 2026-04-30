@@ -1,10 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import type { AuthUser } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { QueueParams } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IInitiateProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
@@ -12,10 +10,9 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import { UserUpdatedEvent } from '@users/domain/schemas';
 import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
 import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
-import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
+import { buildUserUpdateOutboxEvent } from '@users/domain/utils/build-user-update-outbox-event.util';
 
 @Injectable()
 export class InitiateProfileUpdateUseCase
@@ -59,22 +56,11 @@ export class InitiateProfileUpdateUseCase
 					return ok(existingUser);
 				}
 
-				const eventType = 'user.updated';
-				const eventId = randomUUID();
-
-				const outboxEvent: QueueParams<UserUpdatedEvent> = {
-					identifier: USER_SYNC_QUEUE,
-					queueName: USER_SYNC_QUEUE,
-					maxAttempts: 5,
-					eventType,
-					eventId,
-					payload: {
-						...input.data,
-						eventType,
-						externalAuthId: input.authUser.externalAuthId,
-						provider: input.authUser.provider,
-					},
-				};
+				const outboxEvent = buildUserUpdateOutboxEvent(
+					input.data,
+					input.authUser.externalAuthId,
+					input.authUser.provider
+				);
 
 				const updatedProfile = await this.repo.updateProfileById(
 					userId,
