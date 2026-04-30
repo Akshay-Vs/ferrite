@@ -1,0 +1,29 @@
+name: Build Core App
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Install and Build NestJS Core
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Provision Bun Runtime
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Resolve Workspace and Development Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Execute Turborepo Build Pipeline
+        run: bunx turbo run build --filter=@ferrite/core
