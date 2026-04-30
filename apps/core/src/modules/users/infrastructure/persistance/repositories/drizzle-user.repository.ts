@@ -1,7 +1,9 @@
 import { AuthProvider } from '@auth/index';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { type PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import { DB } from '@core/database/db.provider';
-import type { TDatabase } from '@core/database/db.type';
+import type { DrizzleTransaction, TDatabase } from '@core/database/db.type';
+import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import { userAuthProviders, users } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
@@ -30,6 +32,11 @@ export class DrizzleUserRepository implements IUserRepository {
 
 	private get typedDb(): TDatabase {
 		return this.db;
+	}
+
+	private getExecutor(tx?: ITransactionContext): TDatabase {
+		if (tx) return DrizzleUnitOfWork.unwrap(tx) as unknown as TDatabase;
+		return this.typedDb;
 	}
 
 	async createWithAuth(event: UserCreatedEvent): Promise<string> {
@@ -132,7 +139,8 @@ export class DrizzleUserRepository implements IUserRepository {
 	async updateProfileById(
 		id: string,
 		data: UpdateProfileInput,
-		outboxEvent: QueueParams<UserUpdatedEvent>
+		outboxEvent: QueueParams<UserUpdatedEvent>,
+		tx?: ITransactionContext
 	): Promise<UserProfileFull | null> {
 		return traceDbOp(
 			this.tracer,
@@ -142,29 +150,74 @@ export class DrizzleUserRepository implements IUserRepository {
 				'db.operation': 'update',
 			},
 			async () => {
-				return this.typedDb.transaction(async (tx) => {
-					// 1. Update user
-					const result = await traceDbOp(
-						this.tracer,
-						'db.users.update',
-						{ 'db.table': 'users', 'db.operation': 'update' },
-						() =>
-							tx
-								.update(users)
-								.set({
-									...data,
-									updatedAt: new Date(),
-								})
-								.where(and(eq(users.id, id), isNull(users.deletedAt)))
-								.returning()
-					);
+				if (tx) {
+					// External UoW transaction
+					const drizzleTx = DrizzleUnitOfWork.unwrap(tx);
+					return this.runProfileUpdate(drizzleTx, id, data, outboxEvent);
+				}
+				// Internal transaction
+				return this.typedDb.transaction(async (innerTx) =>
+					this.runProfileUpdate(innerTx, id, data, outboxEvent)
+				);
+			}
+		);
+	}
 
-					if (result.length === 0) return null;
+	private async runProfileUpdate(
+		executor: DrizzleTransaction,
+		id: string,
+		data: UpdateProfileInput,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null> {
+		// 1. Update user
+		const result = await traceDbOp(
+			this.tracer,
+			'db.users.update',
+			{ 'db.table': 'users', 'db.operation': 'update' },
+			() =>
+				executor
+					.update(users)
+					.set({
+						...data,
+						updatedAt: new Date(),
+					})
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.returning()
+		);
 
-					// 2. Write outbox event
-					await this.enqueue.execute(tx, outboxEvent);
-					return UserMapper.toUserProfile(result[0]);
-				});
+		if (result.length === 0) return null;
+
+		// 2. Write outbox event
+		await this.enqueue.execute(executor, outboxEvent);
+		return UserMapper.toUserProfile(result[0]);
+	}
+
+	async updateProfileFieldsById(
+		id: string,
+		data: UpdateProfileInput,
+		tx?: ITransactionContext
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateProfileFieldsById',
+			{
+				'db.table': 'users',
+				'db.operation': 'update',
+			},
+			async () => {
+				const executor = this.getExecutor(tx);
+
+				const result = await executor
+					.update(users)
+					.set({
+						...data,
+						updatedAt: new Date(),
+					})
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.returning();
+
+				if (result.length === 0) return null;
+				return UserMapper.toUserProfile(result[0]);
 			}
 		);
 	}
