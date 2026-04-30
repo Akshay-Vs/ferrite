@@ -1,5 +1,5 @@
 import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
-import { ok, type Result } from '@common/interfaces/result.interface';
+import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -25,23 +25,30 @@ export class GetOnboardingSessionUseCase
 	}
 
 	async execute(authUser: AuthUser): Promise<Result<OnboardingSession, Error>> {
-		return this.tracer.withSpan(
-			'use-case.get-onboarding-session',
-			async () => {
-				const userId = authUser.id;
+		return this.tracer.withSpan('use-case.get-onboarding-session', async () => {
+			const userId = authUser.id;
 
+			try {
 				// Try to find existing session
 				let session = await this.onboardingRepo.findByUserId(userId);
 
 				if (!session) {
 					// Lazy initialization — idempotent upsert
-					this.logger.log(`Creating onboarding session for user ${userId}`);
+					this.logger.debug(`Creating onboarding session for user ${userId}`);
 					session = await this.onboardingRepo.upsert(userId);
 				}
 
 				return ok(session);
-			},
-			{ 'use-case.userId': authUser.id }
-		);
+			} catch (error) {
+				const errorMsg = error instanceof Error ? error.message : String(error);
+				const errorStack = error instanceof Error ? error.stack : undefined;
+				this.logger.error(
+					`Failed to get or create onboarding session: ${errorMsg}`,
+					errorStack,
+					'GetOnboardingSessionUseCase'
+				);
+				return err(error instanceof Error ? error : new Error(errorMsg));
+			}
+		});
 	}
 }
