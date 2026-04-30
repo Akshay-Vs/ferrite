@@ -1,4 +1,4 @@
-import { ok, type Result } from '@common/interfaces/result.interface';
+import { err, ok, type Result } from '@common/interfaces/result.interface';
 import {
 	type ITransactionContext,
 	type IUnitOfWork,
@@ -7,6 +7,9 @@ import {
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import type { Store } from '@core/database/schema/store.schema';
+import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStorePermissionChecker,
@@ -43,58 +46,76 @@ export class InitializeStoreOrchestratorUseCase
 		private readonly permissionChecker: IStorePermissionChecker,
 		private readonly createStoreUc: CreateStoreUseCase,
 		private readonly createStoreRoleUc: CreateStoreRoleUseCase,
-		private readonly addStoreMemberUc: AddStoreMemberUseCase
-	) {}
+		private readonly addStoreMemberUc: AddStoreMemberUseCase,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async execute(payload: InitializeStoreInput): Promise<Result<Store, Error>> {
-		const runSteps = async (
-			tx: ITransactionContext
-		): Promise<Result<Store, Error>> => {
-			// 1. Create the store
-			const storeRes = await this.createStoreUc.execute({
-				tx,
-				input: payload.input,
-				createdBy: payload.createdBy,
-			});
-			if (storeRes.isErr()) throw storeRes.error;
+		return this.tracer.withSpan(
+			'InitializeStoreOrchestratorUseCase.execute',
+			async () => {
+				const runSteps = async (
+					tx: ITransactionContext
+				): Promise<Result<Store, Error>> => {
+					// 1. Create the store
+					const storeRes = await this.createStoreUc.execute({
+						tx,
+						input: payload.input,
+						createdBy: payload.createdBy,
+					});
+					if (storeRes.isErr()) throw storeRes.error;
 
-			// 2. Create the owner role with all permissions
-			const roleRes = await this.createStoreRoleUc.execute({
-				tx,
-				storeId: storeRes.value.id,
-				name: 'Owner',
-				description: 'Default store owner role',
-				isSystem: true,
-				permissions: [...STORE_PERMISSIONS],
-			});
-			if (roleRes.isErr()) throw roleRes.error;
+					// 2. Create the owner role with all permissions
+					const roleRes = await this.createStoreRoleUc.execute({
+						tx,
+						storeId: storeRes.value.id,
+						name: 'Owner',
+						description: 'Default store owner role',
+						isSystem: true,
+						permissions: [...STORE_PERMISSIONS],
+					});
+					if (roleRes.isErr()) throw roleRes.error;
 
-			// 3. Add the creator as an owner member
-			const memberRes = await this.addStoreMemberUc.execute({
-				tx,
-				storeId: storeRes.value.id,
-				userId: payload.createdBy,
-				roleId: roleRes.value.id,
-				isOwner: true,
-			});
-			if (memberRes.isErr()) throw memberRes.error;
+					// 3. Add the creator as an owner member
+					const memberRes = await this.addStoreMemberUc.execute({
+						tx,
+						storeId: storeRes.value.id,
+						userId: payload.createdBy,
+						roleId: roleRes.value.id,
+						isOwner: true,
+					});
+					if (memberRes.isErr()) throw memberRes.error;
 
-			return ok(storeRes.value);
-		};
+					return ok(storeRes.value);
+				};
 
-		// Use external tx if provided, otherwise start our own
-		const result = payload.tx
-			? await runSteps(payload.tx)
-			: await this.uow.execute(runSteps);
+				try {
+					// Use external tx if provided, otherwise start our own
+					const result = payload.tx
+						? await runSteps(payload.tx)
+						: await this.uow.execute(runSteps);
 
-		// Invalidate permission cache after commit
-		if (result.isOk()) {
-			await this.permissionChecker.invalidatePermissions(
-				payload.createdBy,
-				result.value.id
-			);
-		}
+					// Invalidate permission cache after commit
+					if (result.isOk()) {
+						await this.permissionChecker.invalidatePermissions(
+							payload.createdBy,
+							result.value.id
+						);
+					}
 
-		return result;
+					return result;
+				} catch (e) {
+					const error = e instanceof Error ? e : new Error(String(e));
+					this.logger.error(
+						`InitializeStoreOrchestratorUseCase error: ${error.message}`,
+						error.stack
+					);
+					return err(error);
+				}
+			}
+		);
 	}
 }
