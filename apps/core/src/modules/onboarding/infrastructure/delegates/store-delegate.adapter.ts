@@ -1,5 +1,7 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
+import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { IStoreDelegate } from '@modules/onboarding/domain/ports/store-delegate.port';
 import type { SubmitStoreCreationInput } from '@modules/onboarding/domain/schemas/submit-store-creation.zodschema';
 import { InitializeStoreOrchestratorUseCase } from '@modules/store/application/use-cases/initialize-store-orchestrator.usecase';
@@ -21,38 +23,52 @@ import { Inject, Injectable } from '@nestjs/common';
 export class StoreDelegateAdapter implements IStoreDelegate {
 	constructor(
 		@Inject(STORE_REPOSITORY) private readonly storeRepo: IStoreRepository,
-		private readonly initializeStoreUc: InitializeStoreOrchestratorUseCase
-	) {}
+		private readonly initializeStoreUc: InitializeStoreOrchestratorUseCase,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async createStoreWithOwner(
 		input: SubmitStoreCreationInput,
 		createdBy: string,
 		tx?: ITransactionContext
 	): Promise<string> {
-		// Unwrap the UoW context to a raw Drizzle tx that the store repo understands
-		const rawTx = tx ? DrizzleUnitOfWork.unwrap(tx) : undefined;
+		return this.tracer.withSpan(
+			'StoreDelegateAdapter.createStoreWithOwner',
+			async () => {
+				// Unwrap the UoW context to a raw Drizzle tx that the store repo understands
+				const rawTx = tx ? DrizzleUnitOfWork.unwrap(tx) : undefined;
 
-		const result = await this.initializeStoreUc.execute({
-			input: {
-				name: input.name,
-				slug: input.slug,
-				description: input.description,
-				bannerUrl: input.bannerUrl,
-				iconUrl: input.iconUrl,
+				const result = await this.initializeStoreUc.execute({
+					input: {
+						name: input.name,
+						slug: input.slug,
+						description: input.description,
+						bannerUrl: input.bannerUrl,
+						iconUrl: input.iconUrl,
+					},
+					createdBy,
+					tx: rawTx,
+				});
+
+				if (result.isErr()) {
+					throw result.error;
+				}
+
+				return result.value.id;
 			},
-			createdBy,
-			tx: rawTx,
-		});
-
-		if (result.isErr()) {
-			throw result.error;
-		}
-
-		return result.value.id;
+			{ storeSlug: input.slug, userId: createdBy }
+		);
 	}
 
 	async hasStores(userId: string): Promise<boolean> {
-		const userStores = await this.storeRepo.findByUserId(userId);
+		const userStores = await this.tracer.withSpan(
+			'StoreDelegateAdapter.hasStores',
+			() => this.storeRepo.findByUserId(userId),
+			{ userId }
+		);
 		return userStores.length > 0;
 	}
 }
