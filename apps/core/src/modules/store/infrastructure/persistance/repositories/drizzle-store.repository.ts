@@ -15,6 +15,7 @@ import {
 } from '@core/database/schema';
 import type { Store, StoreRole } from '@core/database/schema/store.schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
+import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
@@ -28,8 +29,11 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork
-	) {}
+		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
+		@Inject(AppLogger) private readonly appLogger: AppLogger
+	) {
+		this.appLogger.setContext(this.constructor.name);
+	}
 
 	private getExecutor(tx?: ITransactionContext): TDatabase {
 		if (tx) return DrizzleUnitOfWork.unwrap(tx) as unknown as TDatabase;

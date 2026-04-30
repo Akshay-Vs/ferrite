@@ -5,9 +5,10 @@ import {
 	eventPayloadSchema,
 } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
-
 import { BaseProcessor } from '@core/processor';
 import { GraphileProcessor } from '@core/processor/decorators/graphile-processor.decorator';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
@@ -23,7 +24,8 @@ export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 	constructor(
 		protected readonly logger: AppLogger,
 		@Inject(ROUTE_USER_EVENTS_UC)
-		private readonly routeUserEvents: IRouteUserEventsUseCase
+		private readonly routeUserEvents: IRouteUserEventsUseCase,
+		@Inject(OTEL_TRACER) private readonly otelTracer: ITracer
 	) {
 		super(logger);
 	}
@@ -32,39 +34,41 @@ export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 		payload: EventPayload,
 		_helpers?: JobHelpers
 	): Promise<Result<void, Error>> {
-		const validatedEvent = eventPayloadSchema.safeParse(payload);
+		return this.otelTracer.withSpan('UserSyncProcessor.handle', async () => {
+			const validatedEvent = eventPayloadSchema.safeParse(payload);
 
-		if (!validatedEvent.success) {
-			this.logger.error(
-				`Failed to validate event: ${validatedEvent.error.message}`
-			);
-
-			return err(validatedEvent.error);
-		}
-
-		const { eventType } = validatedEvent.data;
-		const result = await this.routeUserEvents.execute(validatedEvent.data);
-
-		if (result.isErr()) {
-			if (
-				result.error instanceof UnsupportedEventTypeError ||
-				result.error instanceof UserExistsError ||
-				result.error instanceof UserConflictError
-			) {
-				this.logger.warn(
-					`Acknowledging expected domain error: ${result.error.message}`
+			if (!validatedEvent.success) {
+				this.logger.error(
+					`Failed to validate event: ${validatedEvent.error.message}`
 				);
 
-				return ok(); // Acknowledge job without throwing
+				return err(validatedEvent.error);
 			}
 
-			this.logger.error(
-				`Failed to process ${eventType}: ${result.error.message}`
-			);
+			const { eventType } = validatedEvent.data;
+			const result = await this.routeUserEvents.execute(validatedEvent.data);
 
-			return err(result.error);
-		}
+			if (result.isErr()) {
+				if (
+					result.error instanceof UnsupportedEventTypeError ||
+					result.error instanceof UserExistsError ||
+					result.error instanceof UserConflictError
+				) {
+					this.logger.warn(
+						`Acknowledging expected domain error: ${result.error.message}`
+					);
 
-		return ok();
+					return ok(); // Acknowledge job without throwing
+				}
+
+				this.logger.error(
+					`Failed to process ${eventType}: ${result.error.message}`
+				);
+
+				return err(result.error);
+			}
+
+			return ok();
+		});
 	}
 }

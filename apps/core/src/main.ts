@@ -72,7 +72,8 @@ void (async (): Promise<void> => {
 		logger.log(
 			`Server Started in ${process.env.NODE_ENV ?? 'production'} mode`
 		);
-	} catch (_error) {
+	} catch (error) {
+		logger.error(error);
 		try {
 			await otelSDK.shutdown();
 		} catch (shutdownError) {
