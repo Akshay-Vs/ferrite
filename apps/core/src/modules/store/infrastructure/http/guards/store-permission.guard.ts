@@ -1,10 +1,13 @@
+import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
 import { PERMISSIONS_KEY } from '@common/decorators/require-permission.decorator';
+import { SKIP_PERMISSIONS } from '@common/decorators/skip-permissions.decorator';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { AuthenticatedRequest } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { CheckStorePermissionUseCase } from '@modules/store/application/use-cases/check-store-permission.usecase';
+import { PermissionNotProvidedError } from '@modules/store/domain/errors/permission-not-provided-error';
 import {
 	CanActivate,
 	ExecutionContext,
@@ -41,17 +44,38 @@ export class StorePermissionGuard implements CanActivate {
 					'http.route': request.route?.path ?? 'unknown',
 				});
 
-				// 1. Read decorator metadata
+				// Short-circuit for public and permission-exempt routes
+				const isPublic = this.reflector.getAllAndOverride<boolean>(
+					IS_PUBLIC_ROUTE,
+					[context.getHandler(), context.getClass()]
+				);
+				if (isPublic) {
+					this.logger.debug('Public route — skipping permission check');
+					return true;
+				}
+
+				const skipPermissions = this.reflector.getAllAndOverride<boolean>(
+					SKIP_PERMISSIONS,
+					[context.getHandler(), context.getClass()]
+				);
+				if (skipPermissions) {
+					this.logger.debug(
+						'@SkipPermissions — skipping store permission check'
+					);
+					return true;
+				}
+
+				// Read decorator metadata
 				const requiredPermissions = this.reflector.getAllAndOverride<
 					PermissionKey[]
 				>(PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
 				if (!requiredPermissions || requiredPermissions.length === 0) {
-					this.logger.debug('No required permissions, bypassing guard');
-					return true;
+					this.logger.debug('No permissions provided');
+					throw new PermissionNotProvidedError();
 				}
 
-				// 2. Ensure authenticated user
+				// Ensure authenticated user
 				const authUser = request.authUser;
 
 				if (!authUser) {
@@ -59,7 +83,7 @@ export class StorePermissionGuard implements CanActivate {
 					throw new UnauthorizedException('User is not authenticated');
 				}
 
-				// 3. Extract storeId from route params
+				//. Extract storeId from route params
 				const storeId = request.params?.storeId as string | undefined;
 
 				if (!storeId) {
@@ -71,7 +95,7 @@ export class StorePermissionGuard implements CanActivate {
 					);
 				}
 
-				// 4. Execute permission check
+				// Execute permission check
 				const result = await this.checkPermission.execute({
 					userId: authUser.id,
 					storeId,
