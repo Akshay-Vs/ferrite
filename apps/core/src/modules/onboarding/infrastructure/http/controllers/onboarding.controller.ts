@@ -19,12 +19,17 @@ import {
 	HttpCode,
 	HttpStatus,
 	Inject,
-	InternalServerErrorException,
 	Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SubmitAboutMeDto } from '../dto/submit-about-me.dto';
 import { SubmitStoreCreationDto } from '../dto/submit-store-creation.dto';
+
+import {
+	GetOnboardingSessionDocs,
+	SubmitAboutMeDocs,
+	SubmitStoreCreationDocs,
+} from './docs/onboarding.swaggerdocs';
 
 @ApiTags('Onboarding')
 @ApiBearerAuth('swagger-access-token')
@@ -44,16 +49,12 @@ export class OnboardingController {
 	) {}
 
 	@Get('session')
-	@ApiOperation({
-		summary: 'Get onboarding session',
-		description:
-			'Returns the current onboarding state for the authenticated user. Creates a session if none exists (idempotent).',
-	})
+	@GetOnboardingSessionDocs()
 	async getSession(@AuthUserParam() authUser: AuthUser) {
 		return this.tracer.withSpan('http.get-onboarding-session', async () => {
 			const result = await this.getSessionUc.execute(authUser);
 			if (result.isErr()) {
-				throw new InternalServerErrorException(result.error.message);
+				throw result.error;
 			}
 			return result.value;
 		});
@@ -61,11 +62,7 @@ export class OnboardingController {
 
 	@Post('steps/about-me')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({
-		summary: 'Submit "About Me" step',
-		description:
-			'Updates the user profile and advances onboarding to the STORE_CREATION step. Atomic transaction.',
-	})
+	@SubmitAboutMeDocs()
 	async submitAboutMe(
 		@AuthUserParam() authUser: AuthUser,
 		@Body() payload: SubmitAboutMeDto
@@ -83,7 +80,7 @@ export class OnboardingController {
 				) {
 					throw new ConflictException(result.error.message);
 				}
-				throw new InternalServerErrorException(result.error.message);
+				throw result.error;
 			}
 
 			return result.value;
@@ -92,11 +89,7 @@ export class OnboardingController {
 
 	@Post('steps/store-creation')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({
-		summary: 'Submit "Store Creation" step',
-		description:
-			'Creates a store with owner role and completes onboarding. Atomic transaction.',
-	})
+	@SubmitStoreCreationDocs()
 	async submitStoreCreation(
 		@AuthUserParam() authUser: AuthUser,
 		@Body() payload: SubmitStoreCreationDto
@@ -113,7 +106,7 @@ export class OnboardingController {
 				) {
 					throw new ConflictException(result.error.message);
 				}
-				throw new InternalServerErrorException(result.error.message);
+				throw result.error;
 			}
 
 			return result.value;
