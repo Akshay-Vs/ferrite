@@ -6,6 +6,13 @@ import type { UpdateStoreInput } from '../schemas/update-store.zodschema';
 
 export const STORE_REPOSITORY = Symbol('STORE_REPOSITORY');
 
+/**
+ * A store with the requesting user's membership context.
+ */
+export interface StoreMembership extends Store {
+	isOwner: boolean;
+}
+
 export interface IStoreRepository {
 	/**
 	 * Creates a new Store.
@@ -57,14 +64,25 @@ export interface IStoreRepository {
 	): Promise<void>;
 
 	/**
+	 * Adds multiple users as members of a store with a specific role.
+	 */
+	addStoreMembers(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userIds: string[],
+		roleId: string,
+		isOwner: boolean
+	): Promise<void>;
+
+	/**
 	 * Find store by ID.
 	 */
 	findById(storeId: string): Promise<Store | null>;
 
 	/**
-	 * Returns stores created by or member of.
+	 * Returns all stores where the user is a member, with ownership status.
 	 */
-	findByUserId(userId: string): Promise<Store[]>;
+	findByUserId(userId: string): Promise<StoreMembership[]>;
 
 	/**
 	 * Execute queries inside a transaction.
