@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AddStoreMemberUseCase } from './application/use-cases/add-store-member.usecase';
+import { AddStoreMembersUseCase } from './application/use-cases/add-store-members.usecase';
 import { CheckStorePermissionUseCase } from './application/use-cases/check-store-permission.usecase';
 // Use Cases
 import { CreateStoreUseCase } from './application/use-cases/create-store.usecase';
@@ -11,13 +12,14 @@ import { InitializeStoreOrchestratorUseCase } from './application/use-cases/init
 import { UpdateStoreUseCase } from './application/use-cases/update-store.usecase';
 import { STORE_REPOSITORY } from './domain/ports/store.repository.port';
 import { STORE_PERMISSION_CHECKER } from './domain/ports/store-permission-checker.port';
+import { RoleController } from './infrastructure/http/controllers/role.controller';
 import { StoreController } from './infrastructure/http/controllers/store.controller';
 import { StorePermissionGuard } from './infrastructure/http/guards/store-permission.guard';
 import { DrizzleStoreRepository } from './infrastructure/persistance/repositories/drizzle-store.repository';
 import { DrizzleStorePermissionRepository } from './infrastructure/persistance/repositories/drizzle-store-permission.repository';
 
 @Module({
-	controllers: [StoreController],
+	controllers: [StoreController, RoleController],
 	providers: [
 		{
 			provide: STORE_REPOSITORY,
@@ -32,6 +34,7 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		CreateStoreUseCase,
 		CreateStoreRoleUseCase,
 		AddStoreMemberUseCase,
+		AddStoreMembersUseCase,
 		InitializeStoreOrchestratorUseCase,
 		GetOwnStoresUseCase,
 		GetPublicStoreUseCase,

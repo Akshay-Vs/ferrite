@@ -2,7 +2,9 @@ import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
+import { SkipPermissions } from '@common/decorators/skip-permissions.decorator';
 import type { Store } from '@core/database/schema/store.schema';
+import { StoreMembership } from '@modules/store/domain/ports/store.repository.port';
 import {
 	Body,
 	Controller,
@@ -19,6 +21,7 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AddStoreMembersUseCase } from '../../../application/use-cases/add-store-members.usecase';
 import { DeleteStoreUseCase } from '../../../application/use-cases/delete-store.usecase';
 import { GetOwnStoresUseCase } from '../../../application/use-cases/get-own-stores.usecase';
 import {
@@ -27,8 +30,17 @@ import {
 } from '../../../application/use-cases/get-public-store.usecase';
 import { InitializeStoreOrchestratorUseCase } from '../../../application/use-cases/initialize-store-orchestrator.usecase';
 import { UpdateStoreUseCase } from '../../../application/use-cases/update-store.usecase';
+import { AddStoreMembersDto } from '../dto/add-store-members.dto';
 import { CreateStoreDto, UpdateStoreDto } from '../dto/store.dto';
 import { StorePermissionGuard } from '../guards/store-permission.guard';
+import {
+	AddStoreMembersDocs,
+	CreateStoreDocs,
+	DeleteStoreDocs,
+	GetOwnStoresDocs,
+	GetStoreByIdDocs,
+	UpdateStoreDocs,
+} from './docs/store.swaggerdocs';
 
 @ApiTags('Stores')
 @ApiBearerAuth('swagger-access-token')
@@ -40,11 +52,13 @@ export class StoreController {
 		private readonly getOwnStoresUc: GetOwnStoresUseCase,
 		private readonly getPublicStoreUc: GetPublicStoreUseCase,
 		private readonly updateStoreUc: UpdateStoreUseCase,
-		private readonly deleteStoreUc: DeleteStoreUseCase
+		private readonly deleteStoreUc: DeleteStoreUseCase,
+		private readonly addStoreMembersUc: AddStoreMembersUseCase
 	) {}
 
 	@Post()
-	@ApiBearerAuth()
+	@CreateStoreDocs()
+	@SkipPermissions()
 	async createStore(
 		@AuthUserParam() user: AuthUser,
 		@Body() payload: CreateStoreDto
@@ -61,8 +75,11 @@ export class StoreController {
 	}
 
 	@Get()
-	@ApiBearerAuth()
-	async getOwnStores(@AuthUserParam() user: AuthUser): Promise<Store[]> {
+	@GetOwnStoresDocs()
+	@SkipPermissions()
+	async getOwnStores(
+		@AuthUserParam() user: AuthUser
+	): Promise<StoreMembership[]> {
 		const result = await this.getOwnStoresUc.execute(user.id);
 		if (result.isErr()) {
 			throw new UnprocessableEntityException(result.error.message);
@@ -71,6 +88,7 @@ export class StoreController {
 	}
 
 	@Get(':storeId')
+	@GetStoreByIdDocs()
 	@PublicRoute()
 	async getStoreById(
 		@Param('storeId', ParseUUIDPipe) storeId: string
@@ -83,8 +101,8 @@ export class StoreController {
 	}
 
 	@Patch(':storeId')
-	@ApiBearerAuth()
-	@RequirePermission('store.write')
+	@UpdateStoreDocs()
+	@RequirePermission('store.update')
 	async updateStore(
 		@Param('storeId', ParseUUIDPipe) storeId: string,
 		@Body() payload: UpdateStoreDto
@@ -101,7 +119,7 @@ export class StoreController {
 
 	@Delete(':storeId')
 	@HttpCode(HttpStatus.NO_CONTENT)
-	@ApiBearerAuth()
+	@DeleteStoreDocs()
 	@RequirePermission('store.delete')
 	async deleteStore(
 		@Param('storeId', ParseUUIDPipe) storeId: string
@@ -109,6 +127,24 @@ export class StoreController {
 		const result = await this.deleteStoreUc.execute(storeId);
 		if (result.isErr()) {
 			throw new NotFoundException(result.error.message);
+		}
+	}
+
+	@Post(':storeId/members')
+	@HttpCode(HttpStatus.CREATED)
+	@AddStoreMembersDocs()
+	@RequirePermission('staff.create')
+	async addMembers(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Body() payload: AddStoreMembersDto
+	): Promise<void> {
+		const result = await this.addStoreMembersUc.execute({
+			storeId,
+			userIds: payload.userIds,
+			roleId: payload.roleId,
+		});
+		if (result.isErr()) {
+			throw new UnprocessableEntityException(result.error.message);
 		}
 	}
 }
