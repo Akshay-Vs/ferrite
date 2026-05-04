@@ -1,5 +1,6 @@
 import { CommonModules } from '@common/common.module';
 import { HttpExceptionFilter } from '@common/filters/http-error-filter';
+import { PostgresErrorFilter } from '@common/filters/postgres-error.filter';
 import { CoreModules } from '@core/core.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
@@ -55,6 +56,10 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		{
 			provide: APP_FILTER,
 			useClass: HttpExceptionFilter,
+		},
+		{
+			provide: APP_FILTER,
+			useClass: PostgresErrorFilter,
 		},
 	],
 })
