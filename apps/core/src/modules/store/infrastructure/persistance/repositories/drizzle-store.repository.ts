@@ -13,7 +13,11 @@ import {
 	storeRoles,
 	stores,
 } from '@core/database/schema';
-import type { Store, StoreRole } from '@core/database/schema/store.schema';
+import type {
+	Store,
+	StoreMember,
+	StoreRole,
+} from '@core/database/schema/store.schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -249,6 +253,71 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					...r.store,
 					isOwner: r.isOwner,
 				}));
+			}
+		);
+	}
+
+	async findRolesByStoreId(storeId: string): Promise<StoreRole[]> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeRoles.findByStoreId',
+			{ 'db.table': 'store_roles', 'db.operation': 'select' },
+			async () => {
+				return this.db
+					.select()
+					.from(storeRoles)
+					.where(eq(storeRoles.storeId, storeId))
+					.orderBy(desc(storeRoles.createdAt));
+			}
+		);
+	}
+
+	async findRolePermissions(
+		storeId: string,
+		roleId: string
+	): Promise<PermissionKey[]> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeRolePermissions.find',
+			{ 'db.table': 'store_role_permissions', 'db.operation': 'select' },
+			async () => {
+				const rows = await this.db
+					.select({ permissionKey: storeRolePermissions.permissionKey })
+					.from(storeRolePermissions)
+					.innerJoin(
+						storeRoles,
+						eq(storeRolePermissions.storeRoleId, storeRoles.id)
+					)
+					.where(
+						and(
+							eq(storeRolePermissions.storeRoleId, roleId),
+							eq(storeRoles.storeId, storeId)
+						)
+					);
+				return rows.map((r) => r.permissionKey);
+			}
+		);
+	}
+
+	async findRoleMembers(
+		storeId: string,
+		roleId: string
+	): Promise<StoreMember[]> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.findByRole',
+			{ 'db.table': 'store_members', 'db.operation': 'select' },
+			async () => {
+				return this.db
+					.select()
+					.from(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId)
+						)
+					)
+					.orderBy(desc(storeMembers.joinedAt));
 			}
 		);
 	}
