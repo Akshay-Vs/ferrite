@@ -11,8 +11,8 @@ export const createStoreSchema = z.object({
 			'Slug must be alphanumeric, lowercase and can contain hyphens'
 		),
 	description: z.string().optional(),
-	bannerUrl: z.string().url().max(2048).optional(),
-	iconUrl: z.string().url().max(2048).optional(),
+	bannerUrl: z.url().max(2048).optional(),
+	iconUrl: z.string().max(64).optional(),
 });
 
 export type CreateStoreInput = z.infer<typeof createStoreSchema>;

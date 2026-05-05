@@ -20,7 +20,10 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, sql } from 'drizzle-orm';
-import type { IStoreRepository } from '../../../domain/ports/store.repository.port';
+import type {
+	IStoreRepository,
+	StoreMembership,
+} from '../../../domain/ports/store.repository.port';
 import type { CreateStoreInput } from '../../../domain/schemas/create-store.zodschema';
 import type { UpdateStoreInput } from '../../../domain/schemas/update-store.zodschema';
 
@@ -180,6 +183,35 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
+	async addStoreMembers(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userIds: string[],
+		roleId: string,
+		isOwner: boolean
+	): Promise<void> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.addBulk',
+			{ 'db.table': 'store_members', 'db.operation': 'insert' },
+			async () => {
+				if (userIds.length === 0) return;
+
+				const values = userIds.map((userId) => ({
+					storeId,
+					userId,
+					roleId,
+					isOwner,
+				}));
+
+				await this.getExecutor(tx)
+					.insert(storeMembers)
+					.values(values)
+					.onConflictDoNothing();
+			}
+		);
+	}
+
 	async findById(storeId: string): Promise<Store | null> {
 		return traceDbOp(
 			this.tracer,
@@ -195,16 +227,16 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
-	async findByUserId(userId: string): Promise<Store[]> {
+	async findByUserId(userId: string): Promise<StoreMembership[]> {
 		return traceDbOp(
 			this.tracer,
 			'db.stores.findByUserId',
 			{ 'db.table': 'stores,store_members', 'db.operation': 'select' },
 			async () => {
-				// Query stores connected to members
-				const userStores = await this.db
+				const rows = await this.db
 					.select({
 						store: stores,
+						isOwner: storeMembers.isOwner,
 					})
 					.from(storeMembers)
 					.innerJoin(stores, eq(storeMembers.storeId, stores.id))
@@ -213,7 +245,10 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					)
 					.orderBy(desc(stores.createdAt));
 
-				return userStores.map((s) => s.store);
+				return rows.map((r) => ({
+					...r.store,
+					isOwner: r.isOwner,
+				}));
 			}
 		);
 	}
