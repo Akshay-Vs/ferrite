@@ -1,7 +1,9 @@
 import { CommonModules } from '@common/common.module';
-import { HttpExceptionFilter } from '@common/filters/http-error-filter';
 import { PostgresErrorFilter } from '@common/filters/postgres-error.filter';
+import { UnhandledExceptionFilter } from '@common/filters/unhandled-exception-filter';
+import { ZodSerializationExceptionFilter } from '@common/filters/zod-serialization-exception-filter';
 import { CoreModules } from '@core/core.module';
+import { AppLogger } from '@core/logger/logger.service';
 import { AuthModule } from '@modules/auth/auth.module';
 import { HealthModule } from '@modules/health/health.module';
 import { OnboardingModule } from '@modules/onboarding/onboarding.module';
@@ -12,7 +14,13 @@ import { WebhooksModule } from '@modules/webhooks/webhooks.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import {
+	APP_FILTER,
+	APP_GUARD,
+	APP_INTERCEPTOR,
+	APP_PIPE,
+	HttpAdapterHost,
+} from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 
@@ -52,14 +60,22 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 			provide: APP_INTERCEPTOR,
 			useClass: ZodSerializerInterceptor,
 		},
+
 		// Filters
 		{
 			provide: APP_FILTER,
-			useClass: HttpExceptionFilter,
+			useFactory: (adapterHost: HttpAdapterHost, logger: AppLogger) =>
+				new ZodSerializationExceptionFilter(adapterHost, logger),
+			inject: [HttpAdapterHost, AppLogger],
 		},
 		{
 			provide: APP_FILTER,
 			useClass: PostgresErrorFilter,
+		},
+		{
+			provide: APP_FILTER,
+			useFactory: (logger: AppLogger) => new UnhandledExceptionFilter(logger),
+			inject: [AppLogger],
 		},
 	],
 })
