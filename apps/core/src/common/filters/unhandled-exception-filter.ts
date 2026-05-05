@@ -1,0 +1,70 @@
+import { AppLogger } from '@core/logger/logger.service';
+import {
+	ArgumentsHost,
+	Catch,
+	ExceptionFilter,
+	HttpException,
+	HttpStatus,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Catch()
+export class UnhandledExceptionFilter implements ExceptionFilter {
+	constructor(private readonly logger: AppLogger) {
+		this.logger.setContext(UnhandledExceptionFilter.name);
+	}
+
+	catch(exception: unknown, host: ArgumentsHost): void {
+		const ctx = host.switchToHttp();
+		const response = ctx.getResponse<Response>();
+		const request = ctx.getRequest<Request>();
+
+		let status = HttpStatus.INTERNAL_SERVER_ERROR;
+		let message: any = 'Something went wrong. Please try again later.';
+		let error = 'Internal Server Error';
+		let extraData: Record<string, any> = {};
+
+		if (exception instanceof HttpException) {
+			status = exception.getStatus();
+			const responseBody = exception.getResponse() as any;
+
+			// If it's a 500, we mask the message to prevent leakage
+			// For other statuses (400, 401, 403, 404), we can keep the original message
+			if (status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+				message =
+					typeof responseBody === 'string'
+						? responseBody
+						: responseBody.message || exception.message;
+				error =
+					typeof responseBody === 'object' ? responseBody.error : undefined;
+
+				if (typeof responseBody === 'object') {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const {
+						message: _msg,
+						error: _err,
+						statusCode: _sc,
+						...rest
+					} = responseBody;
+					extraData = rest;
+				}
+			}
+		}
+
+		if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+			this.logger.error(
+				`Unhandled exception [${request.method}] ${request.url}`,
+				exception instanceof Error ? exception.stack : String(exception)
+			);
+		}
+
+		response.status(status).json({
+			...extraData,
+			statusCode: status,
+			error,
+			message,
+			path: request.url,
+			timestamp: new Date().toISOString(),
+		});
+	}
+}
