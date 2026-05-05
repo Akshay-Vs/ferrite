@@ -3,6 +3,9 @@ name: Build Core App
 on:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Install and Build NestJS Core
