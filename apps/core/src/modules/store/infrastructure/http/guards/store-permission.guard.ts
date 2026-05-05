@@ -15,7 +15,6 @@ import {
 	ForbiddenException,
 	Inject,
 	Injectable,
-	InternalServerErrorException,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -99,9 +98,7 @@ export class StorePermissionGuard implements CanActivate {
 					this.logger.debug(
 						'Route requires @RequirePermission but has invalid :storeId param'
 					);
-					throw new InternalServerErrorException(
-						'Store ID is not a valid UUID'
-					);
+					throw new ForbiddenException('Store ID is not a valid UUID');
 				}
 
 				// Execute permission check
