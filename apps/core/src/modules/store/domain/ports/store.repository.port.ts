@@ -1,6 +1,10 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
-import type { Store, StoreRole } from '@core/database/schema/store.schema';
+import type {
+	Store,
+	StoreMember,
+	StoreRole,
+} from '@core/database/schema/store.schema';
 import type { CreateStoreInput } from '../schemas/create-store.zodschema';
 import type { UpdateStoreInput } from '../schemas/update-store.zodschema';
 
@@ -83,6 +87,24 @@ export interface IStoreRepository {
 	 * Returns all stores where the user is a member, with ownership status.
 	 */
 	findByUserId(userId: string): Promise<StoreMembership[]>;
+
+	/**
+	 * Find all roles within a store.
+	 */
+	findRolesByStoreId(storeId: string): Promise<StoreRole[]>;
+
+	/**
+	 * Find all permissions for a specific role within a store.
+	 */
+	findRolePermissions(
+		storeId: string,
+		roleId: string
+	): Promise<PermissionKey[]>;
+
+	/**
+	 * Find all members assigned to a specific role within a store.
+	 */
+	findRoleMembers(storeId: string, roleId: string): Promise<StoreMember[]>;
 
 	/**
 	 * Execute queries inside a transaction.
