@@ -1,6 +1,9 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { Store } from '@core/database/schema/store.schema';
+import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
 import {
@@ -22,22 +25,32 @@ export class UpdateStoreUseCase
 {
 	constructor(
 		@Inject(STORE_REPOSITORY)
-		private readonly repo: IStoreRepository
-	) {}
+		private readonly repo: IStoreRepository,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async execute(
 		payload: UpdateStorePayload
 	): Promise<Result<Store, StoreNotFoundError>> {
-		const store = await this.repo.updateStore(
-			undefined, // No tx needed
-			payload.storeId,
-			payload.data
-		);
+		return this.tracer.withSpan('UpdateStoreUseCase.execute', async () => {
+			const store = await this.repo.updateStore(
+				undefined, // No tx needed
+				payload.storeId,
+				payload.data
+			);
 
-		if (!store) {
-			return err(new StoreNotFoundError(payload.storeId));
-		}
+			if (!store) {
+				this.logger.warn(
+					`Failed to update store: Store not found. id=${payload.storeId}`
+				);
+				return err(new StoreNotFoundError(payload.storeId));
+			}
 
-		return ok(store);
+			this.logger.debug(`Updated store: id=${payload.storeId}`);
+			return ok(store);
+		});
 	}
 }

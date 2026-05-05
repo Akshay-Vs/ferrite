@@ -1,6 +1,9 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { Store } from '@core/database/schema/store.schema';
+import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
 import {
@@ -21,26 +24,34 @@ export class GetPublicStoreUseCase
 {
 	constructor(
 		@Inject(STORE_REPOSITORY)
-		private readonly repo: IStoreRepository
-	) {}
+		private readonly repo: IStoreRepository,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async execute(
 		storeId: string
 	): Promise<Result<PublicStoreDto, StoreNotFoundError>> {
-		const store = await this.repo.findById(storeId);
+		return this.tracer.withSpan('GetPublicStoreUseCase.execute', async () => {
+			const store = await this.repo.findById(storeId);
 
-		if (!store || !store.isActive || store.deletedAt !== null) {
-			return err(new StoreNotFoundError(storeId));
-		}
+			if (!store || !store.isActive || store.deletedAt !== null) {
+				this.logger.warn(`Public store not found: id=${storeId}`);
+				return err(new StoreNotFoundError(storeId));
+			}
 
-		return ok({
-			id: store.id,
-			name: store.name,
-			slug: store.slug,
-			description: store.description,
-			bannerUrl: store.bannerUrl,
-			iconUrl: store.iconUrl,
-			createdAt: store.createdAt,
+			this.logger.debug(`Fetched public store: id=${storeId}`);
+			return ok({
+				id: store.id,
+				name: store.name,
+				slug: store.slug,
+				description: store.description,
+				bannerUrl: store.bannerUrl,
+				iconUrl: store.iconUrl,
+				createdAt: store.createdAt,
+			});
 		});
 	}
 }
