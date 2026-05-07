@@ -73,7 +73,7 @@ export class StoreController {
 			});
 
 			if (result.isErr()) {
-				throw new UnprocessableEntityException(result.error.message);
+				throw new UnprocessableEntityException('Failed to create store');
 			}
 			return result.value;
 		});
@@ -88,7 +88,7 @@ export class StoreController {
 		return this.tracer.withSpan('http.get-own-stores', async () => {
 			const result = await this.getOwnStoresUc.execute(user.id);
 			if (result.isErr()) {
-				throw new UnprocessableEntityException(result.error.message);
+				throw new UnprocessableEntityException('Failed to get stores');
 			}
 			return result.value;
 		});
@@ -103,7 +103,7 @@ export class StoreController {
 		return this.tracer.withSpan('http.get-store-by-id', async () => {
 			const result = await this.getPublicStoreUc.execute(storeId);
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Store not found');
 			}
 			return result.value;
 		});
@@ -122,7 +122,7 @@ export class StoreController {
 				data: payload,
 			});
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Store not found');
 			}
 			return result.value;
 		});
@@ -158,7 +158,7 @@ export class StoreController {
 				roleId: payload.roleId,
 			});
 			if (result.isErr()) {
-				throw new UnprocessableEntityException(result.error.message);
+				throw new UnprocessableEntityException('Failed to add members');
 			}
 		});
 	}
