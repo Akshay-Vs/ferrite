@@ -68,7 +68,7 @@ export class RoleController {
 				) {
 					throw new NotFoundException('Store not found');
 				}
-				throw new UnprocessableEntityException(result.error.message);
+				throw new UnprocessableEntityException('Failed to create role');
 			}
 
 			return result.value;
@@ -84,7 +84,7 @@ export class RoleController {
 		return this.tracer.withSpan('http.get-store-roles', async () => {
 			const result = await this.getStoreRolesUc.execute(storeId);
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Store not found');
 			}
 			return result.value;
 		});
@@ -103,7 +103,7 @@ export class RoleController {
 				roleId,
 			});
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Role not found');
 			}
 			return result.value;
 		});
@@ -119,7 +119,7 @@ export class RoleController {
 		return this.tracer.withSpan('http.get-role-members', async () => {
 			const result = await this.getRoleMembersUc.execute({ storeId, roleId });
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Role not found');
 			}
 			return result.value;
 		});
