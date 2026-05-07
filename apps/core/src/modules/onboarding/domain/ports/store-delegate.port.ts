@@ -1,5 +1,5 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { SubmitStoreCreationInput } from '../schemas/submit-store-creation.zodschema';
+import type { OnboardingStoreCreate } from '@ferrite/schema';
 
 export const STORE_DELEGATE = Symbol('STORE_DELEGATE');
 
@@ -18,7 +18,7 @@ export interface IStoreDelegate {
 	 * @returns The created store's ID.
 	 */
 	createStoreWithOwner(
-		input: SubmitStoreCreationInput,
+		input: OnboardingStoreCreate,
 		createdBy: string,
 		tx?: ITransactionContext
 	): Promise<string>;

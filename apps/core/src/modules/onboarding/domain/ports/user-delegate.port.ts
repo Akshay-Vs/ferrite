@@ -1,5 +1,5 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { SubmitAboutMeInput } from '../schemas/submit-about-me.zodschema';
+import type { OnboardingAboutUser } from '@ferrite/schema';
 
 export const USER_DELEGATE = Symbol('USER_DELEGATE');
 
@@ -23,7 +23,7 @@ export interface IUserDelegate {
 	 */
 	updateProfile(
 		userId: string,
-		data: SubmitAboutMeInput,
+		data: OnboardingAboutUser,
 		externalAuthId: string,
 		provider: string,
 		tx?: ITransactionContext
