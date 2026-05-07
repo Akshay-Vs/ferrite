@@ -3,10 +3,10 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
 	entry: ['src/**/*.ts'],
 	format: ['cjs', 'esm'],
-	splitting: false,
+	splitting: true,
 	sourcemap: true,
 	clean: true,
-	bundle: false,
+	bundle: true,
 	outDir: 'dist',
 	dts: {
 		compilerOptions: {
