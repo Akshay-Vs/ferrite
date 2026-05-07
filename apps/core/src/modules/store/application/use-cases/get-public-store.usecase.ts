@@ -15,7 +15,7 @@ export const GET_PUBLIC_STORE_UC = Symbol('GetPublicStoreUseCase');
 
 export type PublicStoreDto = Pick<
 	Store,
-	'id' | 'name' | 'slug' | 'description' | 'bannerUrl' | 'iconUrl' | 'createdAt'
+	'id' | 'name' | 'description' | 'bannerUrl' | 'icon' | 'createdAt'
 >;
 
 @Injectable()
@@ -46,10 +46,9 @@ export class GetPublicStoreUseCase
 			return ok({
 				id: store.id,
 				name: store.name,
-				slug: store.slug,
 				description: store.description,
 				bannerUrl: store.bannerUrl,
-				iconUrl: store.iconUrl,
+				icon: store.icon,
 				createdAt: store.createdAt,
 			});
 		});
