@@ -9,7 +9,10 @@ export const onboardingStoreCreateSchema = z.object({
 		.max(255),
 
 	// Step 2
-	storeCurrency: z.enum(['USD', 'INR', 'EUR', 'JPY']),
+	storeCurrency: z
+		.string()
+		.length(3)
+		.regex(/^[A-Z]{3}$/),
 	storeIcon: z
 		.string()
 		.min(1, {
@@ -17,8 +20,6 @@ export const onboardingStoreCreateSchema = z.object({
 		})
 		.max(24),
 });
-
-// Extracted sub-schemas for localized form validation
 
 // Step 1
 export const storeCreateSchema = onboardingStoreCreateSchema.pick({
@@ -34,6 +35,7 @@ export const storeConfigureSchema = onboardingStoreCreateSchema.pick({
 
 export type OnboardingStoreCreate = z.infer<typeof onboardingStoreCreateSchema>;
 
+// Currency options for select component
 export const CURRENCY_OPTIONS: Array<{
 	value: OnboardingStoreCreate['storeCurrency'];
 	label: string;
