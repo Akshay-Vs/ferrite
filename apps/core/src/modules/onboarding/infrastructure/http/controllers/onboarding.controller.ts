@@ -22,8 +22,8 @@ import {
 	Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SubmitAboutMeDto } from '../dto/submit-about-me.dto';
-import { SubmitStoreCreationDto } from '../dto/submit-store-creation.dto';
+import { OnboardingAboutUserDto } from '../dto/submit-about-me.dto';
+import { OnboardingStoreCreationDto } from '../dto/submit-store-creation.dto';
 
 import {
 	GetOnboardingSessionDocs,
@@ -65,7 +65,7 @@ export class OnboardingController {
 	@SubmitAboutMeDocs()
 	async submitAboutMe(
 		@AuthUserParam() authUser: AuthUser,
-		@Body() payload: SubmitAboutMeDto
+		@Body() payload: OnboardingAboutUserDto
 	) {
 		return this.tracer.withSpan('http.submit-about-me', async () => {
 			const result = await this.submitAboutMeUc.execute({
@@ -92,7 +92,7 @@ export class OnboardingController {
 	@SubmitStoreCreationDocs()
 	async submitStoreCreation(
 		@AuthUserParam() authUser: AuthUser,
-		@Body() payload: SubmitStoreCreationDto
+		@Body() payload: OnboardingStoreCreationDto
 	) {
 		return this.tracer.withSpan('http.submit-store-creation', async () => {
 			const result = await this.submitStoreCreationUc.execute({

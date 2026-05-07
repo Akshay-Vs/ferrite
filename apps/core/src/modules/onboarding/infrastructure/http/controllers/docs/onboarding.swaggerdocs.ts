@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { SubmitAboutMeDto } from '../../dto/submit-about-me.dto';
-import { SubmitStoreCreationDto } from '../../dto/submit-store-creation.dto';
+import { OnboardingAboutUserDto } from '../../dto/submit-about-me.dto';
+import { OnboardingStoreCreationDto } from '../../dto/submit-store-creation.dto';
 
 export const GetOnboardingSessionDocs = () =>
 	applyDecorators(
@@ -28,7 +28,7 @@ export const SubmitAboutMeDocs = () =>
 			description:
 				'Updates the user profile and advances onboarding to the STORE_CREATION step. Atomic transaction.',
 		}),
-		ApiBody({ type: SubmitAboutMeDto }),
+		ApiBody({ type: OnboardingAboutUserDto }),
 		ApiResponse({
 			status: 200,
 			description: 'About Me step submitted successfully.',
@@ -48,7 +48,7 @@ export const SubmitStoreCreationDocs = () =>
 			description:
 				'Creates a store with owner role and completes onboarding. Atomic transaction.',
 		}),
-		ApiBody({ type: SubmitStoreCreationDto }),
+		ApiBody({ type: OnboardingStoreCreationDto }),
 		ApiResponse({
 			status: 200,
 			description: 'Store created and onboarding completed successfully.',
