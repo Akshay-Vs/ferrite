@@ -5,6 +5,7 @@ import { ZodSerializationExceptionFilter } from '@common/filters/zod-serializati
 import { CoreModules } from '@core/core.module';
 import { AppLogger } from '@core/logger/logger.service';
 import { AuthModule } from '@modules/auth/auth.module';
+import { CurrencyModule } from '@modules/currency';
 import { HealthModule } from '@modules/health/health.module';
 import { OnboardingModule } from '@modules/onboarding/onboarding.module';
 import { QueueModule } from '@modules/queue';
@@ -40,6 +41,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		WebhooksModule,
 
 		AuthModule,
+		CurrencyModule,
 		StoreModule,
 		UsersModule,
 		OnboardingModule,
