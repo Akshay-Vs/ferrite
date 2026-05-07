@@ -4,6 +4,7 @@ import {
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
+import { generateSlug } from '@common/utils/generate-slug.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
@@ -67,10 +68,11 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.insert(stores)
 					.values({
 						name: input.name,
-						slug: input.slug,
+						slug: generateSlug(input.name),
 						description: input.description,
+						currencyCode: input.currencyCode,
 						bannerUrl: input.bannerUrl,
-						iconUrl: input.iconUrl,
+						icon: input.storeIcon,
 						createdBy,
 					})
 					.returning();
