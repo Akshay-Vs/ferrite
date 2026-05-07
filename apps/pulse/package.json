@@ -9,6 +9,8 @@
 		"lint": "biome check --fix ."
 	},
 	"dependencies": {
+		"@ferrite/sdk": "workspace:*",
+		"@ferrite/schema": "workspace:*",
 		"@base-ui/react": "^1.4.1",
 		"@clerk/nextjs": "^7.2.1",
 		"@clerk/shared": "^4.8.2",
