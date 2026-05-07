@@ -22,6 +22,7 @@
 		"db:studio": "drizzle-kit studio --verbose"
 	},
 	"dependencies": {
+		"@ferrite/schema": "workspace:*",
 		"@clerk/backend": "^3.2.8",
 		"@nestjs/bullmq": "^11.0.4",
 		"@nestjs/cache-manager": "^3.1.0",
@@ -69,6 +70,7 @@
 		"@nestjs/testing": "^11.0.1",
 		"@swc/cli": "^0.8.1",
 		"@swc/core": "^1.15.26",
+		"@swc/jest": "^0.2.39",
 		"@types/express": "^5.0.0",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^25.6.0",
@@ -98,17 +100,6 @@
 		"transform": {
 			"^.+\\.(t|j)s$": "ts-jest"
 		},
-		"moduleNameMapper": {
-			"^@auth/(.*)$": "<rootDir>/modules/auth/$1",
-			"^@health/(.*)$": "<rootDir>/modules/health/$1",
-			"^@users/(.*)$": "<rootDir>/modules/users/$1",
-			"^@webhooks/(.*)$": "<rootDir>/modules/webhooks/$1",
-			"^@core/(.*)$": "<rootDir>/core/$1",
-			"^@modules/(.*)$": "<rootDir>/modules/$1",
-			"^@common/(.*)$": "<rootDir>/common/$1",
-			"^@database/(.*)$": "<rootDir>/core/database/$1",
-			"^@libs/(.*)$": "<rootDir>/libs/$1"
-		},
 		"collectCoverageFrom": [
 			"**/*.(t|j)s"
 		],
@@ -118,7 +109,7 @@
 			"dotenv/config"
 		],
 		"transformIgnorePatterns": [
-			"node_modules/(?!(\\.bun/.*?/node_modules/)?uuid)"
+			"node_modules/(?!(\\.bun/.*?/node_modules/)?(uuid|zod|@ferrite/schema))"
 		]
 	}
 }
