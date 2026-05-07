@@ -1,3 +1,4 @@
+import { isFkViolation } from '@common/errors/handlers/pg-errors';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -39,26 +40,8 @@ export class DeleteCurrencyUseCase implements IDeleteCurrencyUseCase {
 				this.logger.debug(`Deleted currency: code=${code}`);
 				return ok();
 			} catch (e: any) {
-				// Handle Foreign Key Constraint Violations (PostgreSQL code 23503).
-				// Drizzle wraps the original pg DatabaseError inside DrizzleQueryError.cause,
-				// so e.code is undefined — we must inspect e.cause for the pg error code/message/detail.
-				const cause = e.cause as any;
-				const errorCode = e.code ?? cause?.code;
-				// Drizzle's wrapper message is "Failed query: …" — check the underlying cause messages too.
-				const errorMessage = [e.message, cause?.message]
-					.join(' ')
-					.toLowerCase();
-				const errorDetail = [e.detail, cause?.detail]
-					.filter(Boolean)
-					.join(' ')
-					.toLowerCase();
-
-				if (
-					errorCode === '23503' ||
-					errorMessage.includes('foreign key constraint') ||
-					errorDetail.includes('is still referenced') ||
-					errorDetail.includes('foreign key constraint')
-				) {
+				// Postgres unique-violation → domain error
+				if (isFkViolation(e)) {
 					this.logger.error(
 						`Failed to delete currency: Referential integrity violation. code=${code}`
 					);
@@ -70,9 +53,7 @@ export class DeleteCurrencyUseCase implements IDeleteCurrencyUseCase {
 					e.stack
 				);
 				return err(
-					new Error(
-						'Internal Server Error: An unexpected error occurred while deleting the currency.'
-					)
+					new Error('An unexpected error occurred while deleting the currency.')
 				);
 			}
 		});
