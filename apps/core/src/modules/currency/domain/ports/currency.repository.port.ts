@@ -1,6 +1,8 @@
 import type { Currency } from '@core/database/schema/currency.schema';
-import type { CreateCurrencyInput } from '../schemas/create-currency.zodschema';
-import type { UpdateCurrencyPayload } from '../schemas/update-currency.zodschema';
+import type {
+	CreateCurrencyInput,
+	UpdateCurrencyPayload,
+} from '@ferrite/schema';
 
 export const CURRENCY_REPOSITORY = Symbol('CURRENCY_REPOSITORY');
 

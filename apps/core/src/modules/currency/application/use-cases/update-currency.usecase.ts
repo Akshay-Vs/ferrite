@@ -3,8 +3,8 @@ import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { UpdateCurrencyInput } from '@ferrite/schema/currency/update-currency.zodschema';
 import { IUpdateCurrencyUseCase } from '@modules/currency/domain/ports/use-cases.port';
-import { UpdateCurrencyInput } from '@modules/currency/domain/schemas/update-currency.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { CurrencyNotFoundError } from '../../domain/errors/currency-not-found.error';
 import {

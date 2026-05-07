@@ -6,11 +6,13 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { UpdateCurrencyPayload } from '@modules/currency/domain/schemas/update-currency.zodschema';
+import type {
+	CreateCurrencyInput,
+	UpdateCurrencyPayload,
+} from '@ferrite/schema';
+import type { ICurrencyRepository } from '@modules/currency/domain/ports/currency.repository.port';
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import type { ICurrencyRepository } from '../../../domain/ports/currency.repository.port';
-import type { CreateCurrencyInput } from '../../../domain/schemas/create-currency.zodschema';
 
 @Injectable()
 export class DrizzleCurrencyRepository implements ICurrencyRepository {

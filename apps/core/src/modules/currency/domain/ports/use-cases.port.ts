@@ -1,11 +1,13 @@
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { Currency } from '@core/database/schema';
+import {
+	CreateCurrencyInput,
+	GetCurrenciesInput,
+	UpdateCurrencyInput,
+} from '@ferrite/schema';
 import { CurrencyAlreadyExistsError } from '../errors/currency-already-exists.error';
 import { CurrencyInUseError } from '../errors/currency-in-use.error';
 import { CurrencyNotFoundError } from '../errors/currency-not-found.error';
-import { CreateCurrencyInput } from '../schemas/create-currency.zodschema';
-import { GetCurrenciesInput } from '../schemas/get-currencies.zodschema';
-import { UpdateCurrencyInput } from '../schemas/update-currency.zodschema';
 
 export const CREATE_CURRENCY_UC = Symbol('CreateCurrencyUseCase');
 export const DELETE_CURRENCY_UC = Symbol('DeleteCurrencyUseCase');

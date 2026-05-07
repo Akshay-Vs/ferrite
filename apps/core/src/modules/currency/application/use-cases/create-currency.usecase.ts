@@ -3,6 +3,7 @@ import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { type CreateCurrencyInput } from '@ferrite/schema/currency/create-currency.zodschema';
 import { ICreateCurrencyUseCase } from '@modules/currency/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
 import { CurrencyAlreadyExistsError } from '../../domain/errors/currency-already-exists.error';
@@ -10,7 +11,6 @@ import {
 	CURRENCY_REPOSITORY,
 	type ICurrencyRepository,
 } from '../../domain/ports/currency.repository.port';
-import type { CreateCurrencyInput } from '../../domain/schemas/create-currency.zodschema';
 
 @Injectable()
 export class CreateCurrencyUseCase implements ICreateCurrencyUseCase {
