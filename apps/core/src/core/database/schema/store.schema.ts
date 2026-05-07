@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
 	boolean,
+	char,
 	index,
 	pgTable,
 	primaryKey,
@@ -11,6 +12,7 @@ import {
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
+import { currencies } from './currency.schema';
 import { permissionKeyEnum } from './enum';
 import { users } from './user.schema';
 
@@ -25,8 +27,11 @@ export const stores = pgTable(
 		name: varchar('name', { length: 150 }).notNull(),
 		slug: varchar('slug', { length: 150 }).notNull(),
 		description: text('description'),
+		currencyCode: char('currency_code', { length: 3 })
+			.notNull()
+			.references(() => currencies.code, { onDelete: 'restrict' }),
 		bannerUrl: varchar('banner_url', { length: 2048 }),
-		iconUrl: varchar('icon_url', { length: 2048 }),
+		icon: varchar('icon', { length: 256 }),
 		createdBy: uuid('created_by')
 			.notNull()
 			.references(() => users.id, { onDelete: 'restrict' }),

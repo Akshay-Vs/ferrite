@@ -6,6 +6,7 @@
 
 import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { v4 as uuidv4 } from 'uuid';
+import type { NewCurrency, NewExchangeRate } from '../schema/currency.schema';
 import type { NewUserPaymentMethod } from '../schema/payment.schema';
 import type { NewUserNotificationPreference } from '../schema/preferences.schema';
 import type {
@@ -133,9 +134,10 @@ export function createTestStore(
 	return {
 		name: `Test Store ${storeCounter} - ${Date.now()}`,
 		slug: `test-store-${storeCounter}-${Date.now()}`,
+		currencyCode: 'USD',
 		createdBy,
 		...overrides,
-	};
+	} as NewStore;
 }
 
 // ── Store Members ────────────────────────
@@ -179,5 +181,42 @@ export function createTestStoreRolePermission(
 		storeRoleId,
 		permissionKey,
 		...overrides,
+	};
+}
+
+// ── Currencies ───────────────────────────
+/**
+ * Builds a NewCurrency object. Defaults to USD with 2 decimal places.
+ * Pass `overrides` to test other currencies (e.g. JPY with 0 precision).
+ */
+export function createTestCurrency(
+	overrides: Partial<NewCurrency> = {}
+): NewCurrency {
+	return {
+		code: 'USD',
+		symbol: '$',
+		decimalPrecision: 2,
+		isActive: true,
+		...overrides,
+	};
+}
+
+// ── Exchange Rates ───────────────────────
+/**
+ * Builds a NewExchangeRate between two currency codes.
+ *
+ * @param fromCode - ISO 4217 source currency code (must already exist in `currencies`)
+ * @param toCode   - ISO 4217 target currency code (must already exist in `currencies`)
+ * @param rate     - Decimal string for the exchange rate (default: '0.920000000')
+ */
+export function createTestExchangeRate(
+	fromCode: string,
+	toCode: string,
+	rate = '0.920000000'
+): NewExchangeRate {
+	return {
+		fromCurrencyCode: fromCode,
+		toCurrencyCode: toCode,
+		rate,
 	};
 }
