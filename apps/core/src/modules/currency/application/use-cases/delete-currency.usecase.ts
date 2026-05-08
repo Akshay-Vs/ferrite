@@ -4,9 +4,9 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { CurrencyInUseError } from '@modules/currency/domain/errors/currency-in-use.error';
+import { CurrencyNotFoundError } from '@modules/currency/domain/errors/currency-not-found.error';
 import { IDeleteCurrencyUseCase } from '@modules/currency/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { CurrencyNotFoundError } from '../../domain/errors/currency-not-found.error';
 import {
 	CURRENCY_REPOSITORY,
 	type ICurrencyRepository,

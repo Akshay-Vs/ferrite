@@ -5,6 +5,7 @@ import {
 	index,
 	integer,
 	pgTable,
+	primaryKey,
 	timestamp,
 	uniqueIndex,
 	varchar,
@@ -54,6 +55,7 @@ export const exchangeRates = pgTable(
 	},
 	(t) => [
 		// Primary runtime index — conversion queries always filter by this pair
+		primaryKey({ columns: [t.fromCurrencyCode, t.toCurrencyCode] }),
 		index('idx_exchange_rates_from_to').on(
 			t.fromCurrencyCode,
 			t.toCurrencyCode

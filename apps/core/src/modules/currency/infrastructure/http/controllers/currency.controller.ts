@@ -3,6 +3,14 @@ import { RequireRole } from '@common/decorators/require-role.decorator';
 import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
 import type { Currency } from '@core/database/schema/currency.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+
+import { CreateCurrencyUseCase } from '@modules/currency/application/use-cases/create-currency.usecase';
+import { DeleteCurrencyUseCase } from '@modules/currency/application/use-cases/delete-currency.usecase';
+import { GetCurrenciesUseCase } from '@modules/currency/application/use-cases/get-currencies.usecase';
+import { UpdateCurrencyUseCase } from '@modules/currency/application/use-cases/update-currency.usecase';
+import { CurrencyAlreadyExistsError } from '@modules/currency/domain/errors/currency-already-exists.error';
+import { CurrencyInUseError } from '@modules/currency/domain/errors/currency-in-use.error';
+import { CurrencyNotFoundError } from '@modules/currency/domain/errors/currency-not-found.error';
 import {
 	Body,
 	ConflictException,
@@ -20,14 +28,7 @@ import {
 	Query,
 	UnprocessableEntityException,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CreateCurrencyUseCase } from '../../../application/use-cases/create-currency.usecase';
-import { DeleteCurrencyUseCase } from '../../../application/use-cases/delete-currency.usecase';
-import { GetCurrenciesUseCase } from '../../../application/use-cases/get-currencies.usecase';
-import { UpdateCurrencyUseCase } from '../../../application/use-cases/update-currency.usecase';
-import { CurrencyAlreadyExistsError } from '../../../domain/errors/currency-already-exists.error';
-import { CurrencyInUseError } from '../../../domain/errors/currency-in-use.error';
-import { CurrencyNotFoundError } from '../../../domain/errors/currency-not-found.error';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateCurrencyDto, UpdateCurrencyDto } from '../dto/currency.dto';
 import {
 	CreateCurrencyDocs,
@@ -62,7 +63,7 @@ export class CurrencyController {
 					throw new ConflictException(result.error.message);
 				}
 
-				throw new UnprocessableEntityException(result.error.message);
+				throw new UnprocessableEntityException('Failed to create currency');
 			}
 
 			return result.value;
@@ -71,12 +72,6 @@ export class CurrencyController {
 
 	@Get()
 	@GetCurrenciesDocs()
-	@ApiQuery({
-		name: 'activeOnly',
-		required: false,
-		type: Boolean,
-		description: 'When true, returns only active currencies.',
-	})
 	@PublicRoute()
 	async getCurrencies(
 		@Query('activeOnly') activeOnly?: string
@@ -87,7 +82,7 @@ export class CurrencyController {
 			});
 
 			if (result.isErr()) {
-				throw new UnprocessableEntityException(result.error.message);
+				throw new InternalServerErrorException('Failed to get currency');
 			}
 
 			return result.value;
@@ -104,7 +99,11 @@ export class CurrencyController {
 			});
 
 			if (result.isErr()) {
-				throw new UnprocessableEntityException(result.error.message);
+				if (result.error instanceof CurrencyNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+
+				throw new InternalServerErrorException('Failed to get currency');
 			}
 
 			const currency = result.value.find((c) => c.code === code.toUpperCase());
@@ -134,7 +133,7 @@ export class CurrencyController {
 				if (result.error instanceof CurrencyNotFoundError) {
 					throw new NotFoundException(result.error.message);
 				}
-				throw new InternalServerErrorException(result.error.message);
+				throw new UnprocessableEntityException('Failed to update currency');
 			}
 
 			return result.value;
@@ -156,7 +155,7 @@ export class CurrencyController {
 				if (result.error instanceof CurrencyInUseError) {
 					throw new ConflictException(result.error.message);
 				}
-				throw new InternalServerErrorException(result.error.message);
+				throw new UnprocessableEntityException('Failed to delete currency');
 			}
 		});
 	}

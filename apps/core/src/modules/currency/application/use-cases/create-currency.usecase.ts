@@ -1,12 +1,13 @@
+import { isUniqueViolation } from '@common/errors/handlers/pg-errors';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { type CreateCurrencyInput } from '@ferrite/schema/currency/create-currency.zodschema';
+import { CurrencyAlreadyExistsError } from '@modules/currency/domain/errors/currency-already-exists.error';
 import { ICreateCurrencyUseCase } from '@modules/currency/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { CurrencyAlreadyExistsError } from '../../domain/errors/currency-already-exists.error';
 import {
 	CURRENCY_REPOSITORY,
 	type ICurrencyRepository,
@@ -37,9 +38,9 @@ export class CreateCurrencyUseCase implements ICreateCurrencyUseCase {
 				);
 
 				return ok(currency);
-			} catch (e: any) {
+			} catch (e: unknown) {
 				// Postgres unique-violation → domain error
-				if (e?.cause?.code === '23505') {
+				if (isUniqueViolation(e)) {
 					this.logger.warn(`Currency already exists: code=${input.code}`);
 					return err(new CurrencyAlreadyExistsError(input.code));
 				}
