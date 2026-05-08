@@ -66,9 +66,8 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		// Filters
 		{
 			provide: APP_FILTER,
-			useFactory: (adapterHost: HttpAdapterHost, logger: AppLogger) =>
-				new ZodSerializationExceptionFilter(adapterHost, logger),
-			inject: [HttpAdapterHost, AppLogger],
+			useFactory: (logger: AppLogger) => new UnhandledExceptionFilter(logger),
+			inject: [AppLogger],
 		},
 		{
 			provide: APP_FILTER,
@@ -76,8 +75,9 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		},
 		{
 			provide: APP_FILTER,
-			useFactory: (logger: AppLogger) => new UnhandledExceptionFilter(logger),
-			inject: [AppLogger],
+			useFactory: (adapterHost: HttpAdapterHost, logger: AppLogger) =>
+				new ZodSerializationExceptionFilter(adapterHost, logger),
+			inject: [HttpAdapterHost, AppLogger],
 		},
 	],
 })
