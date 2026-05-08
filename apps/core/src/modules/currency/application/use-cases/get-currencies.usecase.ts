@@ -1,4 +1,4 @@
-import { ok, type Result } from '@common/interfaces/result.interface';
+import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
@@ -23,12 +23,22 @@ export class GetCurrenciesUseCase implements IGetCurrenciesUseCase {
 	}
 
 	async execute(input: GetCurrenciesInput): Promise<Result<Currency[], Error>> {
-		return this.tracer.withSpan('GetCurrenciesUseCase.execute', async () => {
-			const currencies = await this.repo.findAll(input.activeOnly);
-			this.logger.debug(
-				`Fetched ${currencies.length} currencies (activeOnly=${input.activeOnly ?? false})`
+		try {
+			return this.tracer.withSpan('GetCurrenciesUseCase.execute', async () => {
+				const currencies = await this.repo.findAll(input.activeOnly);
+				this.logger.debug(
+					`Fetched ${currencies.length} currencies (activeOnly=${input.activeOnly ?? false})`
+				);
+				return ok(currencies);
+			});
+		} catch (e) {
+			const error = e instanceof Error ? e : new Error(String(e));
+			this.logger.error(
+				`Failed to fetch currencies: ${error.message}`,
+				error.stack
 			);
-			return ok(currencies);
-		});
+
+			return err(error);
+		}
 	}
 }
