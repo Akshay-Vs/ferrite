@@ -36,5 +36,5 @@
 			"@libs/*": ["./src/libs/*"]
 		}
 	},
-	"include": ["src", "test"]
+	"include": ["src"]
 }
