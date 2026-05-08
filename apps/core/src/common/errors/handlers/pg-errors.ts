@@ -38,13 +38,10 @@ const FK_DETAIL_HINTS = [
  */
 export function isFkViolation(err: unknown): boolean {
 	const { code, message, detail } = pgErrorInfo(err);
-
-	// Only fall back to heuristics when the driver did not surface a SQLSTATE code.
 	return (
 		code === PG_FK_VIOLATION ||
-		(!code &&
-			(FK_MESSAGE_HINTS.some((h) => message.includes(h)) ||
-				FK_DETAIL_HINTS.some((h) => detail.includes(h))))
+		FK_MESSAGE_HINTS.some((h) => message.includes(h)) ||
+		FK_DETAIL_HINTS.some((h) => detail.includes(h))
 	);
 }
 
