@@ -5,6 +5,11 @@ import type {
 	StoreRole,
 } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { CreateStoreRoleUseCase } from '@modules/store/application/use-cases/create-store-role.usecase';
+import { GetRoleMembersUseCase } from '@modules/store/application/use-cases/get-role-members.usecase';
+import { GetRolePermissionsUseCase } from '@modules/store/application/use-cases/get-role-permissions.usecase';
+import { GetStoreRolesUseCase } from '@modules/store/application/use-cases/get-store-roles.usecase';
+import { StoreNotFoundError } from '@modules/store/domain/errors/store-not-found.error';
 import {
 	Body,
 	Controller,
@@ -18,10 +23,6 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateStoreRoleUseCase } from '../../../application/use-cases/create-store-role.usecase';
-import { GetRoleMembersUseCase } from '../../../application/use-cases/get-role-members.usecase';
-import { GetRolePermissionsUseCase } from '../../../application/use-cases/get-role-permissions.usecase';
-import { GetStoreRolesUseCase } from '../../../application/use-cases/get-store-roles.usecase';
 import { CreateStoreRoleDto } from '../dto/role.dto';
 import { StorePermissionGuard } from '../guards/store-permission.guard';
 import {
@@ -61,14 +62,11 @@ export class RoleController {
 			});
 
 			if (result.isErr()) {
-				const error = result.error as any;
-				if (
-					error.code === '23503' ||
-					error.message?.includes('foreign key constraint')
-				) {
-					throw new NotFoundException('Store not found');
+				if (result.error instanceof StoreNotFoundError) {
+					throw new NotFoundException(result.error.message);
 				}
-				throw new UnprocessableEntityException('Failed to create role');
+
+				throw new UnprocessableEntityException(result.error.message);
 			}
 
 			return result.value;
