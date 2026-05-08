@@ -8,6 +8,9 @@ import { CreateStoreRoleUseCase } from './application/use-cases/create-store-rol
 import { DeleteStoreUseCase } from './application/use-cases/delete-store.usecase';
 import { GetOwnStoresUseCase } from './application/use-cases/get-own-stores.usecase';
 import { GetPublicStoreUseCase } from './application/use-cases/get-public-store.usecase';
+import { GetRoleMembersUseCase } from './application/use-cases/get-role-members.usecase';
+import { GetRolePermissionsUseCase } from './application/use-cases/get-role-permissions.usecase';
+import { GetStoreRolesUseCase } from './application/use-cases/get-store-roles.usecase';
 import { InitializeStoreOrchestratorUseCase } from './application/use-cases/initialize-store-orchestrator.usecase';
 import { UpdateStoreUseCase } from './application/use-cases/update-store.usecase';
 import { STORE_REPOSITORY } from './domain/ports/store.repository.port';
@@ -38,6 +41,9 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		InitializeStoreOrchestratorUseCase,
 		GetOwnStoresUseCase,
 		GetPublicStoreUseCase,
+		GetStoreRolesUseCase,
+		GetRolePermissionsUseCase,
+		GetRoleMembersUseCase,
 		UpdateStoreUseCase,
 		DeleteStoreUseCase,
 	],

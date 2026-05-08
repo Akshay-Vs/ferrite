@@ -4,7 +4,23 @@
 	"testEnvironment": "node",
 	"testRegex": ".e2e-spec.ts$",
 	"transform": {
-		"^.+\\.(t|j)s$": "ts-jest"
+		"^.+\\.(t|j)s$": [
+			"@swc/jest",
+			{
+				"jsc": {
+					"target": "es2022",
+					"parser": {
+						"syntax": "typescript",
+						"decorators": true,
+						"dynamicImport": true
+					},
+					"transform": {
+						"legacyDecorator": true,
+						"decoratorMetadata": true
+					}
+				}
+			}
+		]
 	},
 	"moduleNameMapper": {
 		"^@auth/(.*)$": "<rootDir>/../src/modules/auth/$1",
@@ -16,6 +32,11 @@
 		"^@common/(.*)$": "<rootDir>/../src/common/$1",
 		"^@database/(.*)$": "<rootDir>/../src/core/database/$1",
 		"^@libs/(.*)$": "<rootDir>/../src/libs/$1",
-		"^uuid$": "<rootDir>/uuid.mock.ts"
-	}
+		"^uuid$": "<rootDir>/uuid.mock.ts",
+		"^@ferrite/schema$": "<rootDir>/../../../packages/schema/src/index.ts",
+		"^@ferrite/schema/(.*)$": "<rootDir>/../../../packages/schema/src/$1"
+	},
+	"transformIgnorePatterns": [
+		"node_modules/(?!(\\.bun/.*?/node_modules/)?(uuid|zod|@ferrite/schema))"
+	]
 }

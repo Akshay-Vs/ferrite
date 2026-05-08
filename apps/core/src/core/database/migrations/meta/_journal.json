@@ -22,6 +22,27 @@
 			"when": 1777907669170,
 			"tag": "0002_redundant_mojo",
 			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1778059097016,
+			"tag": "0003_military_wild_pack",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1778140914933,
+			"tag": "0004_marvelous_vengeance",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1778141815913,
+			"tag": "0005_concerned_mandroid",
+			"breakpoints": true
 		}
 	]
 }

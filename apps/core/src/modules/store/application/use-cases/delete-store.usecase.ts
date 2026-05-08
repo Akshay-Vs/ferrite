@@ -1,5 +1,8 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
+import { AppLogger } from '@core/logger/logger.service';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
 import {
@@ -15,16 +18,26 @@ export class DeleteStoreUseCase
 {
 	constructor(
 		@Inject(STORE_REPOSITORY)
-		private readonly repo: IStoreRepository
-	) {}
+		private readonly repo: IStoreRepository,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async execute(storeId: string): Promise<Result<void, StoreNotFoundError>> {
-		const success = await this.repo.softDeleteStore(undefined, storeId);
+		return this.tracer.withSpan('DeleteStoreUseCase.execute', async () => {
+			const success = await this.repo.softDeleteStore(undefined, storeId);
 
-		if (!success) {
-			return err(new StoreNotFoundError(storeId));
-		}
+			if (!success) {
+				this.logger.warn(
+					`Failed to delete store: Store not found. id=${storeId}`
+				);
+				return err(new StoreNotFoundError(storeId));
+			}
 
-		return ok();
+			this.logger.debug(`Soft-deleted store: id=${storeId}`);
+			return ok();
+		});
 	}
 }

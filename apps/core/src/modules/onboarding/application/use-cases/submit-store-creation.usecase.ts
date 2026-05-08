@@ -8,6 +8,7 @@ import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { OnboardingStoreCreate } from '@ferrite/schema';
 import { Inject, Injectable } from '@nestjs/common';
 import { InvalidStepTransitionError } from '../../domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '../../domain/errors/onboarding-already-completed.error';
@@ -20,13 +21,12 @@ import {
 	STORE_DELEGATE,
 } from '../../domain/ports/store-delegate.port';
 import type { OnboardingSession } from '../../domain/schemas/onboarding-state.zodschema';
-import type { SubmitStoreCreationInput } from '../../domain/schemas/submit-store-creation.zodschema';
 
 @Injectable()
 export class SubmitStoreCreationUseCase
 	implements
 		IUseCase<
-			{ authUser: AuthUser; data: SubmitStoreCreationInput },
+			{ authUser: AuthUser; data: OnboardingStoreCreate },
 			OnboardingSession,
 			InvalidStepTransitionError | OnboardingAlreadyCompletedError | Error
 		>
@@ -45,7 +45,7 @@ export class SubmitStoreCreationUseCase
 
 	async execute(input: {
 		authUser: AuthUser;
-		data: SubmitStoreCreationInput;
+		data: OnboardingStoreCreate;
 	}): Promise<
 		Result<
 			OnboardingSession,

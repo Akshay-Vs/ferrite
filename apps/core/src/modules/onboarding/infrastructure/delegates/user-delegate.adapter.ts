@@ -1,7 +1,7 @@
 import type { AuthProvider } from '@auth/index';
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
+import type { OnboardingAboutUser } from '@ferrite/schema';
 import type { IUserDelegate } from '@modules/onboarding/domain/ports/user-delegate.port';
-import type { SubmitAboutMeInput } from '@modules/onboarding/domain/schemas/submit-about-me.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IUserRepository,
@@ -24,7 +24,7 @@ export class UserDelegateAdapter implements IUserDelegate {
 
 	async updateProfile(
 		userId: string,
-		data: SubmitAboutMeInput,
+		data: OnboardingAboutUser,
 		externalAuthId: string,
 		provider: string,
 		tx?: ITransactionContext
@@ -37,7 +37,10 @@ export class UserDelegateAdapter implements IUserDelegate {
 
 		const result = await this.userRepo.updateProfileById(
 			userId,
-			data,
+			{
+				firstName: data.firstName,
+				lastName: data.lastName,
+			},
 			outboxEvent,
 			tx
 		);

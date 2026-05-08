@@ -4,6 +4,7 @@ import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
 import { SkipPermissions } from '@common/decorators/skip-permissions.decorator';
 import type { Store } from '@core/database/schema/store.schema';
+import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { StoreMembership } from '@modules/store/domain/ports/store.repository.port';
 import {
 	Body,
@@ -12,6 +13,7 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
+	Inject,
 	NotFoundException,
 	Param,
 	ParseUUIDPipe,
@@ -53,7 +55,8 @@ export class StoreController {
 		private readonly getPublicStoreUc: GetPublicStoreUseCase,
 		private readonly updateStoreUc: UpdateStoreUseCase,
 		private readonly deleteStoreUc: DeleteStoreUseCase,
-		private readonly addStoreMembersUc: AddStoreMembersUseCase
+		private readonly addStoreMembersUc: AddStoreMembersUseCase,
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
 	@Post()
@@ -63,15 +66,17 @@ export class StoreController {
 		@AuthUserParam() user: AuthUser,
 		@Body() payload: CreateStoreDto
 	): Promise<Store> {
-		const result = await this.initializeStoreOrchestratorPc.execute({
-			input: payload,
-			createdBy: user.id,
-		});
+		return this.tracer.withSpan('http.create-store', async () => {
+			const result = await this.initializeStoreOrchestratorPc.execute({
+				input: payload,
+				createdBy: user.id,
+			});
 
-		if (result.isErr()) {
-			throw new UnprocessableEntityException(result.error.message);
-		}
-		return result.value;
+			if (result.isErr()) {
+				throw new UnprocessableEntityException('Failed to create store');
+			}
+			return result.value;
+		});
 	}
 
 	@Get()
@@ -80,11 +85,13 @@ export class StoreController {
 	async getOwnStores(
 		@AuthUserParam() user: AuthUser
 	): Promise<StoreMembership[]> {
-		const result = await this.getOwnStoresUc.execute(user.id);
-		if (result.isErr()) {
-			throw new UnprocessableEntityException(result.error.message);
-		}
-		return result.value;
+		return this.tracer.withSpan('http.get-own-stores', async () => {
+			const result = await this.getOwnStoresUc.execute(user.id);
+			if (result.isErr()) {
+				throw new UnprocessableEntityException('Failed to get stores');
+			}
+			return result.value;
+		});
 	}
 
 	@Get(':storeId')
@@ -93,11 +100,13 @@ export class StoreController {
 	async getStoreById(
 		@Param('storeId', ParseUUIDPipe) storeId: string
 	): Promise<PublicStoreDto> {
-		const result = await this.getPublicStoreUc.execute(storeId);
-		if (result.isErr()) {
-			throw new NotFoundException(result.error.message);
-		}
-		return result.value;
+		return this.tracer.withSpan('http.get-store-by-id', async () => {
+			const result = await this.getPublicStoreUc.execute(storeId);
+			if (result.isErr()) {
+				throw new NotFoundException('Store not found');
+			}
+			return result.value;
+		});
 	}
 
 	@Patch(':storeId')
@@ -107,14 +116,16 @@ export class StoreController {
 		@Param('storeId', ParseUUIDPipe) storeId: string,
 		@Body() payload: UpdateStoreDto
 	): Promise<Store> {
-		const result = await this.updateStoreUc.execute({
-			storeId,
-			data: payload,
+		return this.tracer.withSpan('http.update-store', async () => {
+			const result = await this.updateStoreUc.execute({
+				storeId,
+				data: payload,
+			});
+			if (result.isErr()) {
+				throw new NotFoundException('Store not found');
+			}
+			return result.value;
 		});
-		if (result.isErr()) {
-			throw new NotFoundException(result.error.message);
-		}
-		return result.value;
 	}
 
 	@Delete(':storeId')
@@ -124,10 +135,12 @@ export class StoreController {
 	async deleteStore(
 		@Param('storeId', ParseUUIDPipe) storeId: string
 	): Promise<void> {
-		const result = await this.deleteStoreUc.execute(storeId);
-		if (result.isErr()) {
-			throw new NotFoundException(result.error.message);
-		}
+		return this.tracer.withSpan('http.delete-store', async () => {
+			const result = await this.deleteStoreUc.execute(storeId);
+			if (result.isErr()) {
+				throw new NotFoundException(result.error.message);
+			}
+		});
 	}
 
 	@Post(':storeId/members')
@@ -138,13 +151,15 @@ export class StoreController {
 		@Param('storeId', ParseUUIDPipe) storeId: string,
 		@Body() payload: AddStoreMembersDto
 	): Promise<void> {
-		const result = await this.addStoreMembersUc.execute({
-			storeId,
-			userIds: payload.userIds,
-			roleId: payload.roleId,
+		return this.tracer.withSpan('http.add-store-members', async () => {
+			const result = await this.addStoreMembersUc.execute({
+				storeId,
+				userIds: payload.userIds,
+				roleId: payload.roleId,
+			});
+			if (result.isErr()) {
+				throw new UnprocessableEntityException('Failed to add members');
+			}
 		});
-		if (result.isErr()) {
-			throw new UnprocessableEntityException(result.error.message);
-		}
 	}
 }

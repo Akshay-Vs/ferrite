@@ -1,15 +1,15 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
+import { generateSlug } from '@common/utils/generate-slug.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import type { OnboardingStoreCreate } from '@ferrite/schema';
 import type { IStoreDelegate } from '@modules/onboarding/domain/ports/store-delegate.port';
-import type { SubmitStoreCreationInput } from '@modules/onboarding/domain/schemas/submit-store-creation.zodschema';
 import { InitializeStoreOrchestratorUseCase } from '@modules/store/application/use-cases/initialize-store-orchestrator.usecase';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
 } from '@modules/store/domain/ports/store.repository.port';
 import { Inject, Injectable } from '@nestjs/common';
-
 /**
  * Infrastructure adapter bridging the Onboarding module's `IStoreDelegate` port
  * to the Store module's existing `InitializeStoreOrchestratorUseCase`.
@@ -30,20 +30,22 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 	}
 
 	async createStoreWithOwner(
-		input: SubmitStoreCreationInput,
+		input: OnboardingStoreCreate,
 		createdBy: string,
 		tx?: ITransactionContext
 	): Promise<string> {
+		// Generate a slug from the store name
+		const slug = generateSlug(input.storeName);
+
 		return this.tracer.withSpan(
 			'StoreDelegateAdapter.createStoreWithOwner',
 			async () => {
 				const result = await this.initializeStoreUc.execute({
 					input: {
-						name: input.name,
-						slug: input.slug,
-						description: input.description,
-						bannerUrl: input.bannerUrl,
-						iconUrl: input.iconUrl,
+						name: input.storeName,
+						description: input.storeDescription,
+						currencyCode: input.storeCurrency,
+						storeIcon: input.storeIcon,
 					},
 					createdBy,
 					tx,
@@ -55,7 +57,7 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 
 				return result.value.id;
 			},
-			{ storeSlug: input.slug, userId: createdBy }
+			{ storeSlug: slug, userId: createdBy }
 		);
 	}
 

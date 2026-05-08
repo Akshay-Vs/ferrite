@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { userAuthProviders } from './auth.schema';
+import { currencies, exchangeRates } from './currency.schema';
 import { userOnboarding } from './onboarding.schema';
 import { userPaymentMethods } from './payment.schema';
 import { userNotificationPreferences } from './preferences.schema';
@@ -118,5 +119,27 @@ export const storeMembersRelations = relations(storeMembers, ({ one }) => ({
 	role: one(storeRoles, {
 		fields: [storeMembers.roleId],
 		references: [storeRoles.id],
+	}),
+}));
+
+// ─────────────────────────────────────────
+// CURRENCY RELATIONS
+// ─────────────────────────────────────────
+
+export const currenciesRelations = relations(currencies, ({ many }) => ({
+	ratesFrom: many(exchangeRates, { relationName: 'ratesFrom' }),
+	ratesTo: many(exchangeRates, { relationName: 'ratesTo' }),
+}));
+
+export const exchangeRatesRelations = relations(exchangeRates, ({ one }) => ({
+	fromCurrency: one(currencies, {
+		fields: [exchangeRates.fromCurrencyCode],
+		references: [currencies.code],
+		relationName: 'ratesFrom',
+	}),
+	toCurrency: one(currencies, {
+		fields: [exchangeRates.toCurrencyCode],
+		references: [currencies.code],
+		relationName: 'ratesTo',
 	}),
 }));

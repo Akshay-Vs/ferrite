@@ -19,3 +19,44 @@ export const CreateStoreRoleDocs = () =>
 		ApiResponse({ status: 404, description: 'Store not found.' }),
 		ApiResponse({ status: 500, description: 'Internal server error.' })
 	);
+
+export const GetStoreRolesDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Get all store roles',
+			description:
+				'Returns a list of all roles within the specified store. Requires staff.read permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiResponse({ status: 200, description: 'Returns a list of roles.' }),
+		ApiResponse({ status: 404, description: 'Store not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const GetRolePermissionsDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Get role permissions',
+			description:
+				'Returns a list of permissions assigned to the specified role. Requires staff.read permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiResponse({ status: 200, description: 'Returns a list of permissions.' }),
+		ApiResponse({ status: 404, description: 'Role not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const GetRoleMembersDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Get role members',
+			description:
+				'Returns a list of members assigned to the specified role. Requires staff.read permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiResponse({ status: 200, description: 'Returns a list of members.' }),
+		ApiResponse({ status: 404, description: 'Role not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);

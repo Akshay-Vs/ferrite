@@ -79,7 +79,9 @@ export async function cleanupTables(): Promise<void> {
 			stores,
 			user_phones,
 			user_addresses,
-			users
+			users,
+			exchange_rates,
+			currencies
 		CASCADE
 	`);
 }

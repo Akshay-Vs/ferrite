@@ -1,5 +1,6 @@
 'use client';
 
+import { CURRENCY_OPTIONS } from '@ferrite/schema';
 import { Button } from '@/presentation/primitives/button';
 import {
 	Field,
@@ -17,7 +18,6 @@ import {
 	SelectValue,
 } from '@/presentation/primitives/select';
 import { useOnboardingStoreConfigure } from '../hooks/use-onboarding-config-store';
-import { CURRENCY_OPTIONS } from '../schemas/onboarding-store.zodschema';
 
 export default function OnboardingConfigureStoreForm() {
 	const { form, isSubmittingToAPI } = useOnboardingStoreConfigure();

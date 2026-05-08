@@ -1,6 +1,6 @@
-import { submitStoreCreationSchema } from '@modules/onboarding/domain/schemas/submit-store-creation.zodschema';
+import { onboardingStoreCreateSchema } from '@ferrite/schema';
 import { createZodDto } from 'nestjs-zod';
 
-export class SubmitStoreCreationDto extends createZodDto(
-	submitStoreCreationSchema
+export class OnboardingStoreCreationDto extends createZodDto(
+	onboardingStoreCreateSchema
 ) {}

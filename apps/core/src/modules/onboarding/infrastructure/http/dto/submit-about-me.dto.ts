@@ -1,4 +1,6 @@
-import { submitAboutMeSchema } from '@modules/onboarding/domain/schemas/submit-about-me.zodschema';
+import { onboardingAboutUserSchema } from '@ferrite/schema';
 import { createZodDto } from 'nestjs-zod';
 
-export class SubmitAboutMeDto extends createZodDto(submitAboutMeSchema) {}
+export class OnboardingAboutUserDto extends createZodDto(
+	onboardingAboutUserSchema
+) {}

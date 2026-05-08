@@ -1,9 +1,0 @@
-{
-	"extends": "@ferrite/tsconfig/base.json",
-	"compilerOptions": {
-		"module": "Preserve",
-		"rootDir": "src",
-		"jsx": "react-jsx"
-	},
-	"include": ["src/**/*"]
-}

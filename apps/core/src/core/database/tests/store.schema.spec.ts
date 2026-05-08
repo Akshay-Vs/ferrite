@@ -457,8 +457,8 @@ describe('Store tables', () => {
 					'Should have thrown on deleting role with active members'
 				);
 			} catch (e: any) {
-				// 23503 = restrict_violation (ON DELETE RESTRICT)
-				expect(e.cause?.code).toBe('23503');
+				// 23001 = restrict_violation (ON DELETE RESTRICT)
+				expect(e.cause?.code).toBe('23001');
 			}
 		});
 	});

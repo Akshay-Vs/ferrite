@@ -1,3 +1,7 @@
+import {
+	onboardingStoreCreateSchema,
+	storeConfigureSchema,
+} from '@ferrite/schema';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'nextjs-toploader/app';
 import { useState } from 'react';
@@ -5,10 +9,6 @@ import {
 	ONBOARDING_CONNECT_STORE,
 	ONBOARDING_CREATE_STORE,
 } from '@/core/constants/routes.constants';
-import {
-	onboardingStoreCreateSchema,
-	storeConfigureSchema,
-} from '../schemas/onboarding-store.zodschema';
 import { useStoreCreationStore } from '../stores/onboarding.store';
 
 export const useOnboardingStoreConfigure = () => {
