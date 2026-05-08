@@ -63,7 +63,7 @@ export class CurrencyController {
 					throw new ConflictException(result.error.message);
 				}
 
-				throw new UnprocessableEntityException('Falied to create currency');
+				throw new UnprocessableEntityException('Failed to create currency');
 			}
 
 			return result.value;
@@ -82,10 +82,6 @@ export class CurrencyController {
 			});
 
 			if (result.isErr()) {
-				if (result.error instanceof CurrencyNotFoundError) {
-					throw new NotFoundException(result.error.message);
-				}
-
 				throw new InternalServerErrorException('Failed to get currency');
 			}
 
