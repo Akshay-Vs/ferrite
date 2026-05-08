@@ -28,9 +28,8 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 			status = exception.getStatus();
 			const responseBody = exception.getResponse() as any;
 
-			// If it's a 500, we mask the message to prevent leakage
-			// For other statuses (400, 401, 403, 404), we can keep the original message
-			if (status !== HttpStatus.INTERNAL_SERVER_ERROR) {
+			// Mask all server-side failures (5xx) to prevent leakage
+			if (status < HttpStatus.INTERNAL_SERVER_ERROR) {
 				message =
 					typeof responseBody === 'string'
 						? responseBody
