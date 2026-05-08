@@ -35,22 +35,31 @@ export class GetPublicStoreUseCase
 		storeId: string
 	): Promise<Result<PublicStoreDto, StoreNotFoundError>> {
 		return this.tracer.withSpan('GetPublicStoreUseCase.execute', async () => {
-			const store = await this.repo.findById(storeId);
+			try {
+				const store = await this.repo.findById(storeId);
 
-			if (!store || !store.isActive || store.deletedAt !== null) {
-				this.logger.warn(`Public store not found: id=${storeId}`);
+				if (!store || !store.isActive || store.deletedAt !== null) {
+					this.logger.warn(`Public store not found: id=${storeId}`);
+					return err(new StoreNotFoundError(storeId));
+				}
+
+				this.logger.debug(`Fetched public store: id=${storeId}`);
+				return ok({
+					id: store.id,
+					name: store.name,
+					description: store.description,
+					bannerUrl: store.bannerUrl,
+					icon: store.icon,
+					createdAt: store.createdAt,
+				});
+			} catch (e) {
+				const error = e instanceof Error ? e : new Error(String(e));
+				this.logger.error(
+					`Failed to fetch public store: ${error.message}`,
+					error.stack
+				);
 				return err(new StoreNotFoundError(storeId));
 			}
-
-			this.logger.debug(`Fetched public store: id=${storeId}`);
-			return ok({
-				id: store.id,
-				name: store.name,
-				description: store.description,
-				bannerUrl: store.bannerUrl,
-				icon: store.icon,
-				createdAt: store.createdAt,
-			});
 		});
 	}
 }
