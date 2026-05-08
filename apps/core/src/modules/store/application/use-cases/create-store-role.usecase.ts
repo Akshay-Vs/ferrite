@@ -1,3 +1,4 @@
+import { isFkViolation } from '@common/errors/handlers/pg-errors';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
@@ -6,6 +7,7 @@ import type { StoreRole } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { StoreNotFoundError } from '@modules/store/domain/errors/store-not-found.error';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
@@ -55,6 +57,11 @@ export class CreateStoreRoleUseCase
 				return ok(role);
 			} catch (e) {
 				const error = e instanceof Error ? e : new Error(String(e));
+
+				if (isFkViolation(e)) {
+					throw new StoreNotFoundError(`Store ${input.storeId} not found`);
+				}
+
 				this.logger.error(
 					`Failed to create store role: ${error.message}`,
 					error.stack
