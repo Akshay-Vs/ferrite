@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 export const CreateCurrencyDocs = () =>
 	applyDecorators(
@@ -19,6 +19,12 @@ export const GetCurrenciesDocs = () =>
 			summary: 'List all currencies (staff+)',
 			description:
 				'Returns all registered currencies. Use ?activeOnly=true to filter to active currencies only.',
+		}),
+		ApiQuery({
+			name: 'activeOnly',
+			required: false,
+			type: Boolean,
+			description: 'When true, returns only active currencies.',
 		}),
 		ApiResponse({ status: 200, description: 'Returns a list of currencies.' }),
 		ApiResponse({ status: 500, description: 'Internal server error.' })
