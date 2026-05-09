@@ -151,7 +151,12 @@ describe('OnboardingController (e2e)', () => {
 			mockJwtUseCase.execute.mockReset();
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
-				.send({ name: 'My Store', slug: 'my-store' })
+				.send({
+					storeName: 'My Store',
+					storeDescription: 'A store',
+					storeCurrency: 'USD',
+					storeIcon: 'store',
+				})
 				.expect(401);
 		});
 
@@ -163,7 +168,12 @@ describe('OnboardingController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'My Store', slug: 'my-store' })
+				.send({
+					storeName: 'My Store',
+					storeDescription: 'A store',
+					storeCurrency: 'USD',
+					storeIcon: 'store',
+				})
 				.expect(409);
 		});
 
@@ -175,7 +185,12 @@ describe('OnboardingController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'My Store', slug: 'my-store' })
+				.send({
+					storeName: 'My Store',
+					storeDescription: 'A store',
+					storeCurrency: 'USD',
+					storeIcon: 'store',
+				})
 				.expect(409);
 		});
 
@@ -187,7 +202,12 @@ describe('OnboardingController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'My Store', slug: 'my-store' })
+				.send({
+					storeName: 'My Store',
+					storeDescription: 'A store',
+					storeCurrency: 'USD',
+					storeIcon: 'store',
+				})
 				.expect(500);
 		});
 
@@ -198,7 +218,12 @@ describe('OnboardingController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'My Store', slug: 'my-store' })
+				.send({
+					storeName: 'My Store',
+					storeDescription: 'A store',
+					storeCurrency: 'USD',
+					storeIcon: 'store',
+				})
 				.expect(200)
 				.expect((res) => {
 					expect(res.body).toEqual(mockResponse);

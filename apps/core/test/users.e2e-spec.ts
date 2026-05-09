@@ -1,5 +1,5 @@
 import { err, ok } from '@common/interfaces/result.interface';
-import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
+import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
 import type { INestApplication } from '@nestjs/common';
 import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
