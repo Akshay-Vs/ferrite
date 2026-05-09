@@ -4,7 +4,7 @@ import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { type CreateCurrencyInput } from '@ferrite/schema/currency/create-currency.zodschema';
+import { type CreateCurrencyInput } from '@ferrite/schema/currencies/create-currency.zodschema';
 import { CurrencyAlreadyExistsError } from '@modules/currency/domain/errors/currency-already-exists.error';
 import { ICreateCurrencyUseCase } from '@modules/currency/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';

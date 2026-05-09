@@ -1,5 +1,4 @@
 import { isUniqueConstrainViolation } from '@common/errors/handlers/is-unique-constrain-violation';
-import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { inboxEvents } from '@core/database/schema';
@@ -7,6 +6,7 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { getTraceContext } from '@core/tracer/tracer.helpers';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 import { ENQUEUE_GRAPHILE_EVENT_UC, type IEnqueue } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { IWebhookRepository } from '@webhooks/domain/ports/webhook-repository.port';

@@ -1,12 +1,12 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import type {
 	Store,
 	StoreMember,
 	StoreRole,
 } from '@core/database/schema/store.schema';
-import type { CreateStoreInput } from '../schemas/create-store.zodschema';
-import type { UpdateStoreInput } from '../schemas/update-store.zodschema';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
+import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 
 export const STORE_REPOSITORY = Symbol('STORE_REPOSITORY');
 

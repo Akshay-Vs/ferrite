@@ -1,4 +1,4 @@
-import { eventPayloadSchema } from '@common/schemas/event-payload.zodschema';
+import { eventPayloadSchema } from '@ferrite/schema/common/event-payload.zodschema';
 import { z } from 'zod';
 
 export const QueueParamsSchema = z

@@ -1,12 +1,12 @@
 import { ROLES_KEY } from '@common/decorators/require-role.decorator';
-import {
-	platformRoleSchema,
-	ROLE_HIERARCHY,
-} from '@common/schemas/platform-roles.zodschema';
 import { AuthenticatedRequest } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import {
+	platformRoleSchema,
+	ROLE_HIERARCHY,
+} from '@ferrite/schema/common/platform-roles.zodschema';
 import {
 	CanActivate,
 	ExecutionContext,

@@ -1,5 +1,5 @@
-import { authProvidersSchema } from '@auth/index';
 import { z } from 'zod/v4';
+import { authProvidersSchema } from '../auth/auth-providers.zodschema';
 
 export const userDeletedEventSchema = z.object({
 	eventType: z.literal('user.deleted'),

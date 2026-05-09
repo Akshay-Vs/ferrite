@@ -1,10 +1,10 @@
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
-import { PermissionKey } from '@common/schemas/permissions.zodschema';
 import type {
 	StoreMember,
 	StoreRole,
 } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { CreateStoreRoleUseCase } from '@modules/store/application/use-cases/create-store-role.usecase';
 import { GetRoleMembersUseCase } from '@modules/store/application/use-cases/get-role-members.usecase';
 import { GetRolePermissionsUseCase } from '@modules/store/application/use-cases/get-role-permissions.usecase';

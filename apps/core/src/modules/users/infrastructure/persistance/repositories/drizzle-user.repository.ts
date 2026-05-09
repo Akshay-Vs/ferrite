@@ -1,6 +1,5 @@
 import { AuthProvider } from '@auth/index';
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import { type PlatformRole } from '@common/schemas/platform-roles.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { DrizzleTransaction, TDatabase } from '@core/database/db.type';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
@@ -8,6 +7,14 @@ import { userAuthProviders, users } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { type PlatformRole } from '@ferrite/schema/common/platform-roles.zodschema';
+import {
+	UserDeletedEvent,
+	UserUpdatedEvent,
+} from '@ferrite/schema/users/index';
+import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
+import { UserCreatedEvent } from '@ferrite/schema/users/user-created.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import {
 	ENQUEUE_GRAPHILE_EVENT_UC,
 	type IEnqueue,
@@ -15,10 +22,6 @@ import {
 } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '@users/domain/ports/user-repository.port';
-import { UserDeletedEvent, UserUpdatedEvent } from '@users/domain/schemas';
-import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
-import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
-import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 

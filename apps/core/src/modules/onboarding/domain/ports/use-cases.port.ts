@@ -1,9 +1,9 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type {
 	OnboardingAboutUser,
 	OnboardingStoreCreate,
 } from '@ferrite/schema';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import type { InvalidStepTransitionError } from '../errors/invalid-step-transition.error';
 import type { OnboardingAlreadyCompletedError } from '../errors/onboarding-already-completed.error';
 import type { OnboardingSession } from '../schemas/onboarding-state.zodschema';

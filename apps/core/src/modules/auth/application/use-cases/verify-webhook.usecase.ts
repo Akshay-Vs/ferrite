@@ -1,8 +1,8 @@
-import { WebhookPayload } from '@auth/domain/schemas';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
+import { WebhookPayload } from '@ferrite/schema/auth/index';
 import { type IWebhookAuth } from '@modules/auth/domain/ports/auth-provider.port';
 import { WEBHOOK_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
 import { Inject, Injectable } from '@nestjs/common';

@@ -1,5 +1,5 @@
-import { platformRoleEnum } from '@core/database/schema';
 import { z } from 'zod/v4';
+import { platformRoleSchema } from '../common/platform-roles.zodschema';
 
 /**
  * Zod schema for the `PATCH /users/:id/role` admin request body.
@@ -7,7 +7,7 @@ import { z } from 'zod/v4';
  * Ensures only valid platform roles are assigned.
  */
 export const updateRoleSchema = z.object({
-	role: z.enum(platformRoleEnum.enumValues),
+	role: platformRoleSchema,
 });
 
 export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;

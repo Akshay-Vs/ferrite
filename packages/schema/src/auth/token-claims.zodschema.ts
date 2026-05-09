@@ -1,5 +1,5 @@
-import { jwtClaims } from '@common/schemas/jwt-claims.zodschema';
 import { z } from 'zod/v4';
+import { jwtClaims } from '../common/jwt-claims.zodschema';
 
 export const rawTokenClaimsSchema = z
 	.object({

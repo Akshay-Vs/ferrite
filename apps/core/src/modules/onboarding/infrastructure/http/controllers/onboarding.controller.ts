@@ -1,6 +1,6 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { InvalidStepTransitionError } from '@modules/onboarding/domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '@modules/onboarding/domain/errors/onboarding-already-completed.error';
 import {

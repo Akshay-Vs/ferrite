@@ -1,4 +1,4 @@
-import { z } from 'zod/v4';
+import type { z } from 'zod/v4';
 import { createStoreSchema } from './create-store.zodschema';
 
 export const updateStoreSchema = createStoreSchema.partial();

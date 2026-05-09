@@ -4,6 +4,9 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { UserUpdatedEvent } from '@ferrite/schema/users/index';
+import type { UpdateRoleInput } from '@ferrite/schema/users/update-role.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import type { QueueParams } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
@@ -13,9 +16,6 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import { UserUpdatedEvent } from '@users/domain/schemas';
-import type { UpdateRoleInput } from '@users/domain/schemas/update-role.zodschema';
-import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()

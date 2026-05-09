@@ -2,7 +2,7 @@ import {
 	ITokenAuth,
 	IWebhookAuth,
 } from '@auth/domain/ports/auth-provider.port';
-import { AuthProvider } from '@auth/domain/schemas';
+import { AuthProvider } from '@ferrite/schema/auth/index';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClerkAdapter } from './providers/clerk.adapter';

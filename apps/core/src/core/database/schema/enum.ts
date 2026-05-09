@@ -35,7 +35,7 @@ export const paymentProviderEnum = pgEnum('payment_provider', [
 	'paypal',
 ]);
 
-import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
+import { STORE_PERMISSIONS } from '@ferrite/schema/common/permissions.zodschema';
 
 export const permissionKeyEnum = pgEnum('permission_key', STORE_PERMISSIONS);
 

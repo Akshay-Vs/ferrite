@@ -1,10 +1,10 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
 import { SkipPermissions } from '@common/decorators/skip-permissions.decorator';
 import type { Store } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { StoreMembership } from '@modules/store/domain/ports/store.repository.port';
 import {
 	Body,

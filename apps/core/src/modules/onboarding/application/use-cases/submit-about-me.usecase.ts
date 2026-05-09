@@ -1,4 +1,3 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import {
 	type IUnitOfWork,
@@ -9,6 +8,7 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { OnboardingAboutUser } from '@ferrite/schema';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { InvalidStepTransitionError } from '../../domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '../../domain/errors/onboarding-already-completed.error';

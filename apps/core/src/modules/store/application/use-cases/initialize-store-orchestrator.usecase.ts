@@ -5,17 +5,17 @@ import {
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
-import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { STORE_PERMISSIONS } from '@ferrite/schema/common/permissions.zodschema';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStorePermissionChecker,
 	STORE_PERMISSION_CHECKER,
 } from '../../domain/ports/store-permission-checker.port';
-import type { CreateStoreInput } from '../../domain/schemas/create-store.zodschema';
 import { AddStoreMemberUseCase } from './add-store-member.usecase';
 import { CreateStoreUseCase } from './create-store.usecase';
 import { CreateStoreRoleUseCase } from './create-store-role.usecase';

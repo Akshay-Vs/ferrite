@@ -1,9 +1,9 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IOnboardingRepository,

@@ -3,7 +3,6 @@ import {
 	type IUnitOfWork,
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { generateSlug } from '@common/utils/generate-slug.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
@@ -23,14 +22,15 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
+import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import type {
 	IStoreRepository,
 	StoreMembership,
 } from '../../../domain/ports/store.repository.port';
-import type { CreateStoreInput } from '../../../domain/schemas/create-store.zodschema';
-import type { UpdateStoreInput } from '../../../domain/schemas/update-store.zodschema';
 
 @Injectable()
 export class DrizzleStoreRepository implements IStoreRepository {

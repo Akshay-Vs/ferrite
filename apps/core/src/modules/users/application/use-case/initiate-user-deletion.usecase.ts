@@ -4,6 +4,7 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { type UserDeletedEvent } from '@ferrite/schema/users/user-deleted.zodschema';
 import type { QueueParams } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
@@ -12,8 +13,6 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-
-import { type UserDeletedEvent } from '@users/domain/schemas/user-deleted.zodschema';
 import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 @Injectable()

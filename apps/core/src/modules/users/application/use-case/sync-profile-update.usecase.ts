@@ -2,12 +2,12 @@ import { type IUpdateUser } from '@auth/domain/ports/auth-provider.port';
 import { AUTH_PROVIDER } from '@auth/domain/ports/auth-provider.tokens';
 import { UserUpdatePayload } from '@auth/index';
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { EventPayload } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
+import { userUpdatedEventSchema } from '@ferrite/schema/users/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { ISyncUserProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
-import { userUpdatedEventSchema } from '@users/domain/schemas';
 
 @Injectable()
 export class SyncProfileUpdateUseCase implements ISyncUserProfileUpdateUseCase {

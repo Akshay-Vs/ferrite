@@ -1,6 +1,6 @@
 import { AuthProvider } from '@auth/index';
-import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
-import { UserSyncEvent } from '../schemas/user-sync-event.zodschema';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
+import { UserSyncEvent } from '@ferrite/schema/users/user-sync-event.zodschema';
 
 export const WEBHOOK_MAPPER = Symbol('WEBHOOK_MAPPER');
 

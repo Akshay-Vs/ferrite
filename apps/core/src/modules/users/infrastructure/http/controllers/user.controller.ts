@@ -1,8 +1,8 @@
 import { type AuthUser } from '@auth/index';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { RequireRole } from '@common/decorators/require-role.decorator';
-import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
 import {
 	Body,
 	Controller,

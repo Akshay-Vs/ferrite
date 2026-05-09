@@ -1,4 +1,4 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 /**

@@ -1,7 +1,7 @@
 import {
 	type WebhookEnvelope,
 	webhookEnvelopeSchema,
-} from '@common/schemas/webhook-envelope.zodschema';
+} from '../common/webhook-envelope.zodschema';
 
 // Alias for backwards compatibility
 /**

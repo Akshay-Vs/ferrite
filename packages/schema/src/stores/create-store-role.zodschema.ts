@@ -1,5 +1,5 @@
-import { STORE_PERMISSIONS } from '@common/schemas/permissions.zodschema';
 import { z } from 'zod/v4';
+import { STORE_PERMISSIONS } from '../common/permissions.zodschema.ts';
 
 export const createStoreRoleSchema = z.object({
 	name: z.string().min(2).max(100),

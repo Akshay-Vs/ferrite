@@ -4,7 +4,7 @@
  * Pass `overrides` to customise specific fields.
  */
 
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { v4 as uuidv4 } from 'uuid';
 import type { NewCurrency, NewExchangeRate } from '../schema/currency.schema';
 import type { NewUserPaymentMethod } from '../schema/payment.schema';

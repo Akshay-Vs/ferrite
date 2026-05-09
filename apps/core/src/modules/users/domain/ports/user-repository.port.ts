@@ -1,11 +1,14 @@
 import { AuthProvider } from '@auth/index';
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import { PlatformRole } from '@common/schemas/platform-roles.zodschema';
+import { PlatformRole } from '@ferrite/schema/common/platform-roles.zodschema';
+import {
+	UserDeletedEvent,
+	UserUpdatedEvent,
+} from '@ferrite/schema/users/index';
+import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
+import { UserCreatedEvent } from '@ferrite/schema/users/user-created.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import type { QueueParams } from '@modules/queue';
-import { UserDeletedEvent, UserUpdatedEvent } from '../schemas';
-import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
-import { UserCreatedEvent } from '../schemas/user-created.zodschema';
-import type { UserProfileFull } from '../schemas/user-profile.zodschema';
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
 

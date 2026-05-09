@@ -1,7 +1,7 @@
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IWebhookRepository,

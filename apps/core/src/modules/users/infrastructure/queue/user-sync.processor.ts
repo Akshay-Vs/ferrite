@@ -1,14 +1,14 @@
 import { UnsupportedEventTypeError } from '@common/errors/unsupported-event-type.error';
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import {
-	EventPayload,
-	eventPayloadSchema,
-} from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { BaseProcessor } from '@core/processor';
 import { GraphileProcessor } from '@core/processor/decorators/graphile-processor.decorator';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import {
+	EventPayload,
+	eventPayloadSchema,
+} from '@ferrite/schema/common/event-payload.zodschema';
 import { Inject } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';

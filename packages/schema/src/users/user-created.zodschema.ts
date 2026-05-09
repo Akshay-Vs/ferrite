@@ -1,5 +1,5 @@
-import { authProvidersSchema } from '@auth/domain/schemas/auth-providers.zodschema';
 import { z } from 'zod/v4';
+import { authProvidersSchema } from '../auth/auth-providers.zodschema';
 
 export const userCreatedEventSchema = z.object({
 	eventType: z.literal('user.created'),
