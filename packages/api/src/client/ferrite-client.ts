@@ -21,8 +21,14 @@ export class FerriteClient implements IFerriteClient {
 	private readonly instance: AxiosInstance;
 
 	constructor(private readonly config: FerriteApiConfig) {
+		const version = config.version ?? 'v1';
+		const normalizedBaseURL = config.baseURL.replace(/\/$/, '');
+		const baseURL = version
+			? `${normalizedBaseURL}/${version}`
+			: normalizedBaseURL;
+
 		this.instance = axios.create({
-			baseURL: config.baseURL,
+			baseURL,
 			timeout: 30_000,
 			headers: { 'Content-Type': 'application/json' },
 			...config.axiosDefaults,
