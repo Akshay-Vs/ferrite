@@ -5,6 +5,11 @@ export interface FerriteApiConfig {
 	baseURL: string;
 
 	/**
+	 * The API version to prefix to all requests. Defaults to 'v1'.
+	 */
+	version?: string;
+
+	/**
 	 * Asynchronous accessor for the current Bearer token.
 	 * Called before every request. By using a Promise, you can directly pass
 	 * Clerk's `getToken()` function, which automatically handles token refreshing
