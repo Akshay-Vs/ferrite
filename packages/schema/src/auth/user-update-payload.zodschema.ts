@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { OnboardingState } from '../onboarding/onboarding-session.zodschema';
 
 /**
  * The payload schema that dispatches to third-party auth providers.
@@ -10,6 +11,7 @@ export const UserUpdatePayloadSchema = z
 		publicMetadata: z
 			.object({
 				role: z.string(),
+				onboardingStep: OnboardingState,
 			})
 			.partial(),
 	})

@@ -7,8 +7,8 @@ export const createStoreSchema = z.object({
 		.string()
 		.length(3)
 		.regex(/^[A-Z]{3}$/),
-	bannerUrl: z.url().max(2048).optional(),
-	storeIcon: z.string().max(256).optional(),
+	bannerUrl: z.url().max(2048).nullish(),
+	storeIcon: z.string().max(256).nullish(),
 });
 
 export type CreateStoreInput = z.infer<typeof createStoreSchema>;
