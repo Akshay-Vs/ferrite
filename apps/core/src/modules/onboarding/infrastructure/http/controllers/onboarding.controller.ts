@@ -3,6 +3,7 @@ import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import { InvalidStepTransitionError } from '@modules/onboarding/domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '@modules/onboarding/domain/errors/onboarding-already-completed.error';
+import { OnboardingSessionNotFoundError } from '@modules/onboarding/domain/errors/onboarding-session-not-found.error';
 import {
 	GET_ONBOARDING_SESSION_UC,
 	type IGetOnboardingSessionUseCase,
@@ -19,6 +20,7 @@ import {
 	HttpCode,
 	HttpStatus,
 	Inject,
+	NotFoundException,
 	Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -80,6 +82,9 @@ export class OnboardingController {
 				) {
 					throw new ConflictException(result.error.message);
 				}
+				if (result.error instanceof OnboardingSessionNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
 				throw result.error;
 			}
 
@@ -105,6 +110,9 @@ export class OnboardingController {
 					result.error instanceof OnboardingAlreadyCompletedError
 				) {
 					throw new ConflictException(result.error.message);
+				}
+				if (result.error instanceof OnboardingSessionNotFoundError) {
+					throw new NotFoundException(result.error.message);
 				}
 				throw result.error;
 			}
