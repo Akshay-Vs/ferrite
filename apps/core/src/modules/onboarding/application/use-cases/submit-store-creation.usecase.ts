@@ -9,6 +9,7 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { OnboardingStoreCreate } from '@ferrite/schema';
 import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
+import type { OnboardingSession } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { InvalidStepTransitionError } from '../../domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '../../domain/errors/onboarding-already-completed.error';
@@ -20,7 +21,6 @@ import {
 	type IStoreDelegate,
 	STORE_DELEGATE,
 } from '../../domain/ports/store-delegate.port';
-import type { OnboardingSession } from '../../domain/schemas/onboarding-state.zodschema';
 
 @Injectable()
 export class SubmitStoreCreationUseCase

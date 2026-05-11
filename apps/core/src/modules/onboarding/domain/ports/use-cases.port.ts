@@ -4,9 +4,9 @@ import type {
 	OnboardingStoreCreate,
 } from '@ferrite/schema';
 import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
+import type { OnboardingSession } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 import type { InvalidStepTransitionError } from '../errors/invalid-step-transition.error';
 import type { OnboardingAlreadyCompletedError } from '../errors/onboarding-already-completed.error';
-import type { OnboardingSession } from '../schemas/onboarding-state.zodschema';
 
 // ─────────────────────────────────────────
 // DI TOKENS

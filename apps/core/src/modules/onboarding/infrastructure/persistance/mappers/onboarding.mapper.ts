@@ -2,7 +2,7 @@ import type { UserOnboarding } from '@core/database/schema/onboarding.schema';
 import {
 	type OnboardingSession,
 	onboardingSessionSchema,
-} from '@modules/onboarding/domain/schemas/onboarding-state.zodschema';
+} from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 
 /**
  * Maps Drizzle ORM rows ↔ Domain types for the onboarding module.

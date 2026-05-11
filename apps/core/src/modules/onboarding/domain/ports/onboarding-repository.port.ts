@@ -2,7 +2,7 @@ import type { ITransactionContext } from '@common/interfaces/unit-of-work.interf
 import type {
 	OnboardingSession,
 	OnboardingState,
-} from '../schemas/onboarding-state.zodschema';
+} from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 
 export const ONBOARDING_REPOSITORY = Symbol('ONBOARDING_REPOSITORY');
 
