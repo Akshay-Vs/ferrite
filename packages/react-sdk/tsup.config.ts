@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-	entry: ['src/index.ts'],
+	entry: ['src/**/*.ts', 'src/hooks/!(*.test|*.spec).ts'],
 	format: ['cjs', 'esm'],
 	splitting: true,
 	sourcemap: true,
@@ -9,6 +9,7 @@ export default defineConfig({
 	bundle: true,
 	outDir: 'dist',
 	dts: {
+		resolve: true,
 		compilerOptions: {
 			ignoreDeprecations: '6.0',
 		},

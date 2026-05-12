@@ -13,6 +13,8 @@ export const queryKeys = createQueryKeyStore({
 	},
 	users: {
 		me: null,
+		all: (cursor?: string, limit?: string) => [cursor, limit],
+		detail: (userId: string) => [userId],
 	},
 	onboarding: {
 		session: null,
