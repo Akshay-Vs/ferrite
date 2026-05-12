@@ -38,7 +38,7 @@ export const useOnboardingStoreConfigure = () => {
 	const form = useForm({
 		defaultValues: {
 			storeCurrency: onboardingStore.storeCurrency ?? 'USD',
-			storeIcon: onboardingStore.storeIcon ?? '',
+			storeIcon: onboardingStore.storeIcon ?? 'Store',
 		},
 		validators: {
 			onChange: storeConfigureSchema,
