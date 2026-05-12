@@ -82,6 +82,7 @@ export class SubmitAboutMeUseCase
 						input.data,
 						input.authUser.externalAuthId,
 						input.authUser.provider,
+						'STORE_CREATION',
 						tx
 					);
 					await this.onboardingRepo.updateState(userId, 'STORE_CREATION', tx);
