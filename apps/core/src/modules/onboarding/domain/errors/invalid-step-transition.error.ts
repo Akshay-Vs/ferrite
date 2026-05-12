@@ -1,4 +1,4 @@
-import type { OnboardingState } from '../schemas/onboarding-state.zodschema';
+import type { OnboardingState } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 
 export class InvalidStepTransitionError extends Error {
 	readonly _tag = 'InvalidStepTransitionError';

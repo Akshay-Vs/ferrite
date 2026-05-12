@@ -1,5 +1,5 @@
-import { AuthUser } from '@auth/domain/schemas';
-import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
+import { AuthUser } from '@ferrite/schema/auth/index';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 import { Request as ExpressRequest } from 'express';
 
 export interface Request extends ExpressRequest {

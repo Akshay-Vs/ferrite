@@ -1,0 +1,46 @@
+{
+	"name": "@ferrite/react",
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./hooks": {
+			"types": "./dist/hooks/index.d.ts",
+			"import": "./dist/hooks/index.js",
+			"require": "./dist/hooks/index.cjs"
+		},
+		"./hooks/*": {
+			"types": "./dist/hooks/*.d.ts",
+			"import": "./dist/hooks/*.js",
+			"require": "./dist/hooks/*.cjs"
+		}
+	},
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@ferrite/api": "workspace:*",
+		"@ferrite/schema": "workspace:*",
+		"@lukemorales/query-key-factory": "^1.3.4",
+		"@tanstack/query-core": "^5.100.9",
+		"@tanstack/react-query": "^5.100.9",
+		"axios": "^1.9.0",
+		"react": "^19.2.5",
+		"zod": "^4.4.1"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.3.13",
+		"@types/react": "^19.2.14",
+		"tsup": "^8.5.1",
+		"typescript": "^6"
+	}
+}

@@ -3,18 +3,18 @@ import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-	type StoreMembership,
 } from '../../domain/ports/store.repository.port';
 
 export const GET_OWN_STORES_UC = Symbol('GetOwnStoresUseCase');
 
 @Injectable()
 export class GetOwnStoresUseCase
-	implements IUseCase<string, StoreMembership[], Error>
+	implements IUseCase<string, GetAllStores[], Error>
 {
 	constructor(
 		@Inject(STORE_REPOSITORY)
@@ -25,7 +25,7 @@ export class GetOwnStoresUseCase
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(userId: string): Promise<Result<StoreMembership[], Error>> {
+	async execute(userId: string): Promise<Result<GetAllStores[], Error>> {
 		return this.tracer.withSpan('GetOwnStoresUseCase.execute', async () => {
 			try {
 				const stores = await this.repo.findByUserId(userId);

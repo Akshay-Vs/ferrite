@@ -1,11 +1,14 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
 import { SkipPermissions } from '@common/decorators/skip-permissions.decorator';
 import type { Store } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
-import { StoreMembership } from '@modules/store/domain/ports/store.repository.port';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
+import type {
+	GetAllStores,
+	GetStore,
+} from '@ferrite/schema/stores/get-store.zodschema';
 import {
 	Body,
 	Controller,
@@ -26,10 +29,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AddStoreMembersUseCase } from '../../../application/use-cases/add-store-members.usecase';
 import { DeleteStoreUseCase } from '../../../application/use-cases/delete-store.usecase';
 import { GetOwnStoresUseCase } from '../../../application/use-cases/get-own-stores.usecase';
-import {
-	GetPublicStoreUseCase,
-	type PublicStoreDto,
-} from '../../../application/use-cases/get-public-store.usecase';
+import { GetPublicStoreUseCase } from '../../../application/use-cases/get-public-store.usecase';
 import { InitializeStoreOrchestratorUseCase } from '../../../application/use-cases/initialize-store-orchestrator.usecase';
 import { UpdateStoreUseCase } from '../../../application/use-cases/update-store.usecase';
 import { AddStoreMembersDto } from '../dto/add-store-members.dto';
@@ -82,9 +82,7 @@ export class StoreController {
 	@Get()
 	@GetOwnStoresDocs()
 	@SkipPermissions()
-	async getOwnStores(
-		@AuthUserParam() user: AuthUser
-	): Promise<StoreMembership[]> {
+	async getOwnStores(@AuthUserParam() user: AuthUser): Promise<GetAllStores[]> {
 		return this.tracer.withSpan('http.get-own-stores', async () => {
 			const result = await this.getOwnStoresUc.execute(user.id);
 			if (result.isErr()) {
@@ -99,7 +97,7 @@ export class StoreController {
 	@PublicRoute()
 	async getStoreById(
 		@Param('storeId', ParseUUIDPipe) storeId: string
-	): Promise<PublicStoreDto> {
+	): Promise<GetStore> {
 		return this.tracer.withSpan('http.get-store-by-id', async () => {
 			const result = await this.getPublicStoreUc.execute(storeId);
 			if (result.isErr()) {

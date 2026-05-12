@@ -2,9 +2,9 @@ import { WebhookPayload } from '@auth/index';
 import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
+import { UserSyncEvent } from '@ferrite/schema/users/user-sync-event.zodschema';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { IWebhookMapper } from '@users/domain/ports/webhook-mapper.port';
-import { UserSyncEvent } from '@users/domain/schemas/user-sync-event.zodschema';
 
 @Injectable()
 export class ClerkWebhookMapper implements IWebhookMapper {

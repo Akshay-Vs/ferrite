@@ -5,12 +5,12 @@ import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
 } from '../../domain/ports/store.repository.port';
-import type { CreateStoreInput } from '../../domain/schemas/create-store.zodschema';
 
 export interface CreateStoreInputWithContext {
 	tx?: ITransactionContext;

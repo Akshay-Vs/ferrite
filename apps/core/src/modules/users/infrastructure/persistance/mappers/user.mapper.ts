@@ -1,10 +1,10 @@
 import type { NewUser, User } from '@core/database/schema/user.schema';
-import { UserCreatedEvent } from '@users/domain/schemas/user-created.zodschema';
+import { UserCreatedEvent } from '@ferrite/schema/users/user-created.zodschema';
 import type {
 	UserProfileBase,
 	UserProfileFull,
-} from '@users/domain/schemas/user-profile.zodschema';
-import { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
+} from '@ferrite/schema/users/user-profile.zodschema';
+import { UserUpdatedEvent } from '@ferrite/schema/users/user-updated.zodschema';
 
 /**
  * Maps provider-agnostic user events to Drizzle insert/update objects.

@@ -1,21 +1,15 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import type {
 	Store,
 	StoreMember,
 	StoreRole,
 } from '@core/database/schema/store.schema';
-import type { CreateStoreInput } from '../schemas/create-store.zodschema';
-import type { UpdateStoreInput } from '../schemas/update-store.zodschema';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
+import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
+import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 
 export const STORE_REPOSITORY = Symbol('STORE_REPOSITORY');
-
-/**
- * A store with the requesting user's membership context.
- */
-export interface StoreMembership extends Store {
-	isOwner: boolean;
-}
 
 export interface IStoreRepository {
 	/**
@@ -86,7 +80,7 @@ export interface IStoreRepository {
 	/**
 	 * Returns all stores where the user is a member, with ownership status.
 	 */
-	findByUserId(userId: string): Promise<StoreMembership[]>;
+	findByUserId(userId: string): Promise<GetAllStores[]>;
 
 	/**
 	 * Find all roles within a store.

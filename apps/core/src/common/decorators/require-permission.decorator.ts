@@ -1,5 +1,5 @@
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { SetMetadata } from '@nestjs/common';
-import type { PermissionKey } from '../schemas/permissions.zodschema';
 
 export const PERMISSIONS_KEY = Symbol('PERMISSIONS_KEY');
 

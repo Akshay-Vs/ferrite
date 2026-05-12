@@ -1,12 +1,12 @@
 import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
 import { PERMISSIONS_KEY } from '@common/decorators/require-permission.decorator';
 import { SKIP_PERMISSIONS } from '@common/decorators/skip-permissions.decorator';
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
-import { uuidSchema } from '@common/schemas/uuid.zodschema';
 import { AuthenticatedRequest } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
+import { uuidSchema } from '@ferrite/schema/common/uuid.zodschema';
 import { CheckStorePermissionUseCase } from '@modules/store/application/use-cases/check-store-permission.usecase';
 import { PermissionNotProvidedError } from '@modules/store/domain/errors/permission-not-provided-error';
 import {

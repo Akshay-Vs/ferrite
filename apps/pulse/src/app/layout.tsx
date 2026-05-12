@@ -3,13 +3,15 @@ import { appMetadata } from '@app/(config)/metadata';
 import { ClerkProvider } from '@clerk/nextjs';
 import { cn } from '@core/utils/utils';
 import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
-import NextTopLoader from 'nextjs-toploader';
+import { Toaster } from 'sonner';
+import FerriteCoreProvider from '@/core/providers/ferrite-core.provider';
+import QueryClientProvider from '@/core/providers/query-client.provider';
+import ThemeProvider from '@/core/providers/theme.provider';
+import TopLoaderProvider from '@/core/providers/top-loader.provider';
+import { TooltipProvider } from '@/presentation/primitives/tooltip';
 
 import '@presentation/styles/tailwind.css';
 import '@presentation/styles/globals.scss';
-import { Toaster } from 'sonner';
-import { TooltipProvider } from '@/presentation/primitives/tooltip';
 
 export const metadata: Metadata = appMetadata;
 
@@ -22,24 +24,18 @@ export default function RootLayout({
 		<html lang="en" className={cn('font-sans', inter.variable)}>
 			<body className="antialiased bg-background text-content">
 				<ClerkProvider>
-					<ThemeProvider
-						attribute="class"
-						defaultTheme="dark"
-						enableSystem={false}
-						disableTransitionOnChange
-					>
-						<TooltipProvider>
-							<div className="min-h-dvh max-w-dvw flex flex-col">
-								<NextTopLoader
-									color="#A68BF8FA"
-									height={3}
-									showSpinner={false}
-								/>
-								<Toaster />
-								{children}
-							</div>
-						</TooltipProvider>
-					</ThemeProvider>
+					<QueryClientProvider>
+						<FerriteCoreProvider>
+							<ThemeProvider>
+								<TooltipProvider>
+									<TopLoaderProvider>
+										<Toaster />
+										{children}
+									</TopLoaderProvider>
+								</TooltipProvider>
+							</ThemeProvider>
+						</FerriteCoreProvider>
+					</QueryClientProvider>
 				</ClerkProvider>
 			</body>
 		</html>

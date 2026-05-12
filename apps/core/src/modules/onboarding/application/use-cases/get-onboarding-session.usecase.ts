@@ -1,15 +1,15 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
+import type { OnboardingSession } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IOnboardingRepository,
 	ONBOARDING_REPOSITORY,
 } from '../../domain/ports/onboarding-repository.port';
-import type { OnboardingSession } from '../../domain/schemas/onboarding-state.zodschema';
 
 @Injectable()
 export class GetOnboardingSessionUseCase

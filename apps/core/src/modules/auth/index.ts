@@ -1,5 +1,6 @@
 // auth/index.ts
 
+export * from '@ferrite/schema/auth/index';
 export type {
 	ITokenAuth,
 	IWebhookAuth,
@@ -8,27 +9,6 @@ export {
 	TOKEN_AUTH,
 	WEBHOOK_AUTH,
 } from './domain/ports/auth-provider.tokens';
-export {
-	type AuthProvider,
-	authProvidersEnum,
-	authProvidersSchema,
-} from './domain/schemas/auth-providers.zodschema';
-export {
-	type AuthUser,
-	authUserSchema,
-} from './domain/schemas/auth-user.zodschema';
-export {
-	type RawTokenClaims,
-	rawTokenClaimsSchema,
-} from './domain/schemas/token-claims.zodschema';
-export {
-	type UserUpdatePayload,
-	UserUpdatePayloadSchema,
-} from './domain/schemas/user-update-payload.zodschema';
-export {
-	type WebhookPayload,
-	webhookPayloadSchema,
-} from './domain/schemas/webhook-claims.zodschema';
 
 // Guards
 export { AuthGuard } from './infrastructure/http/guards/auth.guard';

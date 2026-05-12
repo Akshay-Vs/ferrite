@@ -3,7 +3,6 @@ import {
 	type IUnitOfWork,
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { generateSlug } from '@common/utils/generate-slug.util';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
@@ -23,14 +22,13 @@ import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
+import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
+import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, sql } from 'drizzle-orm';
-import type {
-	IStoreRepository,
-	StoreMembership,
-} from '../../../domain/ports/store.repository.port';
-import type { CreateStoreInput } from '../../../domain/schemas/create-store.zodschema';
-import type { UpdateStoreInput } from '../../../domain/schemas/update-store.zodschema';
+import type { IStoreRepository } from '../../../domain/ports/store.repository.port';
 
 @Injectable()
 export class DrizzleStoreRepository implements IStoreRepository {
@@ -233,7 +231,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
-	async findByUserId(userId: string): Promise<StoreMembership[]> {
+	async findByUserId(userId: string): Promise<GetAllStores[]> {
 		return traceDbOp(
 			this.tracer,
 			'db.stores.findByUserId',
@@ -252,7 +250,13 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.orderBy(desc(stores.createdAt));
 
 				return rows.map((r) => ({
-					...r.store,
+					id: r.store.id,
+					name: r.store.name,
+					slug: r.store.slug,
+					currencyCode: r.store.currencyCode,
+					bannerUrl: r.store.bannerUrl ?? undefined,
+					storeIcon: r.store.icon ?? undefined,
+					isActive: r.store.isActive,
 					isOwner: r.isOwner,
 				}));
 			}

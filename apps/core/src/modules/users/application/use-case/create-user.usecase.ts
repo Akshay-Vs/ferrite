@@ -1,9 +1,13 @@
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { EventPayload } from '@common/schemas/event-payload.zodschema';
-import { webhookEnvelopeSchema } from '@common/schemas/webhook-envelope.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
+import { webhookEnvelopeSchema } from '@ferrite/schema/common/webhook-envelope.zodschema';
+import {
+	type UserCreatedEvent,
+	userCreatedEventSchema,
+} from '@ferrite/schema/users/user-created.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserConflictError } from '@users/domain/errors/user-conflict.error';
 import { UserExistsError } from '@users/domain/errors/user-exists.error';
@@ -16,10 +20,6 @@ import {
 	type IWebhookMapperRegistry,
 	WEBHOOK_MAPPER_REGISTRY,
 } from '@users/domain/ports/webhook-mapper.registry.port';
-import {
-	type UserCreatedEvent,
-	userCreatedEventSchema,
-} from '@users/domain/schemas/user-created.zodschema';
 
 @Injectable()
 export class CreateUserUseCase implements ICreateUserUseCase {

@@ -1,14 +1,15 @@
 import type { AuthUser } from '@auth/index';
 import { InfrastructureError } from '@common/errors/infrastructure.error';
 import { IUseCase } from '@common/interfaces/use-case.interface';
-import { EventPayload } from '@common/schemas/event-payload.zodschema';
+import { ListAllUsers } from '@ferrite/schema';
+import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
+import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
+import type { UpdateRoleInput } from '@ferrite/schema/users/update-role.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import { MissingAuthProviderError } from '../errors/missing-auth-provider.error';
 import { UserConflictError } from '../errors/user-conflict.error';
 import { UserExistsError } from '../errors/user-exists.error';
 import { UserNotFoundError } from '../errors/user-not-found.error';
-import type { UpdateProfileInput } from '../schemas/update-profile.zodschema';
-import type { UpdateRoleInput } from '../schemas/update-role.zodschema';
-import type { UserProfileFull } from '../schemas/user-profile.zodschema';
 
 export const CREATE_USER_UC = Symbol('CREATE_USER_UC');
 export const UPDATE_USER_UC = Symbol('UPDATE_USER_UC');
@@ -68,7 +69,7 @@ export type IGetAllUsersUseCase = IUseCase<
 			filters?: Partial<UserProfileFull>;
 	  }
 	| undefined,
-	{ items: UserProfileFull[]; nextCursor?: string },
+	ListAllUsers,
 	InfrastructureError
 >;
 

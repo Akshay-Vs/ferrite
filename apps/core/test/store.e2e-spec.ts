@@ -58,7 +58,7 @@ describe('StoreController (e2e)', () => {
 			mockJwtUseCase.execute.mockReset();
 			return request(app.getHttpServer())
 				.post('/stores')
-				.send({ name: 'Test Store', slug: 'test-store' })
+				.send({ name: 'Test Store', currencyCode: 'USD' })
 				.expect(401);
 		});
 
@@ -70,7 +70,7 @@ describe('StoreController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/stores')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'Test Store', slug: 'test-store' })
+				.send({ name: 'Test Store', currencyCode: 'USD' })
 				.expect(422);
 		});
 
@@ -82,7 +82,7 @@ describe('StoreController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/stores')
 				.set('Authorization', BEARER_TOKEN)
-				.send({ name: 'Test Store', slug: 'test-store' })
+				.send({ name: 'Test Store', currencyCode: 'USD' })
 				.expect(201)
 				.expect((res) => {
 					expect(res.body).toEqual({
@@ -124,7 +124,7 @@ describe('StoreController (e2e)', () => {
 				.set('Authorization', BEARER_TOKEN)
 				.expect(422)
 				.expect((res) => {
-					expect(res.body.message).toBe('DB Error');
+					expect(res.body.message).toBe('Failed to get stores');
 				});
 		});
 	});

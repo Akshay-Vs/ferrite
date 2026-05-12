@@ -1,6 +1,6 @@
+import { createStoreSchema } from '@ferrite/schema/stores/create-store.zodschema';
+import { updateStoreSchema } from '@ferrite/schema/stores/update-store.zodschema';
 import { createZodDto } from 'nestjs-zod';
-import { createStoreSchema } from '../../../domain/schemas/create-store.zodschema';
-import { updateStoreSchema } from '../../../domain/schemas/update-store.zodschema';
 
 export class CreateStoreDto extends createZodDto(createStoreSchema) {}
 

@@ -1,25 +1,25 @@
 import {
-	AuthUser,
-	authProvidersEnum,
-	RawTokenClaims,
-} from '@auth/domain/schemas';
-import { UserUpdatePayload } from '@auth/domain/schemas/user-update-payload.zodschema';
-import {
 	ClerkClient,
 	verifyToken as clerkVerifyToken,
 	createClerkClient,
 	WebhookEvent,
 } from '@clerk/backend';
 import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
-import {
-	WebhookEnvelope,
-	webhookEnvelopeSchema,
-} from '@common/schemas/webhook-envelope.zodschema';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import {
+	AuthUser,
+	authProvidersEnum,
+	RawTokenClaims,
+} from '@ferrite/schema/auth/index';
+import { UserUpdatePayload } from '@ferrite/schema/auth/user-update-payload.zodschema';
+import {
+	WebhookEnvelope,
+	webhookEnvelopeSchema,
+} from '@ferrite/schema/common/webhook-envelope.zodschema';
 import {
 	IDeleteUser,
 	ITokenAuth,
@@ -228,7 +228,7 @@ export class ClerkAdapter
 				const clerkPayload: {
 					firstName?: string;
 					lastName?: string;
-					publicMetadata?: { role: string };
+					publicMetadata?: { role?: string; onBoardingState?: string };
 				} = {};
 
 				if (payload.firstName !== undefined) {
@@ -239,9 +239,17 @@ export class ClerkAdapter
 					clerkPayload.lastName = payload.lastName;
 				}
 
-				if (payload.publicMetadata?.role !== undefined) {
+				if (
+					payload.publicMetadata?.role !== undefined ||
+					payload.publicMetadata?.onBoardingState !== undefined
+				) {
 					clerkPayload.publicMetadata = {
-						role: payload.publicMetadata.role,
+						...(payload.publicMetadata.role !== undefined && {
+							role: payload.publicMetadata.role,
+						}),
+						...(payload.publicMetadata.onBoardingState !== undefined && {
+							onBoardingState: payload.publicMetadata.onBoardingState,
+						}),
 					};
 				}
 

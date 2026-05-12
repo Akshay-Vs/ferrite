@@ -23,6 +23,7 @@
 			"@public/*": ["./public/*"],
 			"@app/*": ["./src/app/*"],
 			"@core/*": ["./src/core/*"],
+			"@hooks/*": ["./src/core/hooks/*"],
 			"@infrastructure/*": ["./src/infrastructure/*"],
 			"@presentation/*": ["./src/presentation/*"],
 			"@application/*": ["./src/application/*"]

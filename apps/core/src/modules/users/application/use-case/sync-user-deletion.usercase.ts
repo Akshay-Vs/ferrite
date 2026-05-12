@@ -1,13 +1,13 @@
 import { type IDeleteUser } from '@auth/domain/ports/auth-provider.port';
 import { AUTH_PROVIDER } from '@auth/domain/ports/auth-provider.tokens';
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { EventPayload } from '@common/schemas/event-payload.zodschema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
+import { userDeletedEventSchema } from '@ferrite/schema/users/user-deleted.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { ISyncUserDeletionUseCase } from '@users/domain/ports/use-cases.port';
-import { userDeletedEventSchema } from '@users/domain/schemas/user-deleted.zodschema';
 
 @Injectable()
 export class SyncUserDeletionUseCase implements ISyncUserDeletionUseCase {

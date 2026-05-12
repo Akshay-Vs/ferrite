@@ -2,22 +2,25 @@ import { storeCreateSchema } from '@ferrite/schema';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'nextjs-toploader/app';
 import { ONBOARDING_CONFIGURE_STORE } from '@/core/constants/routes.constants';
-import { useStoreCreationStore } from '../stores/onboarding.store';
+import {
+	updateOnboardingStore,
+	useOnboardingStore,
+} from '../stores/onboarding.store';
 
 export const useOnboardingCreateStore = () => {
 	const router = useRouter();
-	const { data, updateData } = useStoreCreationStore();
+	const { onboardingStore } = useOnboardingStore();
 
 	const form = useForm({
 		defaultValues: {
-			storeName: data.storeName ?? '',
-			storeDescription: data.storeDescription ?? '',
+			storeName: onboardingStore.storeName ?? '',
+			storeDescription: onboardingStore.storeDescription ?? '',
 		},
 		validators: {
 			onSubmit: storeCreateSchema,
 		},
 		onSubmit: async ({ value }) => {
-			updateData(value);
+			updateOnboardingStore(value);
 			router.push(ONBOARDING_CONFIGURE_STORE);
 		},
 	});

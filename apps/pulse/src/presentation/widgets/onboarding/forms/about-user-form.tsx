@@ -107,7 +107,7 @@ const OnboardingAboutUserForm = () => {
 										<span className="text-muted-foreground">(optional)</span>
 									</FieldLabel>
 									<Select
-										value={field.state.value}
+										value={field.state.value ?? ''}
 										onValueChange={(val) => field.handleChange(val as any)}
 									>
 										<SelectTrigger

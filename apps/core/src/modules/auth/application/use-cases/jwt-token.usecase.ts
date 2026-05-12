@@ -1,7 +1,7 @@
-import { AuthUser } from '@auth/domain/schemas';
 import { err, ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
+import { AuthUser } from '@ferrite/schema/auth/index';
 import { type ITokenAuth } from '@modules/auth/domain/ports/auth-provider.port';
 import { TOKEN_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
 import { Inject, Injectable } from '@nestjs/common';

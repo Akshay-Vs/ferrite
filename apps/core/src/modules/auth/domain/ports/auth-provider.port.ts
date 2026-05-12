@@ -1,6 +1,10 @@
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
-import { AuthUser, RawTokenClaims, WebhookPayload } from '../schemas';
-import { UserUpdatePayload } from '../schemas/user-update-payload.zodschema';
+import {
+	AuthUser,
+	RawTokenClaims,
+	WebhookPayload,
+} from '@ferrite/schema/auth/index';
+import { UserUpdatePayload } from '@ferrite/schema/auth/user-update-payload.zodschema';
 
 export interface ITokenVerifier {
 	/**

@@ -1,8 +1,8 @@
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequireRole } from '@common/decorators/require-role.decorator';
-import { PlatformRoles } from '@common/schemas/platform-roles.zodschema';
 import type { Currency } from '@core/database/schema/currency.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
+import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
 
 import { CreateCurrencyUseCase } from '@modules/currency/application/use-cases/create-currency.usecase';
 import { DeleteCurrencyUseCase } from '@modules/currency/application/use-cases/delete-currency.usecase';

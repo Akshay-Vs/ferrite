@@ -3,13 +3,14 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { ListAllUsers } from '@ferrite/schema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import type { IGetAllUsersUseCase } from '@users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 
 @Injectable()
 export class GetAllUsersUseCase implements IGetAllUsersUseCase {
@@ -25,12 +26,7 @@ export class GetAllUsersUseCase implements IGetAllUsersUseCase {
 		cursor?: string;
 		limit?: number;
 		filters?: Partial<UserProfileFull>;
-	}): Promise<
-		Result<
-			{ items: UserProfileFull[]; nextCursor?: string },
-			InfrastructureError
-		>
-	> {
+	}): Promise<Result<ListAllUsers, InfrastructureError>> {
 		return this.tracer.withSpan('use-case.get-all-users', async () => {
 			try {
 				const result = await this.repo.findAll(

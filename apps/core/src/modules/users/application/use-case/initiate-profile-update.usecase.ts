@@ -3,6 +3,8 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
 import type { IInitiateProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
@@ -10,8 +12,6 @@ import {
 	type IUserRepository,
 	USER_REPOSITORY,
 } from '@users/domain/ports/user-repository.port';
-import type { UpdateProfileInput } from '@users/domain/schemas/update-profile.zodschema';
-import type { UserProfileFull } from '@users/domain/schemas/user-profile.zodschema';
 import { buildUserUpdateOutboxEvent } from '@users/domain/utils/build-user-update-outbox-event.util';
 
 @Injectable()

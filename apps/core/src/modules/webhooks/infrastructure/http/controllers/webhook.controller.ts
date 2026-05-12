@@ -1,7 +1,7 @@
 import { WebhookGuard } from '@auth/index';
 import { WebhookEvent } from '@common/decorators/webhook-event.decorator';
 import { WebhookRoute } from '@common/decorators/webhook-route.decorator';
-import type { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
+import type { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 import {
 	Controller,
 	HttpCode,

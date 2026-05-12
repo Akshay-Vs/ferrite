@@ -2,9 +2,11 @@
 
 import { icons } from 'lucide-react';
 import { useMemo, useState, useTransition } from 'react';
+import { splitOnCaps } from '@/core/utils/split-on-caps';
 import { cn } from '@/core/utils/utils';
 import { Input } from '@/presentation/primitives/input';
 import { Button } from './button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 interface IconSelectorProps {
 	value?: string;
@@ -54,7 +56,7 @@ export function IconSelector({
 			if (ALL_ICON_KEYS[i].toLowerCase().includes(query)) {
 				results.push(ALL_ICON_KEYS[i]);
 			}
-			if (results.length >= 5) break;
+			if (results.length >= 6) break;
 		}
 		return results;
 	}, [deferredTerm]);
@@ -77,28 +79,34 @@ export function IconSelector({
 			</div>
 
 			<div className="flex flex-row justify-start items-center h-16 w-full px-2">
-				<div className="flex flex-row justify-start items-start gap-4 w-full">
+				<div className="flex flex-row justify-between items-star w-full">
 					{matchedIcons.length > 0 ? (
 						matchedIcons.map((iconName) => {
 							const IconComponent = icons[iconName];
 							const isSelected = value === iconName;
 
 							return (
-								<Button
-									key={iconName}
-									type="button"
-									onClick={() => onChange?.(iconName)}
-									aria-label={`Select ${iconName} icon`}
-									aria-pressed={isSelected}
-									className={cn(
-										'h-14 w-14 p-0 flex items-center justify-center transition-all',
-										isSelected
-											? 'ring-2 ring-primary bg-accent'
-											: 'border border-input bg-background hover:bg-accent'
-									)}
-								>
-									<IconComponent className="size-6 shrink-0" />
-								</Button>
+								<Tooltip key={iconName}>
+									<TooltipTrigger
+										render={
+											<Button
+												type="button"
+												onClick={() => onChange?.(iconName)}
+												aria-label={`Select ${iconName} icon`}
+												aria-pressed={isSelected}
+												className={cn(
+													'h-14 w-14 p-0 flex items-center justify-center transition-all',
+													isSelected
+														? 'ring-2 ring-accent text-violet-200'
+														: 'border border-input bg-background hover:bg-accent'
+												)}
+											>
+												<IconComponent className="size-6 shrink-0" />
+											</Button>
+										}
+									/>
+									<TooltipContent>{splitOnCaps(iconName)}</TooltipContent>
+								</Tooltip>
 							);
 						})
 					) : (

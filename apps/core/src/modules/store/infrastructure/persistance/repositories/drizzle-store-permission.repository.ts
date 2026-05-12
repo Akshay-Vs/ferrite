@@ -1,4 +1,3 @@
-import type { PermissionKey } from '@common/schemas/permissions.zodschema';
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import {
@@ -9,6 +8,7 @@ import {
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import type { IStorePermissionChecker } from '@modules/store/domain/ports/store-permission-checker.port';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';

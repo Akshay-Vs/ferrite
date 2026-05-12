@@ -3,7 +3,7 @@ import type { Currency } from '@core/database/schema/currency.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { GetCurrenciesInput } from '@ferrite/schema/currency/get-currencies.zodschema';
+import { GetCurrenciesInput } from '@ferrite/schema/currencies/get-currencies.zodschema';
 import { IGetCurrenciesUseCase } from '@modules/currency/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
 import {

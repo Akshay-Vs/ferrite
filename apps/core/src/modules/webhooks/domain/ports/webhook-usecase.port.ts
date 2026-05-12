@@ -1,5 +1,5 @@
 import { IUseCase } from '@common/interfaces/use-case.interface';
-import { WebhookEnvelope } from '@common/schemas/webhook-envelope.zodschema';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 
 export const PERSIST_WEBHOOK_UC = Symbol('PERSIST_WEBHOOK_UC');
 

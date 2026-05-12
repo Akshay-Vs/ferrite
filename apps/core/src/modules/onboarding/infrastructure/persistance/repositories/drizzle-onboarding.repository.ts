@@ -6,13 +6,13 @@ import { userOnboarding } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { Inject, Injectable } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
-import type { IOnboardingRepository } from '../../../domain/ports/onboarding-repository.port';
 import type {
 	OnboardingSession,
 	OnboardingState,
-} from '../../../domain/schemas/onboarding-state.zodschema';
+} from '@ferrite/schema/onboarding/onboarding-session.zodschema';
+import { Inject, Injectable } from '@nestjs/common';
+import { eq, sql } from 'drizzle-orm';
+import type { IOnboardingRepository } from '../../../domain/ports/onboarding-repository.port';
 import { OnboardingMapper } from '../mappers/onboarding.mapper';
 
 @Injectable()

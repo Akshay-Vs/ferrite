@@ -4,13 +4,13 @@ import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
 } from '../../domain/ports/store.repository.port';
-import type { UpdateStoreInput } from '../../domain/schemas/update-store.zodschema';
 
 export interface UpdateStorePayload {
 	storeId: string;

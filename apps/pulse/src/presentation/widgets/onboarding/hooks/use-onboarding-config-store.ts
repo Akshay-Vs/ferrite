@@ -1,61 +1,83 @@
+import { useOnboardStore } from '@ferrite/react';
 import {
 	onboardingStoreCreateSchema,
 	storeConfigureSchema,
 } from '@ferrite/schema';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'nextjs-toploader/app';
-import { useState } from 'react';
+import { DOCS_HOME } from '@/core/constants/resource-url.constants';
 import {
 	ONBOARDING_CONNECT_STORE,
 	ONBOARDING_CREATE_STORE,
 } from '@/core/constants/routes.constants';
-import { useStoreCreationStore } from '../stores/onboarding.store';
+import { toast } from '@/presentation/primitives/sonner';
+import {
+	clearOnboardingStore,
+	useOnboardingStore,
+} from '../stores/onboarding.store';
 
 export const useOnboardingStoreConfigure = () => {
 	const router = useRouter();
-	const { data, clearSession } = useStoreCreationStore();
-	const [isSubmittingToAPI, setIsSubmittingToAPI] = useState(false);
+	const { onboardingStore } = useOnboardingStore();
+
+	const { mutate: onboardStore, isPending } = useOnboardStore({
+		onSuccess: () => {
+			clearOnboardingStore();
+			router.push(ONBOARDING_CONNECT_STORE);
+
+			toast.success('Welcome aboard!', {
+				description: "You're all set to start building your first store!",
+				action: {
+					label: 'View Documentation',
+					onClick: () => window.open(DOCS_HOME, '_blank'),
+				},
+			});
+		},
+	});
 
 	const form = useForm({
 		defaultValues: {
-			storeCurrency: data.storeCurrency ?? 'USD',
-			storeIcon: data.storeIcon ?? '',
+			storeCurrency: onboardingStore.storeCurrency ?? 'USD',
+			storeIcon: onboardingStore.storeIcon ?? 'Store',
 		},
 		validators: {
-			onSubmit: storeConfigureSchema,
+			onChange: storeConfigureSchema,
 		},
 		onSubmit: async ({ value }) => {
-			setIsSubmittingToAPI(true);
+			// Synthesize final payload from both session data and current form value
+			const rawPayload = { ...onboardingStore, ...value };
 
-			// 1. Synthesize final payload from both session data and current form value
-			const rawPayload = { ...data, ...value };
-
-			// 2. Execute a strict validation against the master schema
+			// Execute a strict validation against the master schema
 			const parseResult = onboardingStoreCreateSchema.safeParse(rawPayload);
 
 			if (!parseResult.success) {
 				// Critical anomaly: Step 1 data is missing or corrupted
-				console.error('Payload validation failed', parseResult.error);
+				toast.error('Missing required fields', {
+					description:
+						'Step 1 of the onboarding process is missing required fields',
+				});
 				router.push(ONBOARDING_CREATE_STORE);
+
 				return;
 			}
 
 			const finalPayload = parseResult.data;
 
 			try {
-				// 3. Dispatch to API
-				// await api.stores.create(finalPayload);
+				// Dispatch to API
+				onboardStore(finalPayload);
 
-				// 4. Terminate session and redirect upon success
-				clearSession();
+				// Clear session and redirect upon success
+				clearOnboardingStore();
 				router.push(ONBOARDING_CONNECT_STORE);
 			} catch (error) {
 				console.error('API Error', error);
-			} finally {
-				setIsSubmittingToAPI(false);
+				toast.error('Failed to create store', {
+					description: 'Failed to create store. Please try again.',
+				});
 			}
 		},
 	});
 
-	return { form, isSubmittingToAPI };
+	return { form, isPending };
 };

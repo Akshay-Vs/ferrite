@@ -1,4 +1,3 @@
-import type { AuthUser } from '@auth/domain/schemas/auth-user.zodschema';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import {
 	type IUnitOfWork,
@@ -9,6 +8,8 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { OnboardingStoreCreate } from '@ferrite/schema';
+import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
+import type { OnboardingSession } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { InvalidStepTransitionError } from '../../domain/errors/invalid-step-transition.error';
 import { OnboardingAlreadyCompletedError } from '../../domain/errors/onboarding-already-completed.error';
@@ -20,7 +21,10 @@ import {
 	type IStoreDelegate,
 	STORE_DELEGATE,
 } from '../../domain/ports/store-delegate.port';
-import type { OnboardingSession } from '../../domain/schemas/onboarding-state.zodschema';
+import {
+	type IUserDelegate,
+	USER_DELEGATE,
+} from '../../domain/ports/user-delegate.port';
 
 @Injectable()
 export class SubmitStoreCreationUseCase
@@ -36,6 +40,8 @@ export class SubmitStoreCreationUseCase
 		private readonly onboardingRepo: IOnboardingRepository,
 		@Inject(STORE_DELEGATE)
 		private readonly storeDelegate: IStoreDelegate,
+		@Inject(USER_DELEGATE)
+		private readonly userDelegate: IUserDelegate,
 		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger
@@ -93,6 +99,14 @@ export class SubmitStoreCreationUseCase
 							await this.storeDelegate.createStoreWithOwner(
 								input.data,
 								userId,
+								tx
+							);
+
+							await this.userDelegate.syncOnboardingStep(
+								userId,
+								input.authUser.externalAuthId,
+								input.authUser.provider,
+								'COMPLETED',
 								tx
 							);
 

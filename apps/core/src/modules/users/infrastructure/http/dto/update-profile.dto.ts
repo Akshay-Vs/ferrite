@@ -1,4 +1,4 @@
-import { updateProfileSchema } from '@users/domain/schemas/update-profile.zodschema';
+import { updateProfileSchema } from '@ferrite/schema/users/update-profile.zodschema';
 import { createZodDto } from 'nestjs-zod';
 
 /**

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { AuthProvider } from '@auth/index';
+import type { UserUpdatedEvent } from '@ferrite/schema/users/user-updated.zodschema';
 import type { QueueParams } from '@modules/queue';
-import type { UserUpdatedEvent } from '@users/domain/schemas/user-updated.zodschema';
 import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 /**
