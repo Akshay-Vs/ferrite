@@ -112,7 +112,7 @@ export class DrizzleUserRepository implements IUserRepository {
 				const items = hasNext ? rows.slice(0, parsedLimit) : rows;
 
 				return {
-					items: items.map(UserMapper.toUserProfile),
+					items: items.map((user) => UserMapper.toUserProfile(user)),
 					nextCursor: hasNext ? (offset + parsedLimit).toString() : undefined,
 				};
 			}
