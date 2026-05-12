@@ -4,6 +4,7 @@
 		"target": "ESNext",
 		"module": "Preserve",
 		"moduleDetection": "force",
+		"ignore": ["dist"],
 
 		// Bundler mode
 		"moduleResolution": "bundler",
