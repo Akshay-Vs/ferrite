@@ -14,7 +14,10 @@ The `Onboarding` module acts as a backend-authoritative state machine that guide
 
 The Onboarding module acts as an orchestrator and sits "above" core domain modules. It relies heavily on delegation to maintain clean architectural boundaries:
 
--   **Users Module**: During the `ABOUT_ME` step, the Onboarding module updates the user's profile. It does this via an `IUserDelegate` port. The infrastructure adapter for this port uses the exported `USER_REPOSITORY` and shared outbox utilities from the Users module to perform the update and queue the IdP sync.
+-   **Users Module**: The Onboarding module synchronizes the user's current step to the external IdP (e.g., Clerk) at every transition. It does this via an `IUserDelegate` port:
+    -   During `ABOUT_ME`, it updates profile fields (firstName/lastName) and pushes the next step (`STORE_CREATION`) to `publicMetadata.onBoardingState`.
+    -   During `STORE_CREATION`, it uses a metadata-only sync to push `COMPLETED` to the IdP.
+    -   The infrastructure adapter utilizes the `USER_REPOSITORY` and shared outbox utilities from the Users module to ensure these updates are atomic and eventually consistent with the IdP.
 -   **Store Module**: During the `STORE_CREATION` step, it provisions a new store. It uses an `IStoreDelegate` port. The adapter wraps the Store module's `InitializeStoreOrchestratorUseCase`, passing in a shared transaction context.
 -   **Database Unit of Work (UoW)**: To ensure that an onboarding step transition (e.g., moving to `COMPLETED`) and the associated domain mutation (e.g., creating a store) succeed or fail together, it utilizes the cross-cutting `IUnitOfWork` abstraction from `@common/interfaces`.
 
