@@ -39,9 +39,18 @@ export class SyncProfileUpdateUseCase implements ISyncUserProfileUpdateUseCase {
 					patch.lastName = validatedEvent.lastName;
 				}
 
-				if (validatedEvent.publicMetadata?.role !== undefined) {
+				if (
+					validatedEvent.publicMetadata?.role !== undefined ||
+					validatedEvent.publicMetadata?.onBoardingState !== undefined
+				) {
+					this.logger.debug('Constructing publicMetadata for patch...');
 					patch.publicMetadata = {
-						role: validatedEvent.publicMetadata.role,
+						...(validatedEvent.publicMetadata.role !== undefined && {
+							role: validatedEvent.publicMetadata.role,
+						}),
+						...(validatedEvent.publicMetadata.onBoardingState !== undefined && {
+							onBoardingState: validatedEvent.publicMetadata.onBoardingState,
+						}),
 					};
 				}
 

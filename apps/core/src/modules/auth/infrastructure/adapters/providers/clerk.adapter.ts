@@ -228,7 +228,7 @@ export class ClerkAdapter
 				const clerkPayload: {
 					firstName?: string;
 					lastName?: string;
-					publicMetadata?: { role: string };
+					publicMetadata?: { role?: string; onBoardingState?: string };
 				} = {};
 
 				if (payload.firstName !== undefined) {
@@ -239,9 +239,17 @@ export class ClerkAdapter
 					clerkPayload.lastName = payload.lastName;
 				}
 
-				if (payload.publicMetadata?.role !== undefined) {
+				if (
+					payload.publicMetadata?.role !== undefined ||
+					payload.publicMetadata?.onBoardingState !== undefined
+				) {
 					clerkPayload.publicMetadata = {
-						role: payload.publicMetadata.role,
+						...(payload.publicMetadata.role !== undefined && {
+							role: payload.publicMetadata.role,
+						}),
+						...(payload.publicMetadata.onBoardingState !== undefined && {
+							onBoardingState: payload.publicMetadata.onBoardingState,
+						}),
 					};
 				}
 
