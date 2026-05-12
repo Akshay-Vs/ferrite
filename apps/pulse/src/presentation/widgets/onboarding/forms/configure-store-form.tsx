@@ -20,7 +20,7 @@ import {
 import { useOnboardingStoreConfigure } from '../hooks/use-onboarding-config-store';
 
 export default function OnboardingConfigureStoreForm() {
-	const { form, isSubmittingToAPI } = useOnboardingStoreConfigure();
+	const { form, isPending } = useOnboardingStoreConfigure();
 	return (
 		<form
 			className="flex w-full flex-col gap-6"
@@ -95,8 +95,8 @@ export default function OnboardingConfigureStoreForm() {
 						<Button
 							type="submit"
 							variant="secondary"
-							disabled={!canSubmit || isSubmittingToAPI}
-							isLoading={isSubmittingToAPI}
+							disabled={!canSubmit || isPending}
+							isLoading={isPending}
 							className="w-full"
 						>
 							Next
