@@ -22,8 +22,8 @@ export const userProfileFullSchema = userProfileBaseSchema.extend({
 	preferredLocale: z.string().nullable(),
 	preferredCurrency: z.string().nullable(),
 	platformRole: z.string(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
+	createdAt: z.coerce.date(),
+	updatedAt: z.coerce.date(),
 });
 
 export type UserProfileBase = z.infer<typeof userProfileBaseSchema>;
