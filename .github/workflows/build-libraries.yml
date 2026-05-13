@@ -7,6 +7,12 @@ on:
       - 'packages/api/**'
       - 'packages/react-sdk/**'
       - '.github/workflows/build-libraries.yml'
+      - 'package.json'
+      - 'bun.lock'
+      - 'turbo.json'
+      - 'tsconfig.json'
+      - 'biome.json'
+      - 'bunfig.toml'
   push:
     branches:
       - main
@@ -15,6 +21,12 @@ on:
       - 'packages/api/**'
       - 'packages/react-sdk/**'
       - '.github/workflows/build-libraries.yml'
+      - 'package.json'
+      - 'bun.lock'
+      - 'turbo.json'
+      - 'tsconfig.json'
+      - 'biome.json'
+      - 'bunfig.toml'
 
 permissions:
   contents: read
