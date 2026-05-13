@@ -41,11 +41,5 @@ jobs:
       - name: Resolve Workspace and Development Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Execute Type Check
-        run: bunx turbo run type-check --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
-
-      - name: Execute Lint
-        run: bunx turbo run lint --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
-
-      - name: Execute Turborepo Build Pipeline
-        run: bunx turbo run build --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
+      - name: Execute Turborepo Pipeline (Build, Type-check, Lint)
+        run: bunx turbo run build type-check lint --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
