@@ -11,15 +11,13 @@
 			"cache": false,
 			"persistent": true
 		},
-		"lint": {
-			"dependsOn": ["^build"]
-		},
-		"lint:fix": {
-			"dependsOn": ["^build"],
-			"cache": false
-		},
 		"type-check": {
-			"dependsOn": ["^build"]
+			"dependsOn": ["^build", "^type-check"],
+			"inputs": ["$TURBO_DEFAULT$", "tsconfig.json"]
+		},
+		"lint": {
+			"dependsOn": ["^lint"],
+			"inputs": ["$TURBO_DEFAULT$", "biome.json"]
 		},
 		"test": {
 			"dependsOn": ["^build"],
