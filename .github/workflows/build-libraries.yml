@@ -1,0 +1,51 @@
+name: Build Libraries
+
+on:
+  pull_request:
+    paths:
+      - 'packages/schema/**'
+      - 'packages/api/**'
+      - 'packages/react-sdk/**'
+      - '.github/workflows/build-libraries.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/schema/**'
+      - 'packages/api/**'
+      - 'packages/react-sdk/**'
+      - '.github/workflows/build-libraries.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Provision Bun Runtime
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Resolve Workspace and Development Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Execute Type Check
+        run: bunx turbo run type-check --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
+
+      - name: Execute Lint
+        run: bunx turbo run lint --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
+
+      - name: Execute Turborepo Build Pipeline
+        run: bunx turbo run build --filter=@ferrite/schema --filter=@ferrite/api --filter=@ferrite/react
