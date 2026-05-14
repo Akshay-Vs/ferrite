@@ -42,9 +42,6 @@ export const useStoreSelector = () => {
 		if (!id) return;
 
 		const name = stores.find((store) => store.id === id)?.name;
-
-		console.log(name);
-
 		setSelectedStore(id, name);
 	};
 
