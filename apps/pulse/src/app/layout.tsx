@@ -1,7 +1,7 @@
 import { inter } from '@app/(config)/fonts';
 import { appMetadata } from '@app/(config)/metadata';
 import { ClerkProvider } from '@clerk/nextjs';
-import { cn } from '@core/utils/utils';
+import { cn } from '@core/utils/cn';
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import FerriteCoreProvider from '@/core/providers/ferrite-core.provider';
