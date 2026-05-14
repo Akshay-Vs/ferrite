@@ -12,16 +12,16 @@ export const getStoreSchema = z.object({
 	name: z.string(),
 	description: z
 		.string()
-		.nullable()
+		.nullish()
 		.transform((v) => v ?? undefined),
 	currencyCode: z.string(),
 	storeIcon: z
 		.string()
-		.nullable()
+		.nullish()
 		.transform((v) => v ?? undefined),
 	bannerUrl: z
 		.string()
-		.nullable()
+		.nullish()
 		.transform((v) => v ?? undefined),
 	isActive: z.boolean(),
 });
