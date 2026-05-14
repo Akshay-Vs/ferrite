@@ -1,13 +1,13 @@
 import type * as React from 'react';
 
-import { cn } from '@/core/utils/utils';
+import { cn } from '@/core/utils/cn';
 
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
 	return (
 		<textarea
 			data-slot="textarea"
 			className={cn(
-				'flex field-sizing-content min-h-44 w-full resize-none rounded-[2rem] gradient-border px-8 py-6 text-base transition-[color,box-shadow,background-color] outline-none',
+				'flex field-sizing-content min-h-44 w-full resize-none rounded-container gradient-border px-8 py-6 text-base transition-[color,box-shadow,background-color] outline-none',
 
 				// Typography & Placeholder
 				'placeholder:text-muted-foreground md:text-sm',

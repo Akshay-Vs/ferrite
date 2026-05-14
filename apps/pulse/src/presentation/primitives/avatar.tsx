@@ -3,7 +3,7 @@
 import { Avatar as AvatarPrimitive } from '@base-ui/react/avatar';
 import Image from 'next/image';
 import type * as React from 'react';
-import { cn } from '@/core/utils/utils';
+import { cn } from '@/core/utils/cn';
 
 function Avatar({
 	className,
@@ -122,9 +122,9 @@ function AvatarGroupCount({
 
 export {
 	Avatar,
-	AvatarImage,
+	AvatarBadge,
 	AvatarFallback,
 	AvatarGroup,
 	AvatarGroupCount,
-	AvatarBadge,
+	AvatarImage,
 };

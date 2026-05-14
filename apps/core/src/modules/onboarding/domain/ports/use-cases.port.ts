@@ -1,7 +1,7 @@
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type {
 	OnboardingAboutUser,
-	OnboardingStoreCreate,
+	OnboardingStorePayload,
 } from '@ferrite/schema';
 import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import type { OnboardingSession } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
@@ -42,7 +42,7 @@ export type ISubmitAboutMeUseCase = IUseCase<
  * Submits the "Store Creation" step: creates store + completes onboarding.
  */
 export type ISubmitStoreCreationUseCase = IUseCase<
-	{ authUser: AuthUser; data: OnboardingStoreCreate },
+	{ authUser: AuthUser; data: OnboardingStorePayload },
 	OnboardingSession,
 	InvalidStepTransitionError | OnboardingAlreadyCompletedError | Error
 >;

@@ -1,8 +1,8 @@
 'use client';
 
+import { cn } from '@core/utils/cn';
 import { icons, type LucideProps } from 'lucide-react';
 import { useMemo } from 'react';
-import { cn } from '@core/utils/utils';
 
 interface IconRendererProps extends LucideProps {
 	/** Identifier for the icon asset. */

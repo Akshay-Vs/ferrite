@@ -7,7 +7,7 @@ import {
 	SALES_OVERVIEW,
 	TRAFFIC_OVERVIEW,
 } from '@/core/constants/routes.constants';
-import { cn } from '@/core/utils/utils';
+import { cn } from '@/core/utils/cn';
 import FadeInItem from '@/presentation/animations/fade-in-item';
 import { Button } from '@/presentation/primitives/button';
 

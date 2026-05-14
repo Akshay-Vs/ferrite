@@ -26,7 +26,7 @@ export async function resolveOnboardingState(): Promise<
 		const service = new OnboardingService(ferriteClient);
 		const { currentStep } = await service.getSession();
 		return currentStep;
-	} catch (error) {
+	} catch (_error) {
 		// Default to the initial step on service failure to preserve gating integrity
 		return 'ABOUT_ME';
 	}

@@ -1,9 +1,28 @@
 import { z } from 'zod/v4';
-import { createStoreSchema } from './create-store.zodschema.ts';
 
-export const getStoreSchema = createStoreSchema.extend({
+/**
+ * Read schema for a single store — intentionally independent from
+ * `createStoreSchema` so that write-side validators (strict URL format,
+ * uppercase currency regex, etc.) are NOT applied to the API response.
+ * Optional fields use `nullish().transform()` to coerce API `null` → `undefined`.
+ */
+export const getStoreSchema = z.object({
 	id: z.string(),
 	slug: z.string(),
+	name: z.string(),
+	description: z
+		.string()
+		.nullish()
+		.transform((v) => v ?? undefined),
+	currencyCode: z.string(),
+	storeIcon: z
+		.string()
+		.nullish()
+		.transform((v) => v ?? undefined),
+	bannerUrl: z
+		.string()
+		.nullish()
+		.transform((v) => v ?? undefined),
 	isActive: z.boolean(),
 });
 

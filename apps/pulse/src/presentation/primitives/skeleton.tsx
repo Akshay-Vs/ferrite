@@ -1,4 +1,4 @@
-import { cn } from '@/core/utils/utils';
+import { cn } from '@/core/utils/cn';
 
 function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
 	return (

@@ -20,6 +20,8 @@ export const useStoreSelector = () => {
 		if (!isSuccess || !stores.length) return;
 
 		const currentSelection = useStoreSelection.getState().selectedStoreId;
+		const currentSelectionName = useStoreSelection.getState().selectedStoreName;
+
 		const isSelectionValid = stores.some(
 			(store) => store.id === currentSelection
 		);
@@ -27,16 +29,20 @@ export const useStoreSelector = () => {
 		// Execute assignment and notify if the cached store is obsolete or null
 		if (!currentSelection || !isSelectionValid) {
 			const fallbackStore = stores[0];
-			setSelectedStore(fallbackStore.id);
+			setSelectedStore(fallbackStore.id, fallbackStore.name);
 
 			// Deploy an informational toast denoting system-initiated state mutation
-			toast.info(`Switched store to ${fallbackStore.name}`);
+			toast.info(`Switched store to ${fallbackStore.name}`, {
+				description: `Unable to find ${currentSelectionName ?? 'selected store'}. Falling back to ${fallbackStore.name}.`,
+			});
 		}
 	}, [isSuccess, stores]);
 
 	const handleChange = (id: string | null) => {
 		if (!id) return;
-		setSelectedStore(id);
+
+		const name = stores.find((store) => store.id === id)?.name;
+		setSelectedStore(id, name);
 	};
 
 	const isReady = !isLoading;

@@ -1,9 +1,15 @@
 import { StoreService } from '@ferrite/api';
+import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import type {
 	GetAllStores,
 	GetStore,
 } from '@ferrite/schema/stores/get-store.zodschema';
-import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
+import {
+	type UseMutationOptions,
+	type UseQueryOptions,
+	useMutation,
+	useQuery,
+} from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { queryKeys } from '../constants/query-keys';
 import { useFerriteClient } from '../providers/ferrite-provider';
@@ -44,6 +50,20 @@ export function useGetStore(
 		queryKey: queryKeys.stores.detail(storeId).queryKey,
 		queryFn: () => service.getStore(storeId),
 		enabled: !!storeId && (options?.enabled ?? true),
+		...options,
+	});
+}
+
+/**
+ * Mutation to create a new store (authenticated POST /stores).
+ */
+export function useCreateStore(
+	options?: UseMutationOptions<GetStore, Error, CreateStoreInput>
+) {
+	const service = useStoreService();
+
+	return useMutation({
+		mutationFn: (payload) => service.createStore(payload),
 		...options,
 	});
 }

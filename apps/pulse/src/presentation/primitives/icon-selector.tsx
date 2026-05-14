@@ -2,8 +2,8 @@
 
 import { icons } from 'lucide-react';
 import { useMemo, useState, useTransition } from 'react';
+import { cn } from '@/core/utils/cn';
 import { splitOnCaps } from '@/core/utils/split-on-caps';
-import { cn } from '@/core/utils/utils';
 import { Input } from '@/presentation/primitives/input';
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';

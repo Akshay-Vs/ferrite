@@ -1,4 +1,4 @@
-import { cn } from '@/core/utils/utils';
+import { cn } from '@/core/utils/cn';
 
 const GradientText = ({
 	text,

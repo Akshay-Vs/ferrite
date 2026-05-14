@@ -10,7 +10,7 @@ const LogoutMenuAction = () => {
 	const handleLogout = async () => {
 		try {
 			await signOut({ redirectUrl: LOGIN });
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Failed to logout', {
 				description: 'Please try again later.',
 				action: {

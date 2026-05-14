@@ -2,7 +2,7 @@ import { OnboardingService } from '@ferrite/api';
 import type {
 	OnboardingAboutUser,
 	OnboardingSession,
-	OnboardingStoreCreate,
+	OnboardingStorePayload,
 } from '@ferrite/schema';
 import {
 	type UseMutationOptions,
@@ -55,7 +55,7 @@ export function useOnboardUser(
  * Mutation to create the first store for the user during onboarding.
  */
 export function useOnboardStore(
-	options?: UseMutationOptions<OnboardingSession, Error, OnboardingStoreCreate>
+	options?: UseMutationOptions<OnboardingSession, Error, OnboardingStorePayload>
 ) {
 	const service = useOnboardingService();
 

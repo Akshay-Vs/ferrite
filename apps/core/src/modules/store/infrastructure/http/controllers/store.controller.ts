@@ -65,7 +65,7 @@ export class StoreController {
 	async createStore(
 		@AuthUserParam() user: AuthUser,
 		@Body() payload: CreateStoreDto
-	): Promise<Store> {
+	): Promise<GetStore> {
 		return this.tracer.withSpan('http.create-store', async () => {
 			const result = await this.initializeStoreOrchestratorPc.execute({
 				input: payload,
@@ -75,7 +75,18 @@ export class StoreController {
 			if (result.isErr()) {
 				throw new UnprocessableEntityException('Failed to create store');
 			}
-			return result.value;
+
+			const store = result.value;
+			return {
+				id: store.id,
+				name: store.name,
+				slug: store.slug,
+				currencyCode: store.currencyCode,
+				isActive: store.isActive,
+				description: store.description ?? undefined,
+				storeIcon: store.icon ?? undefined,
+				bannerUrl: store.bannerUrl ?? undefined,
+			};
 		});
 	}
 

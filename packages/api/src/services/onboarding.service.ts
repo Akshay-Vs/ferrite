@@ -1,6 +1,6 @@
 import type {
 	OnboardingAboutUser,
-	OnboardingStoreCreate,
+	OnboardingStorePayload,
 } from '@ferrite/schema';
 import {
 	type OnboardingSession,
@@ -37,7 +37,7 @@ export class OnboardingService {
 	 * Create first store for the user
 	 */
 	public async onboardStore(
-		payload: OnboardingStoreCreate
+		payload: OnboardingStorePayload
 	): Promise<OnboardingSession> {
 		return this.client.post(
 			`${this.domain}/steps/store-creation`,

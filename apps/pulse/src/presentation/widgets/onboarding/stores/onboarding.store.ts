@@ -1,18 +1,15 @@
-import type { OnboardingStoreCreate } from '@ferrite/schema';
-import type { OnboardingState } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
+import type { OnboardingStorePayload } from '@ferrite/schema';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface StoreCreationState {
-	onboardingStore: Partial<OnboardingStoreCreate>;
-	step: OnboardingState;
+	onboardingStore: Partial<OnboardingStorePayload>;
 }
 
 export const useOnboardingStore = create<StoreCreationState>()(
 	persist(
 		(): StoreCreationState => ({
 			onboardingStore: {},
-			step: 'ABOUT_ME',
 		}),
 		{
 			name: 'onboarding-store-storage',
@@ -20,13 +17,8 @@ export const useOnboardingStore = create<StoreCreationState>()(
 	)
 );
 
-// Your existing external actions pattern
-export const setOnboardingStep = (step: OnboardingState) => {
-	useOnboardingStore.setState({ step });
-};
-
 export const updateOnboardingStore = (
-	stepData: Partial<OnboardingStoreCreate>
+	stepData: Partial<OnboardingStorePayload>
 ) => {
 	useOnboardingStore.setState((state) => ({
 		onboardingStore: { ...state.onboardingStore, ...stepData },

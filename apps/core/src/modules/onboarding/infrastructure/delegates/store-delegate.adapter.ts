@@ -2,7 +2,7 @@ import type { ITransactionContext } from '@common/interfaces/unit-of-work.interf
 import { generateSlug } from '@common/utils/generate-slug.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
-import type { OnboardingStoreCreate } from '@ferrite/schema';
+import type { OnboardingStorePayload } from '@ferrite/schema';
 import type { IStoreDelegate } from '@modules/onboarding/domain/ports/store-delegate.port';
 import { InitializeStoreOrchestratorUseCase } from '@modules/store/application/use-cases/initialize-store-orchestrator.usecase';
 import {
@@ -30,23 +30,18 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 	}
 
 	async createStoreWithOwner(
-		input: OnboardingStoreCreate,
+		input: OnboardingStorePayload,
 		createdBy: string,
 		tx?: ITransactionContext
 	): Promise<string> {
 		// Generate a slug from the store name
-		const slug = generateSlug(input.storeName);
+		const slug = generateSlug(input.name);
 
 		return this.tracer.withSpan(
 			'StoreDelegateAdapter.createStoreWithOwner',
 			async () => {
 				const result = await this.initializeStoreUc.execute({
-					input: {
-						name: input.storeName,
-						description: input.storeDescription,
-						currencyCode: input.storeCurrency,
-						storeIcon: input.storeIcon,
-					},
+					input,
 					createdBy,
 					tx,
 				});

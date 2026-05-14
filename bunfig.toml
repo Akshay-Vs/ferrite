@@ -1,6 +1,6 @@
 [install]
 saveTextLockfile = true
-minimumReleaseAge = 360000 # 100 hours
+minimumReleaseAge = 86400 # 24 hours
 
 [install.cache]
 disable = false
