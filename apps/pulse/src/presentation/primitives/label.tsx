@@ -1,21 +1,28 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import type * as React from 'react';
 
-import { cn } from "@/core/utils/utils"
+import { cn } from '@/core/utils/cn';
 
-function Label({ className, htmlFor, ...props }: React.ComponentProps<"label">) {
-  return (
-    <label
-      data-slot="label"
-      htmlFor={htmlFor}
-      className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
-        className
-      )}
-      {...props}
-    />
-  )
+function Label({
+	className,
+	htmlFor,
+	children,
+	...props
+}: React.ComponentProps<'label'>) {
+	return (
+		<label
+			data-slot="label"
+			htmlFor={htmlFor}
+			className={cn(
+				'flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50',
+				className
+			)}
+			{...props}
+		>
+			{children}
+		</label>
+	);
 }
 
-export { Label }
+export { Label };
