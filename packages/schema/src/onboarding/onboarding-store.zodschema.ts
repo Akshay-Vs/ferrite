@@ -1,43 +1,25 @@
-import { z } from 'zod/v4';
+import type { z } from 'zod/v4';
+import {
+	createStoreSchema,
+	storeConfigureStepSchema,
+	storeCreateStepSchema,
+} from '../stores/create-store.zodschema';
 
-export const onboardingStoreCreateSchema = z.object({
-	// Step 1
-	storeName: z.string().min(1, { message: 'Store name is required' }).max(64),
-	storeDescription: z
-		.string()
-		.min(1, { message: 'Store description is required' })
-		.max(255),
-
-	// Step 2
-	storeCurrency: z
-		.string()
-		.length(3)
-		.regex(/^[A-Z]{3}$/),
-	storeIcon: z
-		.string()
-		.min(1, {
-			message: 'Select an icon for your store, search for more icons',
-		})
-		.max(24),
-});
+export const onboardingStorePayloadSchema = createStoreSchema;
 
 // Step 1
-export const storeCreateSchema = onboardingStoreCreateSchema.pick({
-	storeName: true,
-	storeDescription: true,
-});
+export const onboardingStoreCreateStep = storeCreateStepSchema;
 
 // Step 2
-export const storeConfigureSchema = onboardingStoreCreateSchema.pick({
-	storeCurrency: true,
-	storeIcon: true,
-});
+export const onboardingStoreConfigStep = storeConfigureStepSchema;
 
-export type OnboardingStoreCreate = z.infer<typeof onboardingStoreCreateSchema>;
+export type OnboardingStorePayload = z.infer<
+	typeof onboardingStorePayloadSchema
+>;
 
 // Currency options for select component
 export const CURRENCY_OPTIONS: Array<{
-	value: OnboardingStoreCreate['storeCurrency'];
+	value: OnboardingStorePayload['currencyCode'];
 	label: string;
 }> = [
 	{ value: 'USD', label: 'USD ($)' },
