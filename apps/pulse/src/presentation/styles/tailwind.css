@@ -48,13 +48,13 @@
 			linear-gradient(
 				color-mix(
 					in srgb,
-					var(--color-surface) 60%,
-					var(--color-background) 40%
+					var(--color-surface) 40%,
+					var(--color-background) 60%
 				),
 				color-mix(
 					in srgb,
-					var(--color-surface) 60%,
-					var(--color-background) 40%
+					var(--color-surface) 40%,
+					var(--color-background) 60%
 				)
 			)
 			padding-box,
@@ -95,6 +95,7 @@
 	--color-background: #141317;
 	--color-content: #e8e8f0;
 	--color-input: #211f27;
+	--color-popover: #18171d;
 
 	--font-heading: var(--font-sans);
 	--font-heading: var(--font-sans);
@@ -124,7 +125,6 @@
 	--color-primary-foreground: var(--primary-foreground);
 	--color-primary: var(--primary);
 	--color-popover-foreground: var(--popover-foreground);
-	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
