@@ -1,5 +1,5 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { OnboardingStoreCreate } from '@ferrite/schema';
+import type { OnboardingStorePayload } from '@ferrite/schema';
 
 export const STORE_DELEGATE = Symbol('STORE_DELEGATE');
 
@@ -18,7 +18,7 @@ export interface IStoreDelegate {
 	 * @returns The created store's ID.
 	 */
 	createStoreWithOwner(
-		input: OnboardingStoreCreate,
+		input: OnboardingStorePayload,
 		createdBy: string,
 		tx?: ITransactionContext
 	): Promise<string>;

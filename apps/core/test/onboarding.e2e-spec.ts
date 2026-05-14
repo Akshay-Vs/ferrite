@@ -152,9 +152,9 @@ describe('OnboardingController (e2e)', () => {
 			return request(app.getHttpServer())
 				.post('/onboarding/steps/store-creation')
 				.send({
-					storeName: 'My Store',
-					storeDescription: 'A store',
-					storeCurrency: 'USD',
+					name: 'My Store',
+					description: 'A store',
+					currencyCode: 'USD',
 					storeIcon: 'store',
 				})
 				.expect(401);
@@ -169,9 +169,9 @@ describe('OnboardingController (e2e)', () => {
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
 				.send({
-					storeName: 'My Store',
-					storeDescription: 'A store',
-					storeCurrency: 'USD',
+					name: 'My Store',
+					description: 'A store',
+					currencyCode: 'USD',
 					storeIcon: 'store',
 				})
 				.expect(409);
@@ -186,9 +186,9 @@ describe('OnboardingController (e2e)', () => {
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
 				.send({
-					storeName: 'My Store',
-					storeDescription: 'A store',
-					storeCurrency: 'USD',
+					name: 'My Store',
+					description: 'A store',
+					currencyCode: 'USD',
 					storeIcon: 'store',
 				})
 				.expect(409);
@@ -203,9 +203,9 @@ describe('OnboardingController (e2e)', () => {
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
 				.send({
-					storeName: 'My Store',
-					storeDescription: 'A store',
-					storeCurrency: 'USD',
+					name: 'My Store',
+					description: 'A store',
+					currencyCode: 'USD',
 					storeIcon: 'store',
 				})
 				.expect(500);
@@ -219,9 +219,9 @@ describe('OnboardingController (e2e)', () => {
 				.post('/onboarding/steps/store-creation')
 				.set('Authorization', BEARER_TOKEN)
 				.send({
-					storeName: 'My Store',
-					storeDescription: 'A store',
-					storeCurrency: 'USD',
+					name: 'My Store',
+					description: 'A store',
+					currencyCode: 'USD',
 					storeIcon: 'store',
 				})
 				.expect(200)

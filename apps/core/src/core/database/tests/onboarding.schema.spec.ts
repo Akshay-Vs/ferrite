@@ -90,7 +90,7 @@ describe('user_onboarding table', () => {
 
 		const stepData = {
 			aboutMe: { firstName: 'Test', lastName: 'User' },
-			storeSetup: { storeName: 'My Store' },
+			storeSetup: { name: 'My Store' },
 		};
 
 		const [row] = await db
