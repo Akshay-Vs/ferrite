@@ -1,7 +1,9 @@
 'use client';
 
 import { useLowFPS } from '@core/hooks/use-low-fps';
+import { areRectsEqual } from '@core/utils/are-rects-equals';
 import { cn } from '@core/utils/cn';
+import { measureButtons } from '@core/utils/measure-buttons';
 import { Slash } from '@presentation/shapes/slash';
 import {
 	animate,
@@ -19,8 +21,6 @@ import {
 	useRef,
 	useState,
 } from 'react';
-import { areRectsEqual } from '@/core/utils/are-rects-equals';
-import { measureButtons } from '@/core/utils/measure-buttons';
 
 export type TabItem = {
 	id: string | number;
@@ -168,6 +168,7 @@ export const TabBar = memo(
 		// occurs, which would previously leave the pending spinner stuck forever.
 		useEffect(() => {
 			setPendingId(null);
+			/*bion-disable-next-line react-hooks/exhaustive-deps */
 		}, []);
 
 		const handleClick = useCallback(
