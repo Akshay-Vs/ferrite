@@ -1,10 +1,14 @@
+import {
+	type IJwtTokenUseCase,
+	JWT_TOKEN_UC,
+} from '@auth/domain/ports/use-case.port';
 import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
 import { IS_WEBHOOK_ROUTE } from '@common/decorators/webhook-route.decorator';
 import { AuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
+
 import {
 	CanActivate,
 	ExecutionContext,
@@ -19,7 +23,7 @@ export class AuthGuard implements CanActivate {
 	constructor(
 		private readonly logger: AppLogger,
 		private readonly reflector: Reflector,
-		private readonly verifyToken: JwtTokenUseCase,
+		@Inject(JWT_TOKEN_UC) private readonly verifyToken: IJwtTokenUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.logger.setContext(AuthGuard.name);
