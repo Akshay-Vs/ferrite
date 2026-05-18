@@ -147,7 +147,7 @@ export class StoreController {
 		return this.tracer.withSpan('http.delete-store', async () => {
 			const result = await this.deleteStoreUc.execute(storeId);
 			if (result.isErr()) {
-				throw new NotFoundException(result.error.message);
+				throw new NotFoundException('Store not found');
 			}
 		});
 	}
