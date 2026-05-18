@@ -9,7 +9,7 @@ import {
 	TOKEN_AUTH,
 	WEBHOOK_AUTH,
 } from './domain/ports/auth-provider.tokens';
-
+import { JWT_TOKEN_UC } from './domain/ports/use-case.port';
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk.adapter';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
@@ -33,6 +33,10 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 		{
 			provide: WEBHOOK_AUTH,
 			useExisting: TOKEN_AUTH,
+		},
+		{
+			provide: JWT_TOKEN_UC,
+			useClass: JwtTokenUseCase,
 		},
 
 		// Global guards
