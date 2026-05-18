@@ -2,7 +2,7 @@ import { err, ok, Result } from '@common/interfaces/result.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { AppLogger } from '@core/logger/logger.service';
-import { WebhookPayload } from '@ferrite/schema/auth/index';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 import { type IWebhookAuth } from '@modules/auth/domain/ports/auth-provider.port';
 import { WEBHOOK_AUTH } from '@modules/auth/domain/ports/auth-provider.tokens';
 import { Inject, Injectable } from '@nestjs/common';
@@ -14,7 +14,7 @@ import { Inject, Injectable } from '@nestjs/common';
  */
 @Injectable()
 export class VerifyWebhookUseCase
-	implements IUseCase<RawWebhookRequest, WebhookPayload>
+	implements IUseCase<RawWebhookRequest, WebhookEnvelope>
 {
 	constructor(
 		@Inject(WEBHOOK_AUTH) private readonly webhookAuth: IWebhookAuth,
@@ -23,7 +23,7 @@ export class VerifyWebhookUseCase
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(payload: RawWebhookRequest): Promise<Result<WebhookPayload>> {
+	async execute(payload: RawWebhookRequest): Promise<Result<WebhookEnvelope>> {
 		try {
 			const claims = await this.webhookAuth.verifyWebhook(payload);
 			return ok(claims);
