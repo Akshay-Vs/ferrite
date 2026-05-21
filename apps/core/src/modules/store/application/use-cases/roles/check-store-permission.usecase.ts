@@ -1,27 +1,21 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
-import { MemberNotFoundError } from '../../domain/errors/member-not-found.error';
+import { MemberNotFoundError } from '../../../domain/errors/member-not-found.error';
+import {
+	type CheckStorePermissionInput,
+	type ICheckStorePermissionUseCase,
+} from '../../../domain/ports/role-use-cases.port';
 import {
 	type IStorePermissionChecker,
 	STORE_PERMISSION_CHECKER,
-} from '../../domain/ports/store-permission-checker.port';
-
-export interface CheckStorePermissionInput {
-	userId: string;
-	storeId: string;
-	requiredPermissions: PermissionKey[];
-}
-
-export const CHECK_STORE_PERMISSION_UC = Symbol('CheckStorePermissionUseCase');
+} from '../../../domain/ports/store-permission-checker.port';
 
 @Injectable()
 export class CheckStorePermissionUseCase
-	implements IUseCase<CheckStorePermissionInput, boolean, MemberNotFoundError>
+	implements ICheckStorePermissionUseCase
 {
 	constructor(
 		@Inject(STORE_PERMISSION_CHECKER)

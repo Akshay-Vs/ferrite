@@ -1,21 +1,18 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { GetStore } from '@ferrite/schema/stores/get-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
-import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
+import { StoreNotFoundError } from '../../../domain/errors/store-not-found.error';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
+} from '../../../domain/ports/store.repository.port';
+import { type IGetPublicStoreUseCase } from '../../../domain/ports/store-use-cases.port';
 
-export const GET_PUBLIC_STORE_UC = Symbol('GetPublicStoreUseCase');
 @Injectable()
-export class GetPublicStoreUseCase
-	implements IUseCase<string, GetStore, StoreNotFoundError>
-{
+export class GetPublicStoreUseCase implements IGetPublicStoreUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,

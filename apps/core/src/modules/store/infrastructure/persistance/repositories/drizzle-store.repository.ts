@@ -327,4 +327,230 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			}
 		);
 	}
+
+	async deleteStoreRole(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string
+	): Promise<StoreRole | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeRoles.delete',
+			{ 'db.table': 'store_roles', 'db.operation': 'delete' },
+			async () => {
+				const [role] = await this.getExecutor(tx)
+					.delete(storeRoles)
+					.where(
+						and(
+							eq(storeRoles.id, roleId),
+							eq(storeRoles.storeId, storeId),
+							eq(storeRoles.isSystem, false)
+						)
+					)
+					.returning();
+				return role || null;
+			}
+		);
+	}
+
+	async removeStoreMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.remove',
+			{ 'db.table': 'store_members', 'db.operation': 'delete' },
+			async () => {
+				const [deleted] = await this.getExecutor(tx)
+					.delete(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.userId, userId)
+						)
+					)
+					.returning({ storeId: storeMembers.storeId });
+				return !!deleted;
+			}
+		);
+	}
+
+	async updateRolePermissions(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string,
+		permissions: PermissionKey[]
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeRolePermissions.update',
+			{ 'db.table': 'store_role_permissions', 'db.operation': 'delete+insert' },
+			async () => {
+				const executor = this.getExecutor(tx);
+
+				// First verify the role belongs to the store
+				const [role] = await executor
+					.select({ id: storeRoles.id })
+					.from(storeRoles)
+					.where(
+						and(eq(storeRoles.id, roleId), eq(storeRoles.storeId, storeId))
+					);
+
+				if (!role) return false;
+
+				await executor
+					.delete(storeRolePermissions)
+					.where(eq(storeRolePermissions.storeRoleId, roleId));
+
+				if (permissions.length > 0) {
+					await executor.insert(storeRolePermissions).values(
+						permissions.map((key) => ({
+							storeRoleId: roleId,
+							permissionKey: key,
+						}))
+					);
+				}
+
+				return true;
+			}
+		);
+	}
+
+	async findRoleById(
+		storeId: string,
+		roleId: string
+	): Promise<StoreRole | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeRoles.findById',
+			{ 'db.table': 'store_roles', 'db.operation': 'select' },
+			async () => {
+				const [role] = await this.db
+					.select()
+					.from(storeRoles)
+					.where(
+						and(eq(storeRoles.id, roleId), eq(storeRoles.storeId, storeId))
+					);
+				return role || null;
+			}
+		);
+	}
+
+	async isMemberOwner(storeId: string, userId: string): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.isOwner',
+			{ 'db.table': 'store_members', 'db.operation': 'select' },
+			async () => {
+				const [member] = await this.db
+					.select({ isOwner: storeMembers.isOwner })
+					.from(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.userId, userId)
+						)
+					);
+				return member?.isOwner ?? false;
+			}
+		);
+	}
+
+	async countRoleMembers(storeId: string, roleId: string): Promise<number> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.countByRole',
+			{ 'db.table': 'store_members', 'db.operation': 'select' },
+			async () => {
+				const [result] = await this.db
+					.select({ count: sql<number>`cast(count(*) as integer)` })
+					.from(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId)
+						)
+					);
+				return result?.count ?? 0;
+			}
+		);
+	}
+
+	async suspendMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.suspend',
+			{ 'db.table': 'store_members', 'db.operation': 'update' },
+			async () => {
+				const [member] = await this.getExecutor(tx)
+					.update(storeMembers)
+					.set({ suspendedAt: sql`now()` })
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.userId, userId),
+							sql`suspended_at IS NULL`
+						)
+					)
+					.returning({ storeId: storeMembers.storeId });
+				return !!member;
+			}
+		);
+	}
+
+	async unsuspendMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.unsuspend',
+			{ 'db.table': 'store_members', 'db.operation': 'update' },
+			async () => {
+				const [member] = await this.getExecutor(tx)
+					.update(storeMembers)
+					.set({ suspendedAt: null })
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.userId, userId),
+							sql`suspended_at IS NOT NULL`
+						)
+					)
+					.returning({ storeId: storeMembers.storeId });
+				return !!member;
+			}
+		);
+	}
+
+	async isMemberSuspended(
+		storeId: string,
+		userId: string
+	): Promise<boolean | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.isSuspended',
+			{ 'db.table': 'store_members', 'db.operation': 'select' },
+			async () => {
+				const [member] = await this.db
+					.select({ suspendedAt: storeMembers.suspendedAt })
+					.from(storeMembers)
+					.where(
+						and(
+							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.userId, userId)
+						)
+					);
+				if (!member) return null;
+				return member.suspendedAt !== null;
+			}
+		);
+	}
 }

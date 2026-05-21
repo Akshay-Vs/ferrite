@@ -1,26 +1,20 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
+	type GetRolePermissionsInput,
+	type IGetRolePermissionsUseCase,
+} from '../../../domain/ports/role-use-cases.port';
+import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export interface GetRolePermissionsInput {
-	storeId: string;
-	roleId: string;
-}
-
-export const GET_ROLE_PERMISSIONS_UC = Symbol('GetRolePermissionsUseCase');
+} from '../../../domain/ports/store.repository.port';
 
 @Injectable()
-export class GetRolePermissionsUseCase
-	implements IUseCase<GetRolePermissionsInput, PermissionKey[], Error>
-{
+export class GetRolePermissionsUseCase implements IGetRolePermissionsUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,

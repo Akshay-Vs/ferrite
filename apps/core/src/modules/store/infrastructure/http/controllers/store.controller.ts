@@ -9,7 +9,26 @@ import type {
 	GetAllStores,
 	GetStore,
 } from '@ferrite/schema/stores/get-store.zodschema';
+import { RoleNotFoundError } from '@modules/store/domain/errors/role-not-found.error';
+import { SystemRoleProtectedError } from '@modules/store/domain/errors/system-role-protected.error';
 import {
+	ADD_STORE_MEMBERS_UC,
+	type IAddStoreMembersUseCase,
+} from '@modules/store/domain/ports/member-use-cases.port';
+import {
+	DELETE_STORE_UC,
+	GET_OWN_STORES_UC,
+	GET_PUBLIC_STORE_UC,
+	type IDeleteStoreUseCase,
+	type IGetOwnStoresUseCase,
+	type IGetPublicStoreUseCase,
+	type IInitializeStoreOrchestratorUseCase,
+	INITIALIZE_STORE_ORCHESTRATOR_UC,
+	type IUpdateStoreUseCase,
+	UPDATE_STORE_UC,
+} from '@modules/store/domain/ports/store-use-cases.port';
+import {
+	BadRequestException,
 	Body,
 	Controller,
 	Delete,
@@ -26,12 +45,6 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AddStoreMembersUseCase } from '../../../application/use-cases/add-store-members.usecase';
-import { DeleteStoreUseCase } from '../../../application/use-cases/delete-store.usecase';
-import { GetOwnStoresUseCase } from '../../../application/use-cases/get-own-stores.usecase';
-import { GetPublicStoreUseCase } from '../../../application/use-cases/get-public-store.usecase';
-import { InitializeStoreOrchestratorUseCase } from '../../../application/use-cases/initialize-store-orchestrator.usecase';
-import { UpdateStoreUseCase } from '../../../application/use-cases/update-store.usecase';
 import { AddStoreMembersDto } from '../dto/add-store-members.dto';
 import { CreateStoreDto, UpdateStoreDto } from '../dto/store.dto';
 import { StorePermissionGuard } from '../guards/store-permission.guard';
@@ -50,12 +63,18 @@ import {
 @Controller('stores')
 export class StoreController {
 	constructor(
-		private readonly initializeStoreOrchestratorPc: InitializeStoreOrchestratorUseCase,
-		private readonly getOwnStoresUc: GetOwnStoresUseCase,
-		private readonly getPublicStoreUc: GetPublicStoreUseCase,
-		private readonly updateStoreUc: UpdateStoreUseCase,
-		private readonly deleteStoreUc: DeleteStoreUseCase,
-		private readonly addStoreMembersUc: AddStoreMembersUseCase,
+		@Inject(INITIALIZE_STORE_ORCHESTRATOR_UC)
+		private readonly initializeStoreOrchestratorPc: IInitializeStoreOrchestratorUseCase,
+		@Inject(GET_OWN_STORES_UC)
+		private readonly getOwnStoresUc: IGetOwnStoresUseCase,
+		@Inject(GET_PUBLIC_STORE_UC)
+		private readonly getPublicStoreUc: IGetPublicStoreUseCase,
+		@Inject(UPDATE_STORE_UC)
+		private readonly updateStoreUc: IUpdateStoreUseCase,
+		@Inject(DELETE_STORE_UC)
+		private readonly deleteStoreUc: IDeleteStoreUseCase,
+		@Inject(ADD_STORE_MEMBERS_UC)
+		private readonly addStoreMembersUc: IAddStoreMembersUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
@@ -167,6 +186,14 @@ export class StoreController {
 				roleId: payload.roleId,
 			});
 			if (result.isErr()) {
+				if (result.error instanceof RoleNotFoundError) {
+					throw new NotFoundException('Role not found');
+				}
+
+				if (result.error instanceof SystemRoleProtectedError) {
+					throw new BadRequestException('Cannot assign protected role');
+				}
+
 				throw new UnprocessableEntityException('Failed to add members');
 			}
 		});

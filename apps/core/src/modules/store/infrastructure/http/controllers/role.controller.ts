@@ -5,31 +5,67 @@ import type {
 } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
-import { CreateStoreRoleUseCase } from '@modules/store/application/use-cases/create-store-role.usecase';
-import { GetRoleMembersUseCase } from '@modules/store/application/use-cases/get-role-members.usecase';
-import { GetRolePermissionsUseCase } from '@modules/store/application/use-cases/get-role-permissions.usecase';
-import { GetStoreRolesUseCase } from '@modules/store/application/use-cases/get-store-roles.usecase';
+import { MemberAlreadySuspendedError } from '@modules/store/domain/errors/member-already-suspended.error';
+import { MemberNotFoundError } from '@modules/store/domain/errors/member-not-found.error';
+import { MemberNotSuspendedError } from '@modules/store/domain/errors/member-not-suspended.error';
+import { OwnerProtectedError } from '@modules/store/domain/errors/owner-protected.error';
+import { RoleHasMembersError } from '@modules/store/domain/errors/role-has-members.error';
+import { RoleNotFoundError } from '@modules/store/domain/errors/role-not-found.error';
 import { StoreNotFoundError } from '@modules/store/domain/errors/store-not-found.error';
+import { SystemRoleProtectedError } from '@modules/store/domain/errors/system-role-protected.error';
+import {
+	type IRemoveStoreMemberUseCase,
+	type ISuspendStoreMemberUseCase,
+	type IUnsuspendStoreMemberUseCase,
+	REMOVE_STORE_MEMBER_UC,
+	SUSPEND_STORE_MEMBER_UC,
+	UNSUSPEND_STORE_MEMBER_UC,
+} from '@modules/store/domain/ports/member-use-cases.port';
+import {
+	CREATE_STORE_ROLE_UC,
+	DELETE_STORE_ROLE_UC,
+	GET_ROLE_MEMBERS_UC,
+	GET_ROLE_PERMISSIONS_UC,
+	GET_STORE_ROLES_UC,
+	type ICreateStoreRoleUseCase,
+	type IDeleteStoreRoleUseCase,
+	type IGetRoleMembersUseCase,
+	type IGetRolePermissionsUseCase,
+	type IGetStoreRolesUseCase,
+	type IUpdateRolePermissionsUseCase,
+	UPDATE_ROLE_PERMISSIONS_UC,
+} from '@modules/store/domain/ports/role-use-cases.port';
 import {
 	Body,
+	ConflictException,
 	Controller,
+	Delete,
+	ForbiddenException,
 	Get,
+	HttpCode,
+	HttpStatus,
 	Inject,
 	NotFoundException,
 	Param,
 	ParseUUIDPipe,
+	Patch,
 	Post,
 	UnprocessableEntityException,
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateStoreRoleDto } from '../dto/role.dto';
+import { CreateStoreRoleDto, UpdateRolePermissionsDto } from '../dto/role.dto';
 import { StorePermissionGuard } from '../guards/store-permission.guard';
 import {
 	CreateStoreRoleDocs,
+	DeleteStoreRoleDocs,
 	GetRoleMembersDocs,
 	GetRolePermissionsDocs,
 	GetStoreRolesDocs,
+	RemoveRoleMemberDocs,
+	SuspendRoleMemberDocs,
+	UnsuspendRoleMemberDocs,
+	UpdateRolePermissionsDocs,
 } from './docs/role.swaggerdocs';
 
 @ApiTags('Store Roles')
@@ -38,10 +74,24 @@ import {
 @Controller('stores/:storeId/roles')
 export class RoleController {
 	constructor(
-		private readonly createStoreRoleUc: CreateStoreRoleUseCase,
-		private readonly getStoreRolesUc: GetStoreRolesUseCase,
-		private readonly getRolePermissionsUc: GetRolePermissionsUseCase,
-		private readonly getRoleMembersUc: GetRoleMembersUseCase,
+		@Inject(CREATE_STORE_ROLE_UC)
+		private readonly createStoreRoleUc: ICreateStoreRoleUseCase,
+		@Inject(GET_STORE_ROLES_UC)
+		private readonly getStoreRolesUc: IGetStoreRolesUseCase,
+		@Inject(GET_ROLE_PERMISSIONS_UC)
+		private readonly getRolePermissionsUc: IGetRolePermissionsUseCase,
+		@Inject(GET_ROLE_MEMBERS_UC)
+		private readonly getRoleMembersUc: IGetRoleMembersUseCase,
+		@Inject(DELETE_STORE_ROLE_UC)
+		private readonly deleteStoreRoleUc: IDeleteStoreRoleUseCase,
+		@Inject(REMOVE_STORE_MEMBER_UC)
+		private readonly removeStoreMemberUc: IRemoveStoreMemberUseCase,
+		@Inject(UPDATE_ROLE_PERMISSIONS_UC)
+		private readonly updateRolePermissionsUc: IUpdateRolePermissionsUseCase,
+		@Inject(SUSPEND_STORE_MEMBER_UC)
+		private readonly suspendStoreMemberUc: ISuspendStoreMemberUseCase,
+		@Inject(UNSUSPEND_STORE_MEMBER_UC)
+		private readonly unsuspendStoreMemberUc: IUnsuspendStoreMemberUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
@@ -120,6 +170,144 @@ export class RoleController {
 				throw new NotFoundException('Role not found');
 			}
 			return result.value;
+		});
+	}
+
+	@Delete(':roleId')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@DeleteStoreRoleDocs()
+	@RequirePermission('staff.delete')
+	async deleteRole(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Param('roleId', ParseUUIDPipe) roleId: string
+	): Promise<void> {
+		return this.tracer.withSpan('http.delete-store-role', async () => {
+			const result = await this.deleteStoreRoleUc.execute({ storeId, roleId });
+
+			if (result.isErr()) {
+				if (result.error instanceof RoleNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof SystemRoleProtectedError) {
+					throw new ForbiddenException(result.error.message);
+				}
+				if (result.error instanceof RoleHasMembersError) {
+					throw new ConflictException(result.error.message);
+				}
+				throw new UnprocessableEntityException(result.error.message);
+			}
+		});
+	}
+
+	@Delete(':roleId/members/:userId')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@RemoveRoleMemberDocs()
+	@RequirePermission('staff.delete')
+	async removeMember(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Param('roleId', ParseUUIDPipe) roleId: string,
+		@Param('userId', ParseUUIDPipe) userId: string
+	): Promise<void> {
+		return this.tracer.withSpan('http.remove-store-member', async () => {
+			const result = await this.removeStoreMemberUc.execute({
+				storeId,
+				userId,
+			});
+
+			if (result.isErr()) {
+				if (result.error instanceof MemberNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof OwnerProtectedError) {
+					throw new ForbiddenException(result.error.message);
+				}
+				throw new UnprocessableEntityException(result.error.message);
+			}
+		});
+	}
+
+	@Patch(':roleId/permissions')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@UpdateRolePermissionsDocs()
+	@RequirePermission('staff.update')
+	async updateRolePermissions(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Param('roleId', ParseUUIDPipe) roleId: string,
+		@Body() payload: UpdateRolePermissionsDto
+	): Promise<void> {
+		return this.tracer.withSpan('http.update-role-permissions', async () => {
+			const result = await this.updateRolePermissionsUc.execute({
+				storeId,
+				roleId,
+				permissions: payload.permissions,
+			});
+
+			if (result.isErr()) {
+				if (result.error instanceof RoleNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof SystemRoleProtectedError) {
+					throw new ForbiddenException(result.error.message);
+				}
+				throw new UnprocessableEntityException(result.error.message);
+			}
+		});
+	}
+
+	@Post(':roleId/members/:userId/suspend')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@SuspendRoleMemberDocs()
+	@RequirePermission('staff.update')
+	async suspendMember(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Param('roleId', ParseUUIDPipe) roleId: string,
+		@Param('userId', ParseUUIDPipe) userId: string
+	): Promise<void> {
+		return this.tracer.withSpan('http.suspend-store-member', async () => {
+			const result = await this.suspendStoreMemberUc.execute({
+				storeId,
+				userId,
+			});
+
+			if (result.isErr()) {
+				if (result.error instanceof MemberNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof OwnerProtectedError) {
+					throw new ForbiddenException(result.error.message);
+				}
+				if (result.error instanceof MemberAlreadySuspendedError) {
+					throw new ConflictException(result.error.message);
+				}
+				throw new UnprocessableEntityException(result.error.message);
+			}
+		});
+	}
+
+	@Post(':roleId/members/:userId/unsuspend')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@UnsuspendRoleMemberDocs()
+	@RequirePermission('staff.update')
+	async unsuspendMember(
+		@Param('storeId', ParseUUIDPipe) storeId: string,
+		@Param('roleId', ParseUUIDPipe) roleId: string,
+		@Param('userId', ParseUUIDPipe) userId: string
+	): Promise<void> {
+		return this.tracer.withSpan('http.unsuspend-store-member', async () => {
+			const result = await this.unsuspendStoreMemberUc.execute({
+				storeId,
+				userId,
+			});
+
+			if (result.isErr()) {
+				if (result.error instanceof MemberNotFoundError) {
+					throw new NotFoundException(result.error.message);
+				}
+				if (result.error instanceof MemberNotSuspendedError) {
+					throw new ConflictException(result.error.message);
+				}
+				throw new UnprocessableEntityException(result.error.message);
+			}
 		});
 	}
 }

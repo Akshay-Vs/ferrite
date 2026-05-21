@@ -1,20 +1,50 @@
 import { Module } from '@nestjs/common';
-import { AddStoreMemberUseCase } from './application/use-cases/add-store-member.usecase';
-import { AddStoreMembersUseCase } from './application/use-cases/add-store-members.usecase';
-import { CheckStorePermissionUseCase } from './application/use-cases/check-store-permission.usecase';
-// Use Cases
-import { CreateStoreUseCase } from './application/use-cases/create-store.usecase';
-import { CreateStoreRoleUseCase } from './application/use-cases/create-store-role.usecase';
-import { DeleteStoreUseCase } from './application/use-cases/delete-store.usecase';
-import { GetOwnStoresUseCase } from './application/use-cases/get-own-stores.usecase';
-import { GetPublicStoreUseCase } from './application/use-cases/get-public-store.usecase';
-import { GetRoleMembersUseCase } from './application/use-cases/get-role-members.usecase';
-import { GetRolePermissionsUseCase } from './application/use-cases/get-role-permissions.usecase';
-import { GetStoreRolesUseCase } from './application/use-cases/get-store-roles.usecase';
-import { InitializeStoreOrchestratorUseCase } from './application/use-cases/initialize-store-orchestrator.usecase';
-import { UpdateStoreUseCase } from './application/use-cases/update-store.usecase';
+import {
+	AddStoreMembersUseCase,
+	AddStoreMemberUseCase,
+	CheckStorePermissionUseCase,
+	CreateStoreRoleUseCase,
+	CreateStoreUseCase,
+	DeleteStoreRoleUseCase,
+	DeleteStoreUseCase,
+	GetOwnStoresUseCase,
+	GetPublicStoreUseCase,
+	GetRoleMembersUseCase,
+	GetRolePermissionsUseCase,
+	GetStoreRolesUseCase,
+	InitializeStoreOrchestratorUseCase,
+	RemoveStoreMemberUseCase,
+	SuspendStoreMemberUseCase,
+	UnsuspendStoreMemberUseCase,
+	UpdateRolePermissionsUseCase,
+	UpdateStoreUseCase,
+} from './application/use-cases';
+import {
+	ADD_STORE_MEMBER_UC,
+	ADD_STORE_MEMBERS_UC,
+	REMOVE_STORE_MEMBER_UC,
+	SUSPEND_STORE_MEMBER_UC,
+	UNSUSPEND_STORE_MEMBER_UC,
+} from './domain/ports/member-use-cases.port';
+import {
+	CHECK_STORE_PERMISSION_UC,
+	CREATE_STORE_ROLE_UC,
+	DELETE_STORE_ROLE_UC,
+	GET_ROLE_MEMBERS_UC,
+	GET_ROLE_PERMISSIONS_UC,
+	GET_STORE_ROLES_UC,
+	UPDATE_ROLE_PERMISSIONS_UC,
+} from './domain/ports/role-use-cases.port';
 import { STORE_REPOSITORY } from './domain/ports/store.repository.port';
 import { STORE_PERMISSION_CHECKER } from './domain/ports/store-permission-checker.port';
+import {
+	CREATE_STORE_UC,
+	DELETE_STORE_UC,
+	GET_OWN_STORES_UC,
+	GET_PUBLIC_STORE_UC,
+	INITIALIZE_STORE_ORCHESTRATOR_UC,
+	UPDATE_STORE_UC,
+} from './domain/ports/store-use-cases.port';
 import { RoleController } from './infrastructure/http/controllers/role.controller';
 import { StoreController } from './infrastructure/http/controllers/store.controller';
 import { StorePermissionGuard } from './infrastructure/http/guards/store-permission.guard';
@@ -32,27 +62,86 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 			provide: STORE_PERMISSION_CHECKER,
 			useClass: DrizzleStorePermissionRepository,
 		},
-		CheckStorePermissionUseCase,
+		{
+			provide: CHECK_STORE_PERMISSION_UC,
+			useClass: CheckStorePermissionUseCase,
+		},
 		StorePermissionGuard,
-		CreateStoreUseCase,
-		CreateStoreRoleUseCase,
-		AddStoreMemberUseCase,
-		AddStoreMembersUseCase,
-		InitializeStoreOrchestratorUseCase,
-		GetOwnStoresUseCase,
-		GetPublicStoreUseCase,
-		GetStoreRolesUseCase,
-		GetRolePermissionsUseCase,
-		GetRoleMembersUseCase,
-		UpdateStoreUseCase,
-		DeleteStoreUseCase,
+		{
+			provide: CREATE_STORE_UC,
+			useClass: CreateStoreUseCase,
+		},
+		{
+			provide: CREATE_STORE_ROLE_UC,
+			useClass: CreateStoreRoleUseCase,
+		},
+		{
+			provide: ADD_STORE_MEMBER_UC,
+			useClass: AddStoreMemberUseCase,
+		},
+		{
+			provide: ADD_STORE_MEMBERS_UC,
+			useClass: AddStoreMembersUseCase,
+		},
+		{
+			provide: INITIALIZE_STORE_ORCHESTRATOR_UC,
+			useClass: InitializeStoreOrchestratorUseCase,
+		},
+		{
+			provide: GET_OWN_STORES_UC,
+			useClass: GetOwnStoresUseCase,
+		},
+		{
+			provide: GET_PUBLIC_STORE_UC,
+			useClass: GetPublicStoreUseCase,
+		},
+		{
+			provide: GET_STORE_ROLES_UC,
+			useClass: GetStoreRolesUseCase,
+		},
+		{
+			provide: GET_ROLE_PERMISSIONS_UC,
+			useClass: GetRolePermissionsUseCase,
+		},
+		{
+			provide: GET_ROLE_MEMBERS_UC,
+			useClass: GetRoleMembersUseCase,
+		},
+		{
+			provide: UPDATE_STORE_UC,
+			useClass: UpdateStoreUseCase,
+		},
+		{
+			provide: DELETE_STORE_UC,
+			useClass: DeleteStoreUseCase,
+		},
+		{
+			provide: DELETE_STORE_ROLE_UC,
+			useClass: DeleteStoreRoleUseCase,
+		},
+		{
+			provide: REMOVE_STORE_MEMBER_UC,
+			useClass: RemoveStoreMemberUseCase,
+		},
+		{
+			provide: UPDATE_ROLE_PERMISSIONS_UC,
+			useClass: UpdateRolePermissionsUseCase,
+		},
+		{
+			provide: SUSPEND_STORE_MEMBER_UC,
+			useClass: SuspendStoreMemberUseCase,
+		},
+		{
+			provide: UNSUSPEND_STORE_MEMBER_UC,
+			useClass: UnsuspendStoreMemberUseCase,
+		},
 	],
 	exports: [
 		STORE_REPOSITORY,
 		STORE_PERMISSION_CHECKER,
-		CheckStorePermissionUseCase,
+		CHECK_STORE_PERMISSION_UC,
 		StorePermissionGuard,
-		InitializeStoreOrchestratorUseCase,
+		INITIALIZE_STORE_ORCHESTRATOR_UC,
 	],
 })
 export class StoreModule {}

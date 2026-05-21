@@ -1,21 +1,17 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { StoreRole } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
+import { type IGetStoreRolesUseCase } from '../../../domain/ports/role-use-cases.port';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export const GET_STORE_ROLES_UC = Symbol('GetStoreRolesUseCase');
+} from '../../../domain/ports/store.repository.port';
 
 @Injectable()
-export class GetStoreRolesUseCase
-	implements IUseCase<string, StoreRole[], Error>
-{
+export class GetStoreRolesUseCase implements IGetStoreRolesUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,

@@ -1,29 +1,21 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
+import { RoleNotFoundError } from '../../../domain/errors/role-not-found.error';
+import { SystemRoleProtectedError } from '../../../domain/errors/system-role-protected.error';
+import {
+	type AddStoreMemberInput,
+	type IAddStoreMemberUseCase,
+} from '../../../domain/ports/member-use-cases.port';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export interface AddStoreMemberInput {
-	tx?: ITransactionContext;
-	storeId: string;
-	userId: string;
-	roleId: string;
-	isOwner: boolean;
-}
-
-export const ADD_STORE_MEMBER_UC = Symbol('AddStoreMemberUseCase');
+} from '../../../domain/ports/store.repository.port';
 
 @Injectable()
-export class AddStoreMemberUseCase
-	implements IUseCase<AddStoreMemberInput, void, Error>
-{
+export class AddStoreMemberUseCase implements IAddStoreMemberUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
@@ -36,6 +28,15 @@ export class AddStoreMemberUseCase
 	async execute(input: AddStoreMemberInput): Promise<Result<void, Error>> {
 		return this.tracer.withSpan('AddStoreMemberUseCase.execute', async () => {
 			try {
+				const role = await this.repo.findRoleById(input.storeId, input.roleId);
+				if (!role) {
+					return err(new RoleNotFoundError(input.roleId, input.storeId));
+				}
+
+				if (role.isSystem && !input.isOwner) {
+					return err(new SystemRoleProtectedError(input.roleId));
+				}
+
 				await this.repo.addStoreMember(
 					input.tx,
 					input.storeId,

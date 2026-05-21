@@ -4,49 +4,46 @@ import {
 	type IUnitOfWork,
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { STORE_PERMISSIONS } from '@ferrite/schema/common/permissions.zodschema';
-import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
+import {
+	ADD_STORE_MEMBER_UC,
+	type IAddStoreMemberUseCase,
+} from '../../../domain/ports/member-use-cases.port';
+import {
+	CREATE_STORE_ROLE_UC,
+	type ICreateStoreRoleUseCase,
+} from '../../../domain/ports/role-use-cases.port';
 import {
 	type IStorePermissionChecker,
 	STORE_PERMISSION_CHECKER,
-} from '../../domain/ports/store-permission-checker.port';
-import { AddStoreMemberUseCase } from './add-store-member.usecase';
-import { CreateStoreUseCase } from './create-store.usecase';
-import { CreateStoreRoleUseCase } from './create-store-role.usecase';
-
-export interface InitializeStoreInput {
-	input: CreateStoreInput;
-	createdBy: string;
-	/**
-	 * Optional external transaction context.
-	 * When provided, the orchestrator runs all steps in this transaction
-	 * instead of starting its own via `repo.transaction()`.
-	 */
-	tx?: ITransactionContext;
-}
-
-export const INITIALIZE_STORE_ORCHESTRATOR_UC = Symbol(
-	'InitializeStoreOrchestratorUseCase'
-);
+} from '../../../domain/ports/store-permission-checker.port';
+import {
+	CREATE_STORE_UC,
+	type ICreateStoreUseCase,
+	type IInitializeStoreOrchestratorUseCase,
+	type InitializeStoreInput,
+} from '../../../domain/ports/store-use-cases.port';
 
 @Injectable()
 export class InitializeStoreOrchestratorUseCase
-	implements IUseCase<InitializeStoreInput, Store, Error>
+	implements IInitializeStoreOrchestratorUseCase
 {
 	constructor(
 		@Inject(UNIT_OF_WORK)
 		private readonly uow: IUnitOfWork,
 		@Inject(STORE_PERMISSION_CHECKER)
 		private readonly permissionChecker: IStorePermissionChecker,
-		private readonly createStoreUc: CreateStoreUseCase,
-		private readonly createStoreRoleUc: CreateStoreRoleUseCase,
-		private readonly addStoreMemberUc: AddStoreMemberUseCase,
+		@Inject(CREATE_STORE_UC)
+		private readonly createStoreUc: ICreateStoreUseCase,
+		@Inject(CREATE_STORE_ROLE_UC)
+		private readonly createStoreRoleUc: ICreateStoreRoleUseCase,
+		@Inject(ADD_STORE_MEMBER_UC)
+		private readonly addStoreMemberUc: IAddStoreMemberUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger
 	) {

@@ -1,21 +1,20 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
+import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export const GET_OWN_STORES_UC = Symbol('GetOwnStoresUseCase');
+} from '../../../domain/ports/store.repository.port';
+import {
+	type CreateStoreInputWithContext,
+	type ICreateStoreUseCase,
+} from '../../../domain/ports/store-use-cases.port';
 
 @Injectable()
-export class GetOwnStoresUseCase
-	implements IUseCase<string, GetAllStores[], Error>
-{
+export class CreateStoreUseCase implements ICreateStoreUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
@@ -25,18 +24,24 @@ export class GetOwnStoresUseCase
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(userId: string): Promise<Result<GetAllStores[], Error>> {
-		return this.tracer.withSpan('GetOwnStoresUseCase.execute', async () => {
+	async execute(
+		input: CreateStoreInputWithContext
+	): Promise<Result<Store, Error>> {
+		return this.tracer.withSpan('CreateStoreUseCase.execute', async () => {
 			try {
-				const stores = await this.repo.findByUserId(userId);
-				this.logger.debug(
-					`Fetched ${stores.length} stores for user: userId=${userId}`
+				const store = await this.repo.createStore(
+					input.tx,
+					input.input,
+					input.createdBy
 				);
-				return ok(stores);
+				this.logger.debug(
+					`Created store: id=${store.id}, name=${input.input.name}`
+				);
+				return ok(store);
 			} catch (e) {
 				const error = e instanceof Error ? e : new Error(String(e));
 				this.logger.error(
-					`Failed to fetch stores for user: userId=${userId}, error=${error.message}`,
+					`Failed to create store: ${error.message}`,
 					error.stack
 				);
 				return err(error);

@@ -4,11 +4,14 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { OnboardingStorePayload } from '@ferrite/schema';
 import type { IStoreDelegate } from '@modules/onboarding/domain/ports/store-delegate.port';
-import { InitializeStoreOrchestratorUseCase } from '@modules/store/application/use-cases/initialize-store-orchestrator.usecase';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
 } from '@modules/store/domain/ports/store.repository.port';
+import {
+	type IInitializeStoreOrchestratorUseCase,
+	INITIALIZE_STORE_ORCHESTRATOR_UC,
+} from '@modules/store/domain/ports/store-use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
 /**
  * Infrastructure adapter bridging the Onboarding module's `IStoreDelegate` port
@@ -22,7 +25,8 @@ import { Inject, Injectable } from '@nestjs/common';
 export class StoreDelegateAdapter implements IStoreDelegate {
 	constructor(
 		@Inject(STORE_REPOSITORY) private readonly storeRepo: IStoreRepository,
-		private readonly initializeStoreUc: InitializeStoreOrchestratorUseCase,
+		@Inject(INITIALIZE_STORE_ORCHESTRATOR_UC)
+		private readonly initializeStoreUc: IInitializeStoreOrchestratorUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger
 	) {

@@ -1,6 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { CreateStoreRoleDto } from '../../dto/role.dto';
+import {
+	CreateStoreRoleDto,
+	UpdateRolePermissionsDto,
+} from '../../dto/role.dto';
 
 export const CreateStoreRoleDocs = () =>
 	applyDecorators(
@@ -58,5 +61,92 @@ export const GetRoleMembersDocs = () =>
 		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
 		ApiResponse({ status: 200, description: 'Returns a list of members.' }),
 		ApiResponse({ status: 404, description: 'Role not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const DeleteStoreRoleDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Delete a store role',
+			description:
+				'Deletes a custom store role. Cannot delete system roles or roles with active members. Requires staff.delete permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiResponse({ status: 204, description: 'Role deleted successfully.' }),
+		ApiResponse({ status: 403, description: 'System role protected.' }),
+		ApiResponse({ status: 404, description: 'Role not found.' }),
+		ApiResponse({ status: 409, description: 'Role has active members.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const RemoveRoleMemberDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Remove member from store',
+			description:
+				'Removes a user from a store. Requires staff.delete permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiParam({ name: 'userId', description: 'The UUID of the user.' }),
+		ApiResponse({ status: 204, description: 'Member removed successfully.' }),
+		ApiResponse({ status: 403, description: 'Owner protected.' }),
+		ApiResponse({ status: 404, description: 'Member not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const UpdateRolePermissionsDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Update role permissions',
+			description:
+				'Replaces the permissions for a role. Cannot modify system roles. Requires staff.update permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiBody({ type: UpdateRolePermissionsDto }),
+		ApiResponse({
+			status: 204,
+			description: 'Permissions updated successfully.',
+		}),
+		ApiResponse({ status: 403, description: 'System role protected.' }),
+		ApiResponse({ status: 404, description: 'Role not found.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const SuspendRoleMemberDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Suspend store member',
+			description:
+				'Temporarily suspends a user from the store without removing them. Requires staff.update permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiParam({ name: 'userId', description: 'The UUID of the user.' }),
+		ApiResponse({ status: 204, description: 'Member suspended successfully.' }),
+		ApiResponse({ status: 403, description: 'Owner protected.' }),
+		ApiResponse({ status: 404, description: 'Member not found.' }),
+		ApiResponse({ status: 409, description: 'Member already suspended.' }),
+		ApiResponse({ status: 500, description: 'Internal server error.' })
+	);
+
+export const UnsuspendRoleMemberDocs = () =>
+	applyDecorators(
+		ApiOperation({
+			summary: 'Unsuspend store member',
+			description:
+				'Restores access for a suspended user. Requires staff.update permission.',
+		}),
+		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
+		ApiParam({ name: 'roleId', description: 'The UUID of the role.' }),
+		ApiParam({ name: 'userId', description: 'The UUID of the user.' }),
+		ApiResponse({
+			status: 204,
+			description: 'Member unsuspended successfully.',
+		}),
+		ApiResponse({ status: 404, description: 'Member not found.' }),
+		ApiResponse({ status: 409, description: 'Member not suspended.' }),
 		ApiResponse({ status: 500, description: 'Internal server error.' })
 	);

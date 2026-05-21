@@ -101,6 +101,76 @@ export interface IStoreRepository {
 	findRoleMembers(storeId: string, roleId: string): Promise<StoreMember[]>;
 
 	/**
+	 * Deletes a store role by ID. Only non-system roles can be deleted.
+	 * Returns the deleted role, or null if not found.
+	 */
+	deleteStoreRole(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string
+	): Promise<StoreRole | null>;
+
+	/**
+	 * Removes a member from a store entirely.
+	 * Returns true if a row was deleted, false if the member was not found.
+	 */
+	removeStoreMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean>;
+
+	/**
+	 * Replaces all permissions for a role with the given set.
+	 * Deletes existing permissions, inserts the new set.
+	 */
+	updateRolePermissions(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string,
+		permissions: PermissionKey[]
+	): Promise<boolean>;
+
+	/**
+	 * Find a specific role by ID within a store.
+	 */
+	findRoleById(storeId: string, roleId: string): Promise<StoreRole | null>;
+
+	/**
+	 * Check if a member is the store owner.
+	 */
+	isMemberOwner(storeId: string, userId: string): Promise<boolean>;
+
+	/**
+	 * Count members assigned to a specific role.
+	 */
+	countRoleMembers(storeId: string, roleId: string): Promise<number>;
+
+	/**
+	 * Sets suspendedAt on a member. Returns true if updated.
+	 */
+	suspendMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean>;
+
+	/**
+	 * Clears suspendedAt on a member. Returns true if updated.
+	 */
+	unsuspendMember(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean>;
+
+	/**
+	 * Check if a member is currently suspended.
+	 * Returns null if the user is not a member of the store.
+	 */
+	isMemberSuspended(storeId: string, userId: string): Promise<boolean | null>;
+
+	/**
 	 * Execute queries inside a transaction.
 	 */
 	transaction<T>(cb: (tx: ITransactionContext) => Promise<T>): Promise<T>;

@@ -1,34 +1,22 @@
 import { isFkViolation } from '@common/errors/handlers/pg-errors';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { StoreRole } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
-import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { StoreNotFoundError } from '@modules/store/domain/errors/store-not-found.error';
 import { Inject, Injectable } from '@nestjs/common';
 import {
+	type CreateStoreRoleInput,
+	type ICreateStoreRoleUseCase,
+} from '../../../domain/ports/role-use-cases.port';
+import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export interface CreateStoreRoleInput {
-	tx?: ITransactionContext;
-	storeId: string;
-	name: string;
-	description: string | null;
-	isSystem: boolean;
-	permissions: PermissionKey[];
-}
-
-export const CREATE_STORE_ROLE_UC = Symbol('CreateStoreRoleUseCase');
+} from '../../../domain/ports/store.repository.port';
 
 @Injectable()
-export class CreateStoreRoleUseCase
-	implements IUseCase<CreateStoreRoleInput, StoreRole, Error>
-{
+export class CreateStoreRoleUseCase implements ICreateStoreRoleUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
