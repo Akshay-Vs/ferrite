@@ -41,6 +41,7 @@ export class SuspendStoreMemberUseCase implements ISuspendStoreMemberUseCase {
 			async () => {
 				try {
 					const isOwner = await this.repo.isMemberOwner(
+						input.tx,
 						input.storeId,
 						input.userId
 					);
@@ -49,6 +50,7 @@ export class SuspendStoreMemberUseCase implements ISuspendStoreMemberUseCase {
 					}
 
 					const isSuspended = await this.repo.isMemberSuspended(
+						input.tx,
 						input.storeId,
 						input.userId
 					);
@@ -66,6 +68,7 @@ export class SuspendStoreMemberUseCase implements ISuspendStoreMemberUseCase {
 					const suspended = await this.repo.suspendMember(
 						input.tx,
 						input.storeId,
+						input.roleId,
 						input.userId
 					);
 

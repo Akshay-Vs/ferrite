@@ -42,6 +42,7 @@ export class UpdateRolePermissionsUseCase
 			async () => {
 				try {
 					const role = await this.repo.findRoleById(
+						input.tx,
 						input.storeId,
 						input.roleId
 					);

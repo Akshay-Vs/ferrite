@@ -356,6 +356,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	async removeStoreMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean> {
 		return traceDbOp(
@@ -368,6 +369,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.where(
 						and(
 							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId),
 							eq(storeMembers.userId, userId)
 						)
 					)
@@ -388,37 +390,44 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.storeRolePermissions.update',
 			{ 'db.table': 'store_role_permissions', 'db.operation': 'delete+insert' },
 			async () => {
-				const executor = this.getExecutor(tx);
+				const performUpdate = async (txn: ITransactionContext | undefined) => {
+					const executor = this.getExecutor(txn);
 
-				// First verify the role belongs to the store
-				const [role] = await executor
-					.select({ id: storeRoles.id })
-					.from(storeRoles)
-					.where(
-						and(eq(storeRoles.id, roleId), eq(storeRoles.storeId, storeId))
-					);
+					// First verify the role belongs to the store
+					const [role] = await executor
+						.select({ id: storeRoles.id })
+						.from(storeRoles)
+						.where(
+							and(eq(storeRoles.id, roleId), eq(storeRoles.storeId, storeId))
+						);
 
-				if (!role) return false;
+					if (!role) return false;
 
-				await executor
-					.delete(storeRolePermissions)
-					.where(eq(storeRolePermissions.storeRoleId, roleId));
+					await executor
+						.delete(storeRolePermissions)
+						.where(eq(storeRolePermissions.storeRoleId, roleId));
 
-				if (permissions.length > 0) {
-					await executor.insert(storeRolePermissions).values(
-						permissions.map((key) => ({
-							storeRoleId: roleId,
-							permissionKey: key,
-						}))
-					);
-				}
+					if (permissions.length > 0) {
+						await executor.insert(storeRolePermissions).values(
+							permissions.map((key) => ({
+								storeRoleId: roleId,
+								permissionKey: key,
+							}))
+						);
+					}
 
-				return true;
+					return true;
+				};
+
+				return tx
+					? performUpdate(tx)
+					: this.transaction((newTx) => performUpdate(newTx));
 			}
 		);
 	}
 
 	async findRoleById(
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		roleId: string
 	): Promise<StoreRole | null> {
@@ -427,7 +436,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.storeRoles.findById',
 			{ 'db.table': 'store_roles', 'db.operation': 'select' },
 			async () => {
-				const [role] = await this.db
+				const [role] = await this.getExecutor(tx)
 					.select()
 					.from(storeRoles)
 					.where(
@@ -438,13 +447,17 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
-	async isMemberOwner(storeId: string, userId: string): Promise<boolean> {
+	async isMemberOwner(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
 			'db.storeMembers.isOwner',
 			{ 'db.table': 'store_members', 'db.operation': 'select' },
 			async () => {
-				const [member] = await this.db
+				const [member] = await this.getExecutor(tx)
 					.select({ isOwner: storeMembers.isOwner })
 					.from(storeMembers)
 					.where(
@@ -458,13 +471,17 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
-	async countRoleMembers(storeId: string, roleId: string): Promise<number> {
+	async countRoleMembers(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string
+	): Promise<number> {
 		return traceDbOp(
 			this.tracer,
 			'db.storeMembers.countByRole',
 			{ 'db.table': 'store_members', 'db.operation': 'select' },
 			async () => {
-				const [result] = await this.db
+				const [result] = await this.getExecutor(tx)
 					.select({ count: sql<number>`cast(count(*) as integer)` })
 					.from(storeMembers)
 					.where(
@@ -481,6 +498,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	async suspendMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean> {
 		return traceDbOp(
@@ -494,6 +512,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.where(
 						and(
 							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId),
 							eq(storeMembers.userId, userId),
 							sql`suspended_at IS NULL`
 						)
@@ -507,6 +526,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	async unsuspendMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean> {
 		return traceDbOp(
@@ -520,6 +540,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.where(
 						and(
 							eq(storeMembers.storeId, storeId),
+							eq(storeMembers.roleId, roleId),
 							eq(storeMembers.userId, userId),
 							sql`suspended_at IS NOT NULL`
 						)
@@ -531,6 +552,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	}
 
 	async isMemberSuspended(
+		tx: ITransactionContext | undefined,
 		storeId: string,
 		userId: string
 	): Promise<boolean | null> {
@@ -539,7 +561,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.storeMembers.isSuspended',
 			{ 'db.table': 'store_members', 'db.operation': 'select' },
 			async () => {
-				const [member] = await this.db
+				const [member] = await this.getExecutor(tx)
 					.select({ suspendedAt: storeMembers.suspendedAt })
 					.from(storeMembers)
 					.where(
