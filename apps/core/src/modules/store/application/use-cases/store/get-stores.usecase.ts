@@ -11,7 +11,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type IGetOwnStoresUseCase } from '../../../domain/ports/store-use-cases.port';
 
 @Injectable()
-export class GetOwnStoresUseCase implements IGetOwnStoresUseCase {
+export class GetStoresUseCase implements IGetOwnStoresUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,

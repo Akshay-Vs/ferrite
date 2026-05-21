@@ -12,7 +12,7 @@ export * from './roles/get-store-roles.usecase';
 export * from './roles/update-role-permissions.usecase';
 export * from './store/create-store.usecase';
 export * from './store/delete-store.usecase';
-export * from './store/get-own-stores.usecase';
 export * from './store/get-public-store.usecase';
+export * from './store/get-stores.usecase';
 export * from './store/initialize-store-orchestrator.usecase';
 export * from './store/update-store.usecase';

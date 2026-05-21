@@ -20,8 +20,8 @@ import {
 	GET_OWN_STORES_UC,
 	GET_PUBLIC_STORE_UC,
 	type IDeleteStoreUseCase,
-	type IGetOwnStoresUseCase,
 	type IGetPublicStoreUseCase,
+	type IGetStoresUseCase,
 	type IInitializeStoreOrchestratorUseCase,
 	INITIALIZE_STORE_ORCHESTRATOR_UC,
 	type IUpdateStoreUseCase,
@@ -52,8 +52,8 @@ import {
 	AddStoreMembersDocs,
 	CreateStoreDocs,
 	DeleteStoreDocs,
-	GetOwnStoresDocs,
 	GetStoreByIdDocs,
+	GetStoresDocs,
 	UpdateStoreDocs,
 } from './docs/store.swaggerdocs';
 
@@ -66,7 +66,7 @@ export class StoreController {
 		@Inject(INITIALIZE_STORE_ORCHESTRATOR_UC)
 		private readonly initializeStoreOrchestratorPc: IInitializeStoreOrchestratorUseCase,
 		@Inject(GET_OWN_STORES_UC)
-		private readonly getOwnStoresUc: IGetOwnStoresUseCase,
+		private readonly getStoresUc: IGetStoresUseCase,
 		@Inject(GET_PUBLIC_STORE_UC)
 		private readonly getPublicStoreUc: IGetPublicStoreUseCase,
 		@Inject(UPDATE_STORE_UC)
@@ -110,11 +110,11 @@ export class StoreController {
 	}
 
 	@Get()
-	@GetOwnStoresDocs()
+	@GetStoresDocs()
 	@SkipPermissions()
 	async getOwnStores(@AuthUserParam() user: AuthUser): Promise<GetAllStores[]> {
 		return this.tracer.withSpan('http.get-own-stores', async () => {
-			const result = await this.getOwnStoresUc.execute(user.id);
+			const result = await this.getStoresUc.execute(user.id);
 			if (result.isErr()) {
 				throw new UnprocessableEntityException('Failed to get stores');
 			}

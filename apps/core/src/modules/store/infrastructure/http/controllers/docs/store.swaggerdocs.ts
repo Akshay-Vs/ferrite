@@ -13,11 +13,11 @@ export const CreateStoreDocs = () =>
 		ApiResponse({ status: 500, description: 'Internal server error.' })
 	);
 
-export const GetOwnStoresDocs = () =>
+export const GetStoresDocs = () =>
 	applyDecorators(
 		ApiOperation({
-			summary: 'Get own stores',
-			description: 'Returns a list of stores owned by the authenticated user.',
+			summary: 'Get stores',
+			description: 'Returns a list of stores you are a member of',
 		}),
 		ApiResponse({ status: 200, description: 'Returns a list of stores.' }),
 		ApiResponse({ status: 422, description: 'Unprocessable entity.' }),
