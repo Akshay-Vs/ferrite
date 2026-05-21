@@ -7,8 +7,11 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import { uuidSchema } from '@ferrite/schema/common/uuid.zodschema';
-import { CheckStorePermissionUseCase } from '@modules/store/application/use-cases/check-store-permission.usecase';
 import { PermissionNotProvidedError } from '@modules/store/domain/errors/permission-not-provided-error';
+import {
+	CHECK_STORE_PERMISSION_UC,
+	type ICheckStorePermissionUseCase,
+} from '@modules/store/domain/ports/role-use-cases.port';
 import {
 	CanActivate,
 	ExecutionContext,
@@ -24,7 +27,8 @@ export class StorePermissionGuard implements CanActivate {
 	constructor(
 		private readonly reflector: Reflector,
 		private readonly logger: AppLogger,
-		private readonly checkPermission: CheckStorePermissionUseCase,
+		@Inject(CHECK_STORE_PERMISSION_UC)
+		private readonly checkPermission: ICheckStorePermissionUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.logger.setContext(this.constructor.name);
