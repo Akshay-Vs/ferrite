@@ -41,7 +41,7 @@ export type ICreateStoreUseCase = IUseCase<
 	Error
 >;
 export type IDeleteStoreUseCase = IUseCase<string, void, StoreNotFoundError>;
-export type IGetOwnStoresUseCase = IUseCase<string, GetAllStores[], Error>;
+export type IGetStoresUseCase = IUseCase<string, GetAllStores[], Error>;
 export type IGetPublicStoreUseCase = IUseCase<
 	string,
 	GetStore,

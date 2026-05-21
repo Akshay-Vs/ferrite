@@ -38,7 +38,11 @@ export class DeleteStoreRoleUseCase implements IDeleteStoreRoleUseCase {
 	): Promise<Result<void, DeleteStoreRoleError>> {
 		return this.tracer.withSpan('DeleteStoreRoleUseCase.execute', async () => {
 			try {
-				const role = await this.repo.findRoleById(input.storeId, input.roleId);
+				const role = await this.repo.findRoleById(
+					input.tx,
+					input.storeId,
+					input.roleId
+				);
 				if (!role) {
 					return err(new RoleNotFoundError(input.roleId, input.storeId));
 				}
@@ -48,6 +52,7 @@ export class DeleteStoreRoleUseCase implements IDeleteStoreRoleUseCase {
 				}
 
 				const memberCount = await this.repo.countRoleMembers(
+					input.tx,
 					input.storeId,
 					input.roleId
 				);

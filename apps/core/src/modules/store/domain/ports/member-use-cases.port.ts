@@ -30,18 +30,21 @@ export interface AddStoreMembersInput {
 export interface RemoveStoreMemberInput {
 	tx?: ITransactionContext;
 	storeId: string;
+	roleId: string;
 	userId: string;
 }
 
 export interface SuspendStoreMemberInput {
 	tx?: ITransactionContext;
 	storeId: string;
+	roleId: string;
 	userId: string;
 }
 
 export interface UnsuspendStoreMemberInput {
 	tx?: ITransactionContext;
 	storeId: string;
+	roleId: string;
 	userId: string;
 }
 

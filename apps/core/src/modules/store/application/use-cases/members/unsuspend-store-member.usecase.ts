@@ -42,6 +42,7 @@ export class UnsuspendStoreMemberUseCase
 			async () => {
 				try {
 					const isSuspended = await this.repo.isMemberSuspended(
+						input.tx,
 						input.storeId,
 						input.userId
 					);
@@ -59,6 +60,7 @@ export class UnsuspendStoreMemberUseCase
 					const unsuspended = await this.repo.unsuspendMember(
 						input.tx,
 						input.storeId,
+						input.roleId,
 						input.userId
 					);
 

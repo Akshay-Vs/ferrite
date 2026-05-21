@@ -40,6 +40,7 @@ export class RemoveStoreMemberUseCase implements IRemoveStoreMemberUseCase {
 			async () => {
 				try {
 					const isOwner = await this.repo.isMemberOwner(
+						input.tx,
 						input.storeId,
 						input.userId
 					);
@@ -50,6 +51,7 @@ export class RemoveStoreMemberUseCase implements IRemoveStoreMemberUseCase {
 					const removed = await this.repo.removeStoreMember(
 						input.tx,
 						input.storeId,
+						input.roleId,
 						input.userId
 					);
 					if (!removed) {

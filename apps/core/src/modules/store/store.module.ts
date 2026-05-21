@@ -7,11 +7,11 @@ import {
 	CreateStoreUseCase,
 	DeleteStoreRoleUseCase,
 	DeleteStoreUseCase,
-	GetOwnStoresUseCase,
 	GetPublicStoreUseCase,
 	GetRoleMembersUseCase,
 	GetRolePermissionsUseCase,
 	GetStoreRolesUseCase,
+	GetStoresUseCase,
 	InitializeStoreOrchestratorUseCase,
 	RemoveStoreMemberUseCase,
 	SuspendStoreMemberUseCase,
@@ -89,7 +89,7 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		},
 		{
 			provide: GET_OWN_STORES_UC,
-			useClass: GetOwnStoresUseCase,
+			useClass: GetStoresUseCase,
 		},
 		{
 			provide: GET_PUBLIC_STORE_UC,

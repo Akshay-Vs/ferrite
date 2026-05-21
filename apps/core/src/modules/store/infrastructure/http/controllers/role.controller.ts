@@ -211,6 +211,7 @@ export class RoleController {
 		return this.tracer.withSpan('http.remove-store-member', async () => {
 			const result = await this.removeStoreMemberUc.execute({
 				storeId,
+				roleId,
 				userId,
 			});
 
@@ -266,6 +267,7 @@ export class RoleController {
 		return this.tracer.withSpan('http.suspend-store-member', async () => {
 			const result = await this.suspendStoreMemberUc.execute({
 				storeId,
+				roleId,
 				userId,
 			});
 
@@ -296,6 +298,7 @@ export class RoleController {
 		return this.tracer.withSpan('http.unsuspend-store-member', async () => {
 			const result = await this.unsuspendStoreMemberUc.execute({
 				storeId,
+				roleId,
 				userId,
 			});
 

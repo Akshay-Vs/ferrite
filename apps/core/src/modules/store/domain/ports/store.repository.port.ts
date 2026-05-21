@@ -117,6 +117,7 @@ export interface IStoreRepository {
 	removeStoreMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean>;
 
@@ -134,17 +135,29 @@ export interface IStoreRepository {
 	/**
 	 * Find a specific role by ID within a store.
 	 */
-	findRoleById(storeId: string, roleId: string): Promise<StoreRole | null>;
+	findRoleById(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string
+	): Promise<StoreRole | null>;
 
 	/**
 	 * Check if a member is the store owner.
 	 */
-	isMemberOwner(storeId: string, userId: string): Promise<boolean>;
+	isMemberOwner(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean>;
 
 	/**
 	 * Count members assigned to a specific role.
 	 */
-	countRoleMembers(storeId: string, roleId: string): Promise<number>;
+	countRoleMembers(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		roleId: string
+	): Promise<number>;
 
 	/**
 	 * Sets suspendedAt on a member. Returns true if updated.
@@ -152,6 +165,7 @@ export interface IStoreRepository {
 	suspendMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean>;
 
@@ -161,6 +175,7 @@ export interface IStoreRepository {
 	unsuspendMember(
 		tx: ITransactionContext | undefined,
 		storeId: string,
+		roleId: string,
 		userId: string
 	): Promise<boolean>;
 
@@ -168,7 +183,11 @@ export interface IStoreRepository {
 	 * Check if a member is currently suspended.
 	 * Returns null if the user is not a member of the store.
 	 */
-	isMemberSuspended(storeId: string, userId: string): Promise<boolean | null>;
+	isMemberSuspended(
+		tx: ITransactionContext | undefined,
+		storeId: string,
+		userId: string
+	): Promise<boolean | null>;
 
 	/**
 	 * Execute queries inside a transaction.

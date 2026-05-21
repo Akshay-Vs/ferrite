@@ -28,7 +28,11 @@ export class AddStoreMembersUseCase implements IAddStoreMembersUseCase {
 	async execute(input: AddStoreMembersInput): Promise<Result<void, Error>> {
 		return this.tracer.withSpan('AddStoreMembersUseCase.execute', async () => {
 			try {
-				const role = await this.repo.findRoleById(input.storeId, input.roleId);
+				const role = await this.repo.findRoleById(
+					input.tx,
+					input.storeId,
+					input.roleId
+				);
 				if (!role) {
 					return err(new RoleNotFoundError(input.roleId, input.storeId));
 				}
