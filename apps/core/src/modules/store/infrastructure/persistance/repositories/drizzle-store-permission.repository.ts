@@ -6,6 +6,7 @@ import {
 	storeRoles,
 } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
+import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
@@ -13,7 +14,7 @@ import type { IStorePermissionChecker } from '@modules/store/domain/ports/store-
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 const CACHE_PREFIX = 'store-perms';
 
@@ -33,8 +34,11 @@ export class DrizzleStorePermissionRepository
 	constructor(
 		@Inject(DB) private readonly db: TDatabase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(CACHE_MANAGER) private readonly cache: Cache
-	) {}
+		@Inject(CACHE_MANAGER) private readonly cache: Cache,
+		private readonly logger: AppLogger
+	) {
+		this.logger.setContext(this.constructor.name);
+	}
 
 	async getPermissions(
 		userId: string,
@@ -52,10 +56,14 @@ export class DrizzleStorePermissionRepository
 					'cache.permissions_count': cached.permissions?.length ?? 0,
 				});
 			});
+
+			this.logger.debug(`Cache hit for ${cacheKey}`);
+
 			return cached.permissions;
 		}
 
 		// ── Cache miss → single DB round-trip ──
+		this.logger.debug(`Cache miss for ${cacheKey}`);
 		const result = await this.queryPermissions(userId, storeId);
 
 		// Wrap in sentinel before caching (preserves null vs undefined)
@@ -75,6 +83,8 @@ export class DrizzleStorePermissionRepository
 					'cache.key': cacheKey,
 					'cache.operation': 'invalidate',
 				});
+
+				this.logger.debug(`Invalidating cache for ${cacheKey}`);
 				await this.cache.del(cacheKey);
 			}
 		);
@@ -105,6 +115,27 @@ export class DrizzleStorePermissionRepository
 
 				await Promise.all(
 					members.map((m) => this.invalidatePermissions(m.userId, storeId))
+				);
+			}
+		);
+	}
+
+	async invalidatePermissionByUserId(userId: string): Promise<void> {
+		await this.tracer.withSpan(
+			'cache.storePermissions.invalidateByUserId',
+			async (span) => {
+				span.setAttributes({
+					'cache.user_id': userId,
+					'cache.operation': 'invalidateByUserId',
+				});
+
+				const stores = await this.db
+					.select({ storeId: storeMembers.storeId })
+					.from(storeMembers)
+					.where(eq(storeMembers.userId, userId));
+
+				await Promise.all(
+					stores.map((s) => this.invalidatePermissions(userId, s.storeId))
 				);
 			}
 		);
@@ -157,7 +188,8 @@ export class DrizzleStorePermissionRepository
 					.where(
 						and(
 							eq(storeMembers.userId, userId),
-							eq(storeMembers.storeId, storeId)
+							eq(storeMembers.storeId, storeId),
+							sql`${storeMembers.suspendedAt} IS NULL`
 						)
 					);
 
