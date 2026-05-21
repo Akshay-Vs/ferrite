@@ -43,6 +43,13 @@
 			"when": 1778141815913,
 			"tag": "0005_concerned_mandroid",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1779343142260,
+			"tag": "0006_lying_sphinx",
+			"breakpoints": true
 		}
 	]
 }

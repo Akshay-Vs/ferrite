@@ -139,6 +139,7 @@ export const storeMembers = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true })
 			.notNull()
 			.defaultNow(),
+		suspendedAt: timestamp('suspended_at', { withTimezone: true }),
 	},
 	(t) => [
 		// Composite PK: one membership per user per store
