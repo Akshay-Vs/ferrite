@@ -1,9 +1,11 @@
 import { err, ok } from '@common/interfaces/result.interface';
-import { DeleteStoreUseCase } from '@modules/store/application/use-cases/delete-store.usecase';
-import { GetOwnStoresUseCase } from '@modules/store/application/use-cases/get-own-stores.usecase';
-import { GetPublicStoreUseCase } from '@modules/store/application/use-cases/get-public-store.usecase';
-import { InitializeStoreOrchestratorUseCase } from '@modules/store/application/use-cases/initialize-store-orchestrator.usecase';
-import { UpdateStoreUseCase } from '@modules/store/application/use-cases/update-store.usecase';
+import {
+	DELETE_STORE_UC,
+	GET_OWN_STORES_UC,
+	GET_PUBLIC_STORE_UC,
+	INITIALIZE_STORE_ORCHESTRATOR_UC,
+	UPDATE_STORE_UC,
+} from '@modules/store/domain/ports/store-use-cases.port';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import type { App } from 'supertest/types';
@@ -33,13 +35,13 @@ describe('StoreController (e2e)', () => {
 		app = await createTestApp([
 			...authOverrides(mockJwtUseCase, mockCheckPermissionUseCase),
 			{
-				provider: InitializeStoreOrchestratorUseCase,
+				provider: INITIALIZE_STORE_ORCHESTRATOR_UC,
 				useValue: mockInitializeStoreOrchestratorUseCase,
 			},
-			{ provider: GetOwnStoresUseCase, useValue: mockGetOwnStoresUseCase },
-			{ provider: GetPublicStoreUseCase, useValue: mockGetPublicStoreUseCase },
-			{ provider: UpdateStoreUseCase, useValue: mockUpdateStoreUseCase },
-			{ provider: DeleteStoreUseCase, useValue: mockDeleteStoreUseCase },
+			{ provider: GET_OWN_STORES_UC, useValue: mockGetOwnStoresUseCase },
+			{ provider: GET_PUBLIC_STORE_UC, useValue: mockGetPublicStoreUseCase },
+			{ provider: UPDATE_STORE_UC, useValue: mockUpdateStoreUseCase },
+			{ provider: DELETE_STORE_UC, useValue: mockDeleteStoreUseCase },
 		]);
 	}, 30000);
 

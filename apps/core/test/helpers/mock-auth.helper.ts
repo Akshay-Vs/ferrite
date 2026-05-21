@@ -1,6 +1,6 @@
 import { ok } from '@common/interfaces/result.interface';
-import { JwtTokenUseCase } from '@modules/auth/application/use-cases/jwt-token.usecase';
-import { CheckStorePermissionUseCase } from '@modules/store/application/use-cases/check-store-permission.usecase';
+import { JWT_TOKEN_UC } from '@modules/auth/domain/ports/use-case.port';
+import { CHECK_STORE_PERMISSION_UC } from '@modules/store/domain/ports/role-use-cases.port';
 import type { TestOverride } from './app.helper';
 
 /** A valid bearer token used across all E2E test requests. */
@@ -39,7 +39,7 @@ export function authOverrides(
 	permMock: ReturnType<typeof createMockCheckPermissionUseCase>
 ): TestOverride[] {
 	return [
-		{ provider: JwtTokenUseCase, useValue: jwtMock },
-		{ provider: CheckStorePermissionUseCase, useValue: permMock },
+		{ provider: JWT_TOKEN_UC, useValue: jwtMock },
+		{ provider: CHECK_STORE_PERMISSION_UC, useValue: permMock },
 	];
 }
