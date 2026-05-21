@@ -1,21 +1,17 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
-import { StoreNotFoundError } from '../../domain/errors/store-not-found.error';
+import { StoreNotFoundError } from '../../../domain/errors/store-not-found.error';
 import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export const DELETE_STORE_UC = Symbol('DeleteStoreUseCase');
+} from '../../../domain/ports/store.repository.port';
+import { type IDeleteStoreUseCase } from '../../../domain/ports/store-use-cases.port';
 
 @Injectable()
-export class DeleteStoreUseCase
-	implements IUseCase<string, void, StoreNotFoundError>
-{
+export class DeleteStoreUseCase implements IDeleteStoreUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,

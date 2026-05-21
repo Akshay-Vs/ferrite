@@ -1,26 +1,20 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type { StoreMember } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { Inject, Injectable } from '@nestjs/common';
 import {
+	type GetRoleMembersInput,
+	type IGetRoleMembersUseCase,
+} from '../../../domain/ports/role-use-cases.port';
+import {
 	type IStoreRepository,
 	STORE_REPOSITORY,
-} from '../../domain/ports/store.repository.port';
-
-export interface GetRoleMembersInput {
-	storeId: string;
-	roleId: string;
-}
-
-export const GET_ROLE_MEMBERS_UC = Symbol('GetRoleMembersUseCase');
+} from '../../../domain/ports/store.repository.port';
 
 @Injectable()
-export class GetRoleMembersUseCase
-	implements IUseCase<GetRoleMembersInput, StoreMember[], Error>
-{
+export class GetRoleMembersUseCase implements IGetRoleMembersUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
