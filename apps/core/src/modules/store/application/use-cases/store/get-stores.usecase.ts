@@ -8,10 +8,10 @@ import {
 	STORE_REPOSITORY,
 } from '@modules/store/domain/ports/store.repository.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { type IGetOwnStoresUseCase } from '../../../domain/ports/store-use-cases.port';
+import { type IGetStoresUseCase } from '../../../domain/ports/store-use-cases.port';
 
 @Injectable()
-export class GetStoresUseCase implements IGetOwnStoresUseCase {
+export class GetStoresUseCase implements IGetStoresUseCase {
 	constructor(
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
