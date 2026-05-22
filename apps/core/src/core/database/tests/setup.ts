@@ -75,6 +75,7 @@ export async function cleanupTables(): Promise<void> {
 			user_onboarding,
 			store_role_permissions,
 			store_roles,
+			store_invitations,
 			store_members,
 			stores,
 			user_phones,

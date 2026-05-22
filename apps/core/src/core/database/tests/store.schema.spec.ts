@@ -1,5 +1,7 @@
 import { eq } from 'drizzle-orm';
+import { currencies } from '../schema/currency.schema';
 import {
+	storeInvitations,
 	storeMembers,
 	storeRolePermissions,
 	storeRoles,
@@ -7,7 +9,9 @@ import {
 } from '../schema/store.schema';
 import { users } from '../schema/user.schema';
 import {
+	createTestCurrency,
 	createTestStore,
+	createTestStoreInvitation,
 	createTestStoreMember,
 	createTestStoreRole,
 	createTestStoreRolePermission,
@@ -25,6 +29,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
 	await cleanupTables();
+	await db.insert(currencies).values(createTestCurrency());
 });
 
 describe('Store tables', () => {
@@ -460,6 +465,97 @@ describe('Store tables', () => {
 				// 23001 = restrict_violation (ON DELETE RESTRICT)
 				expect(e.cause?.code).toBe('23001');
 			}
+		});
+	});
+
+	describe('store_invitations table', () => {
+		it('should insert a store invitation', async () => {
+			const [user] = await db
+				.insert(users)
+				.values(createTestUser())
+				.returning();
+			const [store] = await db
+				.insert(stores)
+				.values(createTestStore(user.id))
+				.returning();
+			const [role] = await db
+				.insert(storeRoles)
+				.values(createTestStoreRole(store.id, { name: 'Admin' }))
+				.returning();
+
+			const [invitation] = await db
+				.insert(storeInvitations)
+				.values(createTestStoreInvitation(store.id, role.id, user.id))
+				.returning();
+
+			expect(invitation.id).toBeDefined();
+			expect(invitation.storeId).toBe(store.id);
+			expect(invitation.roleId).toBe(role.id);
+			expect(invitation.invitedBy).toBe(user.id);
+			expect(invitation.email).toMatch(/invite-.*@example.com/);
+			expect(invitation.token).toBeDefined();
+			expect(invitation.status).toBe('pending');
+		});
+
+		it('should enforce unique token', async () => {
+			const [user] = await db
+				.insert(users)
+				.values(createTestUser())
+				.returning();
+			const [store] = await db
+				.insert(stores)
+				.values(createTestStore(user.id))
+				.returning();
+			const [role] = await db
+				.insert(storeRoles)
+				.values(createTestStoreRole(store.id, { name: 'Admin' }))
+				.returning();
+
+			const token = 'fixed-token-123';
+			await db
+				.insert(storeInvitations)
+				.values(
+					createTestStoreInvitation(store.id, role.id, user.id, { token })
+				);
+
+			try {
+				await db
+					.insert(storeInvitations)
+					.values(
+						createTestStoreInvitation(store.id, role.id, user.id, { token })
+					);
+				throw new Error('Should have thrown on duplicate token');
+			} catch (e: any) {
+				expect(e.cause?.code).toBe('23505');
+			}
+		});
+
+		it('should cascade delete invitations when store is deleted', async () => {
+			const [user] = await db
+				.insert(users)
+				.values(createTestUser())
+				.returning();
+			const [store] = await db
+				.insert(stores)
+				.values(createTestStore(user.id))
+				.returning();
+			const [role] = await db
+				.insert(storeRoles)
+				.values(createTestStoreRole(store.id, { name: 'Admin' }))
+				.returning();
+
+			await db
+				.insert(storeInvitations)
+				.values(createTestStoreInvitation(store.id, role.id, user.id));
+
+			await db.delete(stores).where(eq(stores.id, store.id));
+
+			const rows = await db
+				.select()
+				.from(storeInvitations)
+				.where(eq(storeInvitations.storeId, store.id));
+
+			expect(rows).toHaveLength(0);
 		});
 	});
 });
