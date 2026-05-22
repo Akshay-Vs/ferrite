@@ -13,7 +13,7 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 import { currencies } from './currency.schema';
-import { permissionKeyEnum } from './enum';
+import { invitationStatusEnum, permissionKeyEnum } from './enum';
 import { users } from './user.schema';
 
 // ─────────────────────────────────────────
@@ -170,3 +170,38 @@ export type NewStoreRolePermission = typeof storeRolePermissions.$inferInsert;
 
 export type StoreMember = typeof storeMembers.$inferSelect;
 export type NewStoreMember = typeof storeMembers.$inferInsert;
+
+// ─────────────────────────────────────────
+// STORE INVITATIONS
+// ─────────────────────────────────────────
+
+export const storeInvitations = pgTable(
+	'store_invitations',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		storeId: uuid('store_id')
+			.notNull()
+			.references(() => stores.id, { onDelete: 'cascade' }),
+		email: varchar('email', { length: 255 }).notNull(),
+		roleId: uuid('role_id')
+			.notNull()
+			.references(() => storeRoles.id, { onDelete: 'cascade' }),
+		invitedBy: uuid('invited_by')
+			.notNull()
+			.references(() => users.id, { onDelete: 'restrict' }),
+		token: varchar('token', { length: 255 }).notNull().unique(),
+		status: invitationStatusEnum('status').notNull().default('pending'),
+		createdAt: timestamp('created_at', { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+	},
+	(t) => [
+		index('idx_store_invitations_store_id').on(t.storeId),
+		index('idx_store_invitations_email').on(t.email),
+		uniqueIndex('uq_store_invitations_token').on(t.token),
+	]
+);
+
+export type StoreInvitation = typeof storeInvitations.$inferSelect;
+export type NewStoreInvitation = typeof storeInvitations.$inferInsert;

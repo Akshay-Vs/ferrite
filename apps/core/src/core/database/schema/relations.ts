@@ -5,6 +5,7 @@ import { userOnboarding } from './onboarding.schema';
 import { userPaymentMethods } from './payment.schema';
 import { userNotificationPreferences } from './preferences.schema';
 import {
+	storeInvitations,
 	storeMembers,
 	storeRolePermissions,
 	storeRoles,
@@ -25,6 +26,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 	paymentMethods: many(userPaymentMethods),
 	createdStores: many(stores),
 	storeMemberships: many(storeMembers),
+	sentStoreInvitations: many(storeInvitations, { relationName: 'invitedBy' }),
 }));
 
 export const userOnboardingRelations = relations(userOnboarding, ({ one }) => ({
@@ -86,6 +88,7 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
 	}),
 	members: many(storeMembers),
 	roles: many(storeRoles),
+	invitations: many(storeInvitations),
 }));
 
 export const storeRolesRelations = relations(storeRoles, ({ one, many }) => ({
@@ -95,6 +98,7 @@ export const storeRolesRelations = relations(storeRoles, ({ one, many }) => ({
 	}),
 	permissions: many(storeRolePermissions),
 	members: many(storeMembers),
+	invitations: many(storeInvitations),
 }));
 
 export const storeRolePermissionsRelations = relations(
@@ -121,6 +125,24 @@ export const storeMembersRelations = relations(storeMembers, ({ one }) => ({
 		references: [storeRoles.id],
 	}),
 }));
+
+export const storeInvitationsRelations = relations(
+	storeInvitations,
+	({ one }) => ({
+		store: one(stores, {
+			fields: [storeInvitations.storeId],
+			references: [stores.id],
+		}),
+		role: one(storeRoles, {
+			fields: [storeInvitations.roleId],
+			references: [storeRoles.id],
+		}),
+		invitedBy: one(users, {
+			fields: [storeInvitations.invitedBy],
+			references: [users.id],
+		}),
+	})
+);
 
 // ─────────────────────────────────────────
 // CURRENCY RELATIONS
