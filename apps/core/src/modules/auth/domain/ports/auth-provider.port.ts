@@ -1,19 +1,21 @@
+import { Result } from '@common/interfaces/result.interface';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
-import {
-	AuthUser,
-	RawTokenClaims,
-	WebhookPayload,
-} from '@ferrite/schema/auth/index';
+import { AuthUser, RawTokenClaims } from '@ferrite/schema/auth/index';
 import { UserUpdatePayload } from '@ferrite/schema/auth/user-update-payload.zodschema';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
+import { DeleteUserError } from '../errors/delete-user.error';
+import { InvalidTokenError } from '../errors/invalid-token.error';
+import { InvalidWebhookPayloadError } from '../errors/invalid-webhook-payload.error';
+import { UpdateUserError } from '../errors/update-user.error';
+import { WebhookVerificationError } from '../errors/webhook-verification.error';
 
 export interface ITokenVerifier {
 	/**
 	 * Cryptographically verify the JWT signature and return the verified claims.
 	 * @param token - The raw JWT string from the Authorization header
-	 * @returns Verified and decoded token claims
-	 * @throws {UnauthorizedException} If the signature is invalid or the token is expired
+	 * @returns A Result containing the verified and decoded token claims, or an InvalidTokenError
 	 */
-	verifyJWT(token: string): Promise<RawTokenClaims>;
+	verifyJWT(token: string): Promise<Result<RawTokenClaims, InvalidTokenError>>;
 }
 
 export interface ITokenTransformer {
@@ -31,11 +33,16 @@ export interface IWebhookVerifier {
 	/**
 	 * Verify the webhook signature from the HTTP request.
 	 * @param payload - Raw HTTP envelope containing the unparsed body buffer and headers
-	 * @returns WebhookPayload if the signature is valid
-	 * @throws {BadRequestException} If the signature is missing or malformed
-	 * @throws {UnauthorizedException} If the signature is invalid or the timestamp is outside tolerance
+	 * @returns A Result containing WebhookPayload if the signature is valid, or an error
 	 */
-	verifyWebhook(payload: RawWebhookRequest): Promise<WebhookPayload>;
+	verifyWebhook(
+		payload: RawWebhookRequest
+	): Promise<
+		Result<
+			WebhookEnvelope,
+			InvalidWebhookPayloadError | WebhookVerificationError
+		>
+	>;
 }
 
 /**
@@ -60,7 +67,7 @@ export interface IWebhookAuth extends IWebhookVerifier {}
  * Implemented by: ClerkAdapter, KindeAdapter etc
  */
 export interface IDeleteUser {
-	deleteUser(externalAuthId: string): Promise<void>;
+	deleteUser(externalAuthId: string): Promise<Result<void, DeleteUserError>>;
 }
 
 /**
@@ -69,5 +76,8 @@ export interface IDeleteUser {
  * Implemented by: ClerkAdapter, KindeAdapter etc
  */
 export interface IUpdateUser {
-	updateUser(externalAuthId: string, payload: UserUpdatePayload): Promise<void>;
+	updateUser(
+		externalAuthId: string,
+		payload: UserUpdatePayload
+	): Promise<Result<void, UpdateUserError>>;
 }
