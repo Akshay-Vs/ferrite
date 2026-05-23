@@ -39,10 +39,9 @@ export class UserSyncProcessor extends BaseProcessor<EventPayload> {
 
 			if (!validatedEvent.success) {
 				this.logger.error(
-					`Failed to validate event: ${validatedEvent.error.message}`
+					`Poison Pill Envelope: ${validatedEvent.error.message}`
 				);
-
-				return err(validatedEvent.error);
+				return ok(); // ack poison pill
 			}
 
 			const { eventType } = validatedEvent.data;
