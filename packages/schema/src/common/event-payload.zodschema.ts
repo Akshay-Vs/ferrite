@@ -18,12 +18,6 @@ import { z } from 'zod';
  *   return this.myUseCase.execute(parsed.data);
  * }
  * ```
- *
- * ## How jobs are enqueued
- * Producers call `GraphileEnqueueEvent` with a `QueueParams<T>` object that
- * extends this schema. The `payload` field is typed as `T` at the call-site
- * but is stored as plain JSON in the database, so processors must always
- * re-validate at runtime.
  */
 export const eventPayloadSchema = z
 	.object({
