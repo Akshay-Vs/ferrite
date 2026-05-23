@@ -23,6 +23,7 @@ import {
 	HttpAdapterHost,
 } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { NotificationsModule } from '@notifications/index';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 
 @Module({
@@ -45,6 +46,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		StoreModule,
 		UsersModule,
 		OnboardingModule,
+		NotificationsModule,
 	],
 	providers: [
 		// Guards
