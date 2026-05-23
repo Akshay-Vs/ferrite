@@ -4,6 +4,7 @@ import {
 	createClerkClient,
 	WebhookEvent,
 } from '@clerk/backend';
+import { err, ok, Result } from '@common/interfaces/result.interface';
 import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
 import { RawWebhookRequest } from '@common/types/webhook-payload.type';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
@@ -20,18 +21,18 @@ import {
 	WebhookEnvelope,
 	webhookEnvelopeSchema,
 } from '@ferrite/schema/common/webhook-envelope.zodschema';
+import { DeleteUserError } from '@modules/auth/domain/errors/delete-user.error';
+import { InvalidTokenError } from '@modules/auth/domain/errors/invalid-token.error';
+import { InvalidWebhookPayloadError } from '@modules/auth/domain/errors/invalid-webhook-payload.error';
+import { UpdateUserError } from '@modules/auth/domain/errors/update-user.error';
+import { WebhookVerificationError } from '@modules/auth/domain/errors/webhook-verification.error';
 import {
 	IDeleteUser,
 	ITokenAuth,
 	IUpdateUser,
 	IWebhookAuth,
 } from '@modules/auth/domain/ports/auth-provider.port';
-import {
-	BadRequestException,
-	Inject,
-	Injectable,
-	UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { USER_SYNC_QUEUE } from '@users/index';
 import { Webhook } from 'svix';
@@ -66,7 +67,9 @@ export class ClerkAdapter
 	}
 
 	//  ITokenVerifier
-	async verifyJWT(token: string): Promise<RawTokenClaims> {
+	async verifyJWT(
+		token: string
+	): Promise<Result<RawTokenClaims, InvalidTokenError>> {
 		return this.tracer.withSpan('adapters.clerk.verifyJWT', async (span) => {
 			try {
 				this.logger.debug('Verifying JWT token');
@@ -81,10 +84,10 @@ export class ClerkAdapter
 				});
 
 				if (!claims.email) {
-					throw new UnauthorizedException('Invalid or expired token');
+					return err(new InvalidTokenError('Invalid or expired token'));
 				}
 
-				return {
+				return ok({
 					sub: claims.sub,
 					email: claims.email as string,
 					email_verified: (claims.email_verified as boolean) ?? false,
@@ -92,10 +95,10 @@ export class ClerkAdapter
 					metadata: (claims.public_metadata as Record<string, unknown>) ?? {},
 					iat: claims.iat,
 					exp: claims.exp,
-				};
+				});
 			} catch {
 				this.logger.error('Invalid or expired token');
-				throw new UnauthorizedException('Invalid or expired token');
+				return err(new InvalidTokenError('Invalid or expired token'));
 			}
 		});
 	}
@@ -120,7 +123,14 @@ export class ClerkAdapter
 	}
 
 	//  IWebhookVerifier
-	async verifyWebhook(payload: RawWebhookRequest): Promise<WebhookEnvelope> {
+	async verifyWebhook(
+		payload: RawWebhookRequest
+	): Promise<
+		Result<
+			WebhookEnvelope,
+			InvalidWebhookPayloadError | WebhookVerificationError
+		>
+	> {
 		return this.tracer.withSpan(
 			'adapters.clerk.verifyWebhook',
 			async (span) => {
@@ -147,13 +157,15 @@ export class ClerkAdapter
 					this.logger.error(
 						'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
 					);
-					throw new BadRequestException(
-						'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+					return err(
+						new InvalidWebhookPayloadError(
+							'Missing svix headers: svix-id, svix-timestamp, svix-signature are required'
+						)
 					);
 				}
 				if (!body) {
 					this.logger.error('Missing request body');
-					throw new BadRequestException('Missing request body');
+					return err(new InvalidWebhookPayloadError('Missing request body'));
 				}
 
 				const wh = new Webhook(webhookSecret);
@@ -172,8 +184,10 @@ export class ClerkAdapter
 					);
 				} catch (error) {
 					this.logger.error(`Webhook signature verification failed: ${error}`);
-					throw new UnauthorizedException(
-						'Webhook signature verification failed'
+					return err(
+						new WebhookVerificationError(
+							'Webhook signature verification failed'
+						)
 					);
 				}
 
@@ -182,7 +196,9 @@ export class ClerkAdapter
 					this.logger.error(
 						'Invalid svix-timestamp header: not a valid number'
 					);
-					throw new BadRequestException('Invalid svix-timestamp header');
+					return err(
+						new InvalidWebhookPayloadError('Invalid svix-timestamp header')
+					);
 				}
 
 				try {
@@ -195,26 +211,33 @@ export class ClerkAdapter
 						queueName: USER_SYNC_QUEUE,
 					});
 
-					return parsed;
+					return ok(parsed);
 				} catch (error) {
 					this.logger.error(
 						`Webhook payload schema validation failed: ${error}`
 					);
-					throw new BadRequestException(
-						'Webhook payload failed schema validation'
+					return err(
+						new InvalidWebhookPayloadError(
+							'Webhook payload failed schema validation'
+						)
 					);
 				}
 			}
 		);
 	}
 
-	async deleteUser(externalAuthId: string): Promise<void> {
+	async deleteUser(
+		externalAuthId: string
+	): Promise<Result<void, DeleteUserError>> {
 		return this.tracer.withSpan('adapters.clerk.deleteUser', async (_span) => {
 			try {
 				await this.clerkClient.users.deleteUser(externalAuthId);
+				return ok();
 			} catch (error) {
 				this.logger.error(`Failed to delete user in Clerk: ${error}`);
-				throw new Error(`Failed to delete user in Clerk: ${error}`);
+				return err(
+					new DeleteUserError(`Failed to delete user in Clerk: ${error}`)
+				);
 			}
 		});
 	}
@@ -222,7 +245,7 @@ export class ClerkAdapter
 	async updateUser(
 		externalAuthId: string,
 		payload: UserUpdatePayload
-	): Promise<void> {
+	): Promise<Result<void, UpdateUserError>> {
 		return this.tracer.withSpan('adapters.clerk.updateUser', async (_span) => {
 			try {
 				const clerkPayload: {
@@ -254,9 +277,12 @@ export class ClerkAdapter
 				}
 
 				await this.clerkClient.users.updateUser(externalAuthId, clerkPayload);
+				return ok();
 			} catch (error) {
 				this.logger.error(`Failed to update user in Clerk: ${error}`);
-				throw new Error(`Failed to update user in Clerk: ${error}`);
+				return err(
+					new UpdateUserError(`Failed to update user in Clerk: ${error}`)
+				);
 			}
 		});
 	}
