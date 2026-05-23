@@ -1,7 +1,7 @@
-import { WebhookPayload } from '@auth/index';
+import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
 
 export const WEBHOOK_REPOSITORY = Symbol('WEBHOOK_REPOSITORY');
 
 export interface IWebhookRepository {
-	persistWebhook(payload: WebhookPayload): Promise<boolean>;
+	persistWebhook(payload: WebhookEnvelope): Promise<boolean>;
 }
