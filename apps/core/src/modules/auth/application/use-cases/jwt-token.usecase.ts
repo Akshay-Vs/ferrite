@@ -16,15 +16,15 @@ export class JwtTokenUseCase implements IJwtTokenUseCase {
 	}
 
 	async execute(token: string): Promise<Result<AuthUser, Error>> {
-		try {
-			this.logger.debug('Verifying JWT token');
-			const claims = await this.tokenAuth.verifyJWT(token);
+		this.logger.debug('Verifying JWT token');
+		const result = await this.tokenAuth.verifyJWT(token);
 
-			this.logger.debug('Successfully verified JWT token');
-			return ok(this.tokenAuth.toAuthUser(claims));
-		} catch (error) {
-			this.logger.error('Failed to verify JWT token');
-			return err(error instanceof Error ? error : new Error(String(error)));
+		if (result.isErr()) {
+			this.logger.error('Failed to verify JWT token', result.error.stack);
+			return err(result.error);
 		}
+
+		this.logger.debug('Successfully verified JWT token');
+		return ok(this.tokenAuth.toAuthUser(result.unwrap()));
 	}
 }
