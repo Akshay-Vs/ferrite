@@ -1,5 +1,30 @@
 import { z } from 'zod';
 
+/**
+ * Generic job envelope used by **graphile-worker** for every task in the queue.
+ * It is the standard wrapper that graphile-worker stores in the
+ * `graphile_worker.jobs` table and passes to every processor's `handle()`
+ * method, regardless of which feature enqueued the job.
+ *
+ * ## How to use in a processor
+ * The `payload` field carries the actual job-specific data and must be
+ * validated against the appropriate domain schema inside `handle()`:
+ *
+ * ```ts
+ * // Good — parse the inner payload against your feature schema
+ * protected async handle(envelope: EventPayload): Promise<Result<void, Error>> {
+ *   const parsed = MyFeaturePayloadSchema.safeParse(envelope.payload);
+ *   if (!parsed.success) return err(new MyError('Invalid payload'));
+ *   return this.myUseCase.execute(parsed.data);
+ * }
+ * ```
+ *
+ * ## How jobs are enqueued
+ * Producers call `GraphileEnqueueEvent` with a `QueueParams<T>` object that
+ * extends this schema. The `payload` field is typed as `T` at the call-site
+ * but is stored as plain JSON in the database, so processors must always
+ * re-validate at runtime.
+ */
 export const eventPayloadSchema = z
 	.object({
 		eventId: z.string().min(1),
