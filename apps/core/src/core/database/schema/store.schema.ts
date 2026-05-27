@@ -189,7 +189,7 @@ export const storeInvitations = pgTable(
 		invitedBy: uuid('invited_by')
 			.notNull()
 			.references(() => users.id, { onDelete: 'restrict' }),
-		token: varchar('token', { length: 255 }).notNull().unique(),
+		token: varchar('token', { length: 255 }).notNull(),
 		status: invitationStatusEnum('status').notNull().default('pending'),
 		createdAt: timestamp('created_at', { withTimezone: true })
 			.notNull()
