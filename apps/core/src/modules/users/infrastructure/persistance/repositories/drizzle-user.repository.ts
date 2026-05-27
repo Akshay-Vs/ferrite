@@ -197,7 +197,10 @@ export class DrizzleUserRepository implements IUserRepository {
 		if (result.length === 0) return null;
 
 		// 2. Write outbox event
-		await this.enqueue.execute(ctx, outboxEvent);
+		const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
+		if (enqueueResult.isErr()) {
+			throw enqueueResult.error;
+		}
 		return UserMapper.toUserProfile(result[0]);
 	}
 
@@ -270,7 +273,10 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return false;
 
 					// 2. Write outbox event
-					await this.enqueue.execute(ctx, outboxEvent);
+					const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
+					if (enqueueResult.isErr()) {
+						throw enqueueResult.error;
+					}
 
 					return true;
 				});
@@ -315,7 +321,7 @@ export class DrizzleUserRepository implements IUserRepository {
 					const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
 
 					if (enqueueResult.isErr()) {
-						throw new Error('Failed to enqueue role update event');
+						throw enqueueResult.error;
 					}
 
 					return UserMapper.toUserProfile(result[0]);
