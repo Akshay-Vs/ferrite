@@ -30,9 +30,12 @@ export class JwtTokenUseCase implements IJwtTokenUseCase {
 
 				this.logger.debug('Successfully verified JWT token');
 				return ok(this.tokenAuth.toAuthUser(result.unwrap()));
-			} catch (error: any) {
-				this.logger.error('Failed to verify JWT token', error.stack);
-				return err(error instanceof Error ? error : new Error(String(error)));
+			} catch (caught: unknown) {
+				const normalized =
+					caught instanceof Error ? caught : new Error(String(caught));
+				this.logger.error('Failed to verify JWT token', normalized.stack);
+				return err(normalized);
+			}
 			}
 		});
 	}
