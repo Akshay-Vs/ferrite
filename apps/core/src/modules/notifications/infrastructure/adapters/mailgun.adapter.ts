@@ -20,19 +20,11 @@ export class MailgunAdapter implements IEmailProvider {
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {
 		this.logger.setContext(this.constructor.name);
-
-		// Ephemeral extraction. These variables will be garbage collected
-		// after the constructor terminates.
 		const apiKey = this.config.getOrThrow<string>('MAILGUN_API_KEY');
 		const baseUrl = this.config.getOrThrow<string>('MAILGUN_BASE_URL');
-
-		// Persistent operational state required for runtime execution.
 		this.domain = this.config.getOrThrow<string>('MAILGUN_SANDBOX_DOMAIN');
 
-		// Ephemeral factory instantiation
 		const mailgunFactory = new Mailgun(FormData);
-
-		// Persistent client instantiation
 		this.client = mailgunFactory.client({
 			key: apiKey,
 			username: 'api',
@@ -59,8 +51,10 @@ export class MailgunAdapter implements IEmailProvider {
 					'h:X-Mailgun-Variables': JSON.stringify(payload.payload),
 				};
 
-				await this.client.messages.create(this.domain, messageData);
-				return ok(undefined);
+				const res = await this.client.messages.create(this.domain, messageData);
+
+				this.logger.debug(`Mailgun transit completed: status ${res.status}`);
+				return ok();
 			} catch (error) {
 				this.logger.error(`Mailgun transit failed: ${error}`);
 				return err(new EmailTransitError('External MTA rejected the payload'));
