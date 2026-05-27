@@ -8,7 +8,7 @@ export interface IEmailProvider {
 	/**
 	 * Sends an email to the specified recipients.
 	 * @param to The email address or addresses to send the email to.
-	 * @param subject The subject of the email.
+	 * @param payload `EmailTransitPayload` object containing the email template and data.
 	 * @param body The body of the email.
 	 */
 	sendEmail(
