@@ -1,8 +1,9 @@
 import { Button as ButtonPrimitive } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode, useMemo } from 'react';
 import { cn } from '@/core/utils/cn';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 const buttonVariants = cva(
 	"group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding whitespace-nowrap transition-all duration-200 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer font-normal text-base active:scale-98",
@@ -38,48 +39,69 @@ const buttonVariants = cva(
 	}
 );
 
+// Stable reference — defined outside the component so it is never recreated
+const DEFAULT_LOADING_CONTENT = (
+	<>
+		<Loader2 className="animate-spin" aria-hidden="true" />
+		<span className="sr-only">Loading…</span>
+	</>
+);
+
 type ButtonProps = ButtonPrimitive.Props &
 	VariantProps<typeof buttonVariants> & {
 		isLoading?: boolean;
 		loadingText?: string;
 		children?: ReactNode;
+		tooltip?: string;
 	};
 
-function Button({
+const Button = memo(function Button({
 	className,
 	variant = 'default',
 	size = 'default',
 	isLoading = false,
 	loadingText,
 	children,
+	tooltip,
 	disabled,
+	type = 'button',
 	...props
 }: ButtonProps) {
 	const isDisabled = disabled || isLoading;
 
-	let content: React.ReactNode;
+	const resolvedClassName = useMemo(
+		() => cn(buttonVariants({ variant, size, className })),
+		[variant, size, className]
+	);
 
-	if (isLoading) {
-		content = loadingText ?? (
-			<>
-				<Loader2 className="animate-spin" />
-				<span className="sr-only">Loading...</span>
-			</>
-		);
-	} else {
-		content = children;
-	}
+	const content = isLoading
+		? (loadingText ?? DEFAULT_LOADING_CONTENT)
+		: children;
 
-	return (
+	const button = (
 		<ButtonPrimitive
 			data-slot="button"
-			className={cn(buttonVariants({ variant, size, className }))}
+			className={resolvedClassName}
 			disabled={isDisabled}
+			type={type}
+			aria-busy={isLoading || undefined}
 			{...props}
 		>
 			{content}
 		</ButtonPrimitive>
 	);
-}
+
+	// Return the button if no tooltip is provided
+	if (!tooltip) return button;
+
+	return (
+		<Tooltip>
+			<TooltipTrigger render={button} />
+			<TooltipContent>{tooltip}</TooltipContent>
+		</Tooltip>
+	);
+});
+
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };
