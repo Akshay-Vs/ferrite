@@ -1,0 +1,1 @@
+ALTER TABLE "store_invitations" DROP CONSTRAINT "store_invitations_token_unique";

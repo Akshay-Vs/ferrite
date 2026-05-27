@@ -25,6 +25,7 @@ export class SendEmailQueueProcessor extends BaseProcessor<EventPayload> {
 		@Inject(OTEL_TRACER) private readonly otelTracer: ITracer
 	) {
 		super(logger);
+		this.logger.setContext(this.constructor.name);
 	}
 
 	protected async handle(

@@ -28,9 +28,7 @@ export class SendEmailUseCase
 		payload: EmailTransitPayload
 	): Promise<Result<void, EmailTransitError>> {
 		return this.tracer.withSpan('use-case.send-email', async () => {
-			this.logger.debug(
-				`Sending email to ${payload.recipient} with subject: ${payload.subject}`
-			);
+			this.logger.debug('Sending email');
 			return this.emailAdapter.sendEmail(payload);
 		});
 	}

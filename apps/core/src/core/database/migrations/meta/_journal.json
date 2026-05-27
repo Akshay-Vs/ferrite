@@ -57,6 +57,13 @@
 			"when": 1779446490620,
 			"tag": "0007_gigantic_swordsman",
 			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1779862404627,
+			"tag": "0008_flippant_mac_gargan",
+			"breakpoints": true
 		}
 	]
 }

@@ -107,6 +107,7 @@ flowchart TD
 ```
 
 **Return values from `handle()`:**
+
 | Return | Effect |
 |---|---|
 | `ok()` | Job marked successful, deleted from queue |
