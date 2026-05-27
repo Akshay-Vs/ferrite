@@ -4,10 +4,15 @@ import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { EmailTransitPayload } from '@ferrite/schema';
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EmailClientError } from '@notifications/domain/errors/email-client.error';
 import { EmailTransitError } from '@notifications/domain/errors/email-transit.error';
 import type { IEmailProvider } from '@notifications/domain/ports/email-provider.port';
 import Mailgun from 'mailgun.js';
-import { Interfaces, MailgunMessageData } from 'mailgun.js/definitions';
+import {
+	type APIErrorType,
+	Interfaces,
+	MailgunMessageData,
+} from 'mailgun.js/definitions';
 
 export class MailgunAdapter implements IEmailProvider {
 	private readonly client: Interfaces.IMailgunClient;
@@ -34,7 +39,7 @@ export class MailgunAdapter implements IEmailProvider {
 
 	async sendEmail(
 		payload: EmailTransitPayload
-	): Promise<Result<void, EmailTransitError>> {
+	): Promise<Result<void, EmailTransitError | EmailClientError>> {
 		return this.tracer.withSpan('adapters.mailgun.dispatch', async () => {
 			try {
 				// Fallback Protocol: Default to the system identifier if the tenant is null
@@ -57,6 +62,23 @@ export class MailgunAdapter implements IEmailProvider {
 				return ok();
 			} catch (error) {
 				this.logger.error(`Mailgun transit failed: ${error}`);
+
+				if (error && typeof error === 'object' && 'status' in error) {
+					const apiError = error as APIErrorType;
+					this.logger.error(
+						`Mailgun API Error: ${apiError.status} - ${apiError.message}`
+					);
+
+					if (apiError.status >= 400 && apiError.status < 500) {
+						return err(
+							new EmailClientError(
+								`Client error from MTA: ${apiError.message}`,
+								apiError.status
+							)
+						);
+					}
+				}
+
 				return err(new EmailTransitError('External MTA rejected the payload'));
 			}
 		});
