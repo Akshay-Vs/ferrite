@@ -8,6 +8,7 @@ import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import {
+	storeInvitations,
 	storeMembers,
 	storeRolePermissions,
 	storeRoles,
@@ -162,6 +163,32 @@ export class DrizzleStoreRepository implements IStoreRepository {
 				}
 
 				return role;
+			}
+		);
+	}
+
+	async inviteStoreMember(
+		tx: ITransactionContext | undefined,
+		email: string,
+		storeId: string,
+		invitedBy: string,
+		expiresAt: Date,
+		token: string,
+		roleId: string
+	): Promise<void> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeMembers.invite',
+			{ 'db.table': 'store_members', 'db.operation': 'insert' },
+			async () => {
+				await this.getExecutor(tx).insert(storeInvitations).values({
+					email,
+					storeId,
+					roleId,
+					invitedBy,
+					expiresAt,
+					token,
+				});
 			}
 		);
 	}
