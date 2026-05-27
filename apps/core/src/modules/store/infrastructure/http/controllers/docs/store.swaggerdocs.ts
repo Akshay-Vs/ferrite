@@ -61,16 +61,19 @@ export const DeleteStoreDocs = () =>
 		ApiResponse({ status: 500, description: 'Internal server error.' })
 	);
 
-export const AddStoreMembersDocs = () =>
+export const InviteStoreMemberDocs = () =>
 	applyDecorators(
 		ApiOperation({
-			summary: 'Add members to store',
+			summary: 'Invite member to store',
 			description:
-				'Bulk adds users to a store with a specific role. Requires staff.create permission.',
+				'Invites a user to a store with a specific role via email. Requires staff.create permission.',
 		}),
 		ApiParam({ name: 'storeId', description: 'The UUID of the store.' }),
-		ApiResponse({ status: 201, description: 'Members added successfully.' }),
-		ApiResponse({ status: 400, description: 'Invalid input.' }),
-		ApiResponse({ status: 404, description: 'Store not found.' }),
+		ApiResponse({ status: 201, description: 'Member invited successfully.' }),
+		ApiResponse({
+			status: 400,
+			description: 'Invalid input or protected role.',
+		}),
+		ApiResponse({ status: 404, description: 'Role or store not found.' }),
 		ApiResponse({ status: 500, description: 'Internal server error.' })
 	);
