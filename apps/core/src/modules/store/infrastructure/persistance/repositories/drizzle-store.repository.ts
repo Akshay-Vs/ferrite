@@ -62,7 +62,8 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.stores.create',
 			{ 'db.table': 'stores', 'db.operation': 'insert' },
 			async () => {
-				const [store] = await this.getExecutor(tx)
+				const executor = this.getExecutor(tx);
+				const [store] = await executor
 					.insert(stores)
 					.values({
 						name: input.name,
