@@ -1,15 +1,16 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
+import { EmailTransitError } from '@notifications/domain/errors/email-transit.error';
 import type { MemberAlreadySuspendedError } from '../errors/member-already-suspended.error';
 import type { MemberNotFoundError } from '../errors/member-not-found.error';
 import type { MemberNotSuspendedError } from '../errors/member-not-suspended.error';
 import type { OwnerProtectedError } from '../errors/owner-protected.error';
 
 export const ADD_STORE_MEMBER_UC = Symbol('ADD_STORE_MEMBER_UC');
-export const ADD_STORE_MEMBERS_UC = Symbol('ADD_STORE_MEMBERS_UC');
 export const REMOVE_STORE_MEMBER_UC = Symbol('REMOVE_STORE_MEMBER_UC');
 export const SUSPEND_STORE_MEMBER_UC = Symbol('SUSPEND_STORE_MEMBER_UC');
 export const UNSUSPEND_STORE_MEMBER_UC = Symbol('UNSUSPEND_STORE_MEMBER_UC');
+export const INVITE_STORE_MEMBER_UC = Symbol('INVITE_STORE_MEMBER_UC');
 
 export interface AddStoreMemberInput {
 	tx?: ITransactionContext;
@@ -17,14 +18,6 @@ export interface AddStoreMemberInput {
 	userId: string;
 	roleId: string;
 	isOwner: boolean;
-}
-
-export interface AddStoreMembersInput {
-	tx?: ITransactionContext;
-	storeId: string;
-	userIds: string[];
-	roleId: string;
-	isOwner?: boolean;
 }
 
 export interface RemoveStoreMemberInput {
@@ -48,6 +41,16 @@ export interface UnsuspendStoreMemberInput {
 	userId: string;
 }
 
+export interface InviteStoreMemberInput {
+	tx?: ITransactionContext;
+	email: string;
+	storeId: string;
+	invitedBy: string;
+	expiresAt: Date;
+	token: string;
+	roleId: string;
+}
+
 export type RemoveStoreMemberError =
 	| MemberNotFoundError
 	| OwnerProtectedError
@@ -65,21 +68,25 @@ export type UnsuspendStoreMemberError =
 	| Error;
 
 export type IAddStoreMemberUseCase = IUseCase<AddStoreMemberInput, void, Error>;
-export type IAddStoreMembersUseCase = IUseCase<
-	AddStoreMembersInput,
+
+export type IInviteStoreMemberUseCase = IUseCase<
+	InviteStoreMemberInput,
 	void,
-	Error
+	EmailTransitError | Error
 >;
+
 export type IRemoveStoreMemberUseCase = IUseCase<
 	RemoveStoreMemberInput,
 	void,
 	RemoveStoreMemberError
 >;
+
 export type ISuspendStoreMemberUseCase = IUseCase<
 	SuspendStoreMemberInput,
 	void,
 	SuspendStoreMemberError
 >;
+
 export type IUnsuspendStoreMemberUseCase = IUseCase<
 	UnsuspendStoreMemberInput,
 	void,
