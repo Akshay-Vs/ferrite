@@ -9,6 +9,7 @@ import {
 } from '@ferrite/schema/common/event-payload.zodschema';
 import { EmailTransitPayloadSchema } from '@ferrite/schema/notification/email.zodschema';
 import { Inject } from '@nestjs/common';
+import { EmailClientError } from '@notifications/domain/errors/email-client.error';
 import { EmailTransitError } from '@notifications/domain/errors/email-transit.error';
 import {
 	type ISendEmailUseCase,
@@ -59,6 +60,13 @@ export class SendEmailQueueProcessor extends BaseProcessor<EventPayload> {
 				const result = await this.sendEmail.execute(validatedEmailPayload.data);
 
 				if (result.isErr()) {
+					if (result.error instanceof EmailClientError) {
+						this.logger.error(
+							`Client error while sending email to ${validatedEmailPayload.data.recipient}: ${result.error}`
+						);
+						return ok(); // ack client error
+					}
+
 					this.logger.error(
 						`Failed to send email to ${validatedEmailPayload.data.recipient}: ${result.error}`
 					);
