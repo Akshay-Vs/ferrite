@@ -27,7 +27,7 @@ const items = [
 
 const StockWarning = () => {
 	return (
-		<FadeInItem className="flex center gap-4 rounded-l-full bg-surface border-r-0 border border-gradient translate-x-5 h-14 pl-1 pr-4">
+		<FadeInItem className="flex center gap-4 rounded-l-full bg-surface/80 border-r-0 border border-gradient translate-x-5 h-14 pl-1 pr-4">
 			<div className="flex items-center">
 				{items.map((item, index) => (
 					<Image
