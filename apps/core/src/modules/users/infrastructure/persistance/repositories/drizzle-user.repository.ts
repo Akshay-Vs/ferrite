@@ -1,7 +1,11 @@
 import { AuthProvider } from '@auth/index';
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
+import {
+	type IUnitOfWork,
+	UNIT_OF_WORK,
+} from '@common/interfaces/unit-of-work.interface';
 import { DB } from '@core/database/db.provider';
-import type { DrizzleTransaction, TDatabase } from '@core/database/db.type';
+import type { TDatabase } from '@core/database/db.type';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import { userAuthProviders, users } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
@@ -30,7 +34,8 @@ export class DrizzleUserRepository implements IUserRepository {
 	constructor(
 		@Inject(DB) private readonly db: TDatabase, // type erasure for decorator metadata
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		@Inject(ENQUEUE_GRAPHILE_EVENT_UC) private readonly enqueue: IEnqueue
+		@Inject(ENQUEUE_GRAPHILE_EVENT_UC) private readonly enqueue: IEnqueue,
+		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork
 	) {}
 
 	private get typedDb(): TDatabase {
@@ -50,7 +55,8 @@ export class DrizzleUserRepository implements IUserRepository {
 			async () => {
 				const newUser = UserMapper.toNewUser(event);
 
-				return this.typedDb.transaction(async (tx) => {
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
 					//Span: insert user row
 					const [inserted] = await traceDbOp(
 						this.tracer,
@@ -155,23 +161,23 @@ export class DrizzleUserRepository implements IUserRepository {
 			async () => {
 				if (tx) {
 					// External UoW transaction
-					const drizzleTx = DrizzleUnitOfWork.unwrap(tx);
-					return this.runProfileUpdate(drizzleTx, id, data, outboxEvent);
+					return this.runProfileUpdate(tx, id, data, outboxEvent);
 				}
 				// Internal transaction
-				return this.typedDb.transaction(async (innerTx) =>
-					this.runProfileUpdate(innerTx, id, data, outboxEvent)
+				return this.uow.execute(async (innerCtx) =>
+					this.runProfileUpdate(innerCtx, id, data, outboxEvent)
 				);
 			}
 		);
 	}
 
 	private async runProfileUpdate(
-		executor: DrizzleTransaction,
+		ctx: ITransactionContext,
 		id: string,
 		data: UpdateProfileInput,
 		outboxEvent: QueueParams<UserUpdatedEvent>
 	): Promise<UserProfileFull | null> {
+		const executor = DrizzleUnitOfWork.unwrap(ctx);
 		// 1. Update user
 		const result = await traceDbOp(
 			this.tracer,
@@ -191,7 +197,7 @@ export class DrizzleUserRepository implements IUserRepository {
 		if (result.length === 0) return null;
 
 		// 2. Write outbox event
-		await this.enqueue.execute(executor, outboxEvent);
+		await this.enqueue.execute(ctx, outboxEvent);
 		return UserMapper.toUserProfile(result[0]);
 	}
 
@@ -242,7 +248,8 @@ export class DrizzleUserRepository implements IUserRepository {
 				const user = await this.findById(id);
 				if (!user) return false;
 
-				return this.typedDb.transaction(async (tx) => {
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
 					// 1. Soft delete user
 					const result = await traceDbOp(
 						this.tracer,
@@ -263,7 +270,7 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return false;
 
 					// 2. Write outbox event
-					await this.enqueue.execute(tx, outboxEvent);
+					await this.enqueue.execute(ctx, outboxEvent);
 
 					return true;
 				});
@@ -284,7 +291,8 @@ export class DrizzleUserRepository implements IUserRepository {
 				'db.operation': 'update',
 			},
 			async () => {
-				return this.typedDb.transaction(async (tx) => {
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
 					// 1. Update platformRole
 					const result = await traceDbOp(
 						this.tracer,
@@ -304,7 +312,7 @@ export class DrizzleUserRepository implements IUserRepository {
 					if (result.length === 0) return null;
 
 					// 2. Write outbox event
-					const enqueueResult = await this.enqueue.execute(tx, outboxEvent);
+					const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
 
 					if (enqueueResult.isErr()) {
 						throw new Error('Failed to enqueue role update event');
