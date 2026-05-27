@@ -36,7 +36,6 @@ export class JwtTokenUseCase implements IJwtTokenUseCase {
 				this.logger.error('Failed to verify JWT token', normalized.stack);
 				return err(normalized);
 			}
-			}
 		});
 	}
 }

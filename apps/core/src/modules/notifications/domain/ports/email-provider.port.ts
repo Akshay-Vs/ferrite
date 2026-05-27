@@ -7,9 +7,7 @@ export const EMAIL_ADAPTER = Symbol('EMAIL_ADAPTER');
 export interface IEmailProvider {
 	/**
 	 * Sends an email to the specified recipients.
-	 * @param to The email address or addresses to send the email to.
-	 * @param payload `EmailTransitPayload` object containing the email template and data.
-	 * @param body The body of the email.
+	 * @param payload `EmailTransitPayload` object containing recipient, template, subject, and template data.
 	 */
 	sendEmail(
 		payload: EmailTransitPayload

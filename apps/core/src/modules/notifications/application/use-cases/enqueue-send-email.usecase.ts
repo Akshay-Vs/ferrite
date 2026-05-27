@@ -58,17 +58,14 @@ export class EnqueueSendEmailUseCase implements IEnqueueSendEmail {
 
 				this.logger.debug(`Enqueued email eventId=${eventId}`);
 				return ok();
-			} catch (error: any) {
+			} catch (caught: unknown) {
+				const normalized =
+					caught instanceof Error ? caught : new Error(String(caught));
 				this.logger.error(
-} catch (caught: unknown) {
-    const normalized =
-        caught instanceof Error ? caught : new Error(String(caught));
-    this.logger.error(
-        `Failed to enqueue email: ${normalized.message}`,
-        normalized.stack
-    );
-    return err(normalized);
-}
+					`Failed to enqueue email: ${normalized.message}`,
+					normalized.stack
+				);
+				return err(normalized);
 			}
 		});
 	}
