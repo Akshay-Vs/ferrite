@@ -50,3 +50,10 @@ export const onboardingStateEnum = pgEnum('onboarding_state', [
 	'STORE_CREATION',
 	'COMPLETED',
 ]);
+
+export const invitationStatusEnum = pgEnum('invitation_status', [
+	'pending',
+	'accepted',
+	'declined',
+	'expired',
+]);

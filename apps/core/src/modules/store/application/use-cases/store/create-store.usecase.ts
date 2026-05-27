@@ -3,6 +3,15 @@ import type { Store } from '@core/database/schema/store.schema';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { EmailTemplate } from '@ferrite/schema/notification/email.zodschema';
+import {
+	ENQUEUE_SEND_EMAIL_UC,
+	type IEnqueueSendEmail,
+} from '@modules/notifications';
+import {
+	type IUserRepository,
+	USER_REPOSITORY,
+} from '@modules/users/domain/ports/user-repository.port';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
@@ -19,7 +28,11 @@ export class CreateStoreUseCase implements ICreateStoreUseCase {
 		@Inject(STORE_REPOSITORY)
 		private readonly repo: IStoreRepository,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
-		private readonly logger: AppLogger
+		private readonly logger: AppLogger,
+		@Inject(ENQUEUE_SEND_EMAIL_UC)
+		private readonly enqueueEmail: IEnqueueSendEmail,
+		@Inject(USER_REPOSITORY)
+		private readonly userRepo: IUserRepository
 	) {
 		this.logger.setContext(this.constructor.name);
 	}
@@ -34,6 +47,20 @@ export class CreateStoreUseCase implements ICreateStoreUseCase {
 					input.input,
 					input.createdBy
 				);
+
+				const user = await this.userRepo.findById(input.createdBy);
+				if (user) {
+					await this.enqueueEmail.execute(input.tx, {
+						recipient: user.email,
+						template: EmailTemplate.WELCOME_ABOARD,
+						subject: 'Welcome aboard',
+						payload: {
+							storeId: store.id,
+							storeName: store.name,
+						},
+					});
+				}
+
 				this.logger.debug(
 					`Created store: id=${store.id}, name=${input.input.name}`
 				);

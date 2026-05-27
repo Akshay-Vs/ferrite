@@ -1,6 +1,9 @@
 import { isUniqueConstrainViolation } from '@common/errors/handlers/is-unique-constrain-violation';
-import { DB } from '@core/database/db.provider';
-import type { TDatabase } from '@core/database/db.type';
+import {
+	type IUnitOfWork,
+	UNIT_OF_WORK,
+} from '@common/interfaces/unit-of-work.interface';
+import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 import { inboxEvents } from '@core/database/schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import { AppLogger } from '@core/logger/logger.service';
@@ -14,16 +17,12 @@ import { IWebhookRepository } from '@webhooks/domain/ports/webhook-repository.po
 @Injectable()
 export class WebhookRepository implements IWebhookRepository {
 	constructor(
-		@Inject(DB) private readonly db: TDatabase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(ENQUEUE_GRAPHILE_EVENT_UC) private readonly enqueue: IEnqueue,
+		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
 		private readonly logger: AppLogger
 	) {
 		this.logger.setContext(this.constructor.name);
-	}
-
-	private get typedDb(): TDatabase {
-		return this.db;
 	}
 
 	async persistWebhook(envelope: WebhookEnvelope): Promise<boolean> {
@@ -33,7 +32,8 @@ export class WebhookRepository implements IWebhookRepository {
 				'db.webhook.persist',
 				{ 'db.table': 'webhooks', 'db.operation': 'insert' },
 				async () => {
-					const result = await this.typedDb.transaction(async (tx) => {
+					const result = await this.uow.execute(async (ctx) => {
+						const tx = DrizzleUnitOfWork.unwrap(ctx);
 						const [inserted] = await traceDbOp(
 							this.tracer,
 							'db.webhooks.insert',
@@ -45,7 +45,7 @@ export class WebhookRepository implements IWebhookRepository {
 									.returning({ id: inboxEvents.id })
 						);
 
-						await traceDbOp(
+						const enqueueRes = await traceDbOp(
 							this.tracer,
 							'db.inbox_events.insert',
 							{
@@ -53,13 +53,17 @@ export class WebhookRepository implements IWebhookRepository {
 								'db.operation': 'graphile-enqueue',
 							},
 							() =>
-								this.enqueue.execute(tx, {
+								this.enqueue.execute(ctx, {
 									identifier: envelope.queueName,
 									maxAttempts: 3,
 									...envelope,
 									__traceContext: getTraceContext(),
 								})
 						);
+
+						if (enqueueRes.isErr()) {
+							throw new Error('Failed to enqueue webhook event to graphile');
+						}
 
 						return inserted?.id ?? null;
 					});

@@ -11,6 +11,7 @@ import type { NewUserPaymentMethod } from '../schema/payment.schema';
 import type { NewUserNotificationPreference } from '../schema/preferences.schema';
 import type {
 	NewStore,
+	NewStoreInvitation,
 	NewStoreMember,
 	NewStoreRole,
 	NewStoreRolePermission,
@@ -180,6 +181,24 @@ export function createTestStoreRolePermission(
 	return {
 		storeRoleId,
 		permissionKey,
+		...overrides,
+	};
+}
+
+// ── Store Invitations ────────────────────
+export function createTestStoreInvitation(
+	storeId: string,
+	roleId: string,
+	invitedBy: string,
+	overrides: Partial<NewStoreInvitation> = {}
+): NewStoreInvitation {
+	return {
+		storeId,
+		roleId,
+		invitedBy,
+		email: `invite-${Date.now()}@example.com`,
+		token: `token-${uuidv4()}`,
+		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days from now
 		...overrides,
 	};
 }

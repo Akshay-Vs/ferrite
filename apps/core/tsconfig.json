@@ -28,6 +28,11 @@
 			"@health/*": ["./src/modules/health/*"],
 			"@users/*": ["./src/modules/users/*"],
 			"@webhooks/*": ["./src/modules/webhooks/*"],
+			"@queue/*": ["./src/modules/queue/*"],
+			"@store/*": ["./src/modules/store/*"],
+			"@onboarding/*": ["./src/modules/onboarding/*"],
+			"@currency/*": ["./src/modules/currency/*"],
+			"@notifications/*": ["./src/modules/notifications/*"],
 			// shared
 			"@core/*": ["./src/core/*"],
 			"@modules/*": ["./src/modules/*"],

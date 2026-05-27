@@ -1,3 +1,5 @@
+import { NotificationsModule } from '@modules/notifications';
+import { UsersModule } from '@modules/users/users.module';
 import { Module } from '@nestjs/common';
 import {
 	AddStoreMembersUseCase,
@@ -52,6 +54,7 @@ import { DrizzleStoreRepository } from './infrastructure/persistance/repositorie
 import { DrizzleStorePermissionRepository } from './infrastructure/persistance/repositories/drizzle-store-permission.repository';
 
 @Module({
+	imports: [NotificationsModule, UsersModule],
 	controllers: [StoreController, RoleController],
 	providers: [
 		{

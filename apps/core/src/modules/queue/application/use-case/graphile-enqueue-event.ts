@@ -1,5 +1,5 @@
 import { err, ok, Result } from '@common/interfaces/result.interface';
-import { DrizzleTransaction } from '@core/database/db.type';
+import { type ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import {
@@ -19,7 +19,7 @@ export class GraphileEnqueueEvent implements IEnqueue {
 	) {}
 
 	async execute(
-		tx: DrizzleTransaction,
+		tx: ITransactionContext,
 		queueParams: QueueParams
 	): Promise<Result<void, Error>> {
 		return this.tracer.withSpan('use-case.enqueue-graphile-event', async () => {

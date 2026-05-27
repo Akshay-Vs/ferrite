@@ -24,12 +24,11 @@ export class VerifyWebhookUseCase
 	}
 
 	async execute(payload: RawWebhookRequest): Promise<Result<WebhookEnvelope>> {
-		try {
-			const claims = await this.webhookAuth.verifyWebhook(payload);
-			return ok(claims);
-		} catch (error) {
-			this.logger.error('Failed to verify webhook');
-			return err(error instanceof Error ? error : new Error(String(error)));
+		const result = await this.webhookAuth.verifyWebhook(payload);
+		if (result.isErr()) {
+			this.logger.error('Failed to verify webhook', result.error.stack);
+			return err(result.error);
 		}
+		return ok(result.unwrap());
 	}
 }
