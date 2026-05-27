@@ -84,7 +84,7 @@
 }
 
 @theme inline {
-	--color-surface: #211f27;
+	--color-surface: #201e25;
 	--color-active: #3e3c48;
 	--color-accent: #a68bf8;
 	--color-border-gradient: linear-gradient(110deg, #666571df, #444347da);
@@ -92,10 +92,10 @@
 	--color-accent-glow: rgba(108, 99, 255, 0.25);
 	--color-success: #22c55e;
 	--color-warn: #f59e0b;
-	--color-background: #141317;
+	--color-background: #0b0a0d;
 	--color-content: #e8e8f0;
 	--color-input: #211f27;
-	--color-popover: #18171d;
+	--color-popover: #141317;
 
 	--font-heading: var(--font-sans);
 	--font-heading: var(--font-sans);
