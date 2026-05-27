@@ -60,10 +60,15 @@ export class EnqueueSendEmailUseCase implements IEnqueueSendEmail {
 				return ok();
 			} catch (error: any) {
 				this.logger.error(
-					`Failed to enqueue email: ${error.message}`,
-					error.stack
-				);
-				return err(error instanceof Error ? error : new Error(String(error)));
+} catch (caught: unknown) {
+    const normalized =
+        caught instanceof Error ? caught : new Error(String(caught));
+    this.logger.error(
+        `Failed to enqueue email: ${normalized.message}`,
+        normalized.stack
+    );
+    return err(normalized);
+}
 			}
 		});
 	}
