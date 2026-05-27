@@ -50,7 +50,7 @@ export class CreateStoreUseCase implements ICreateStoreUseCase {
 
 				const user = await this.userRepo.findById(input.createdBy);
 				if (user) {
-					await this.enqueueEmail.execute(input.tx, {
+					const enqueueResult = await this.enqueueEmail.execute(input.tx, {
 						recipient: user.email,
 						template: EmailTemplate.WELCOME_ABOARD,
 						subject: 'Welcome aboard',
@@ -59,6 +59,14 @@ export class CreateStoreUseCase implements ICreateStoreUseCase {
 							storeName: store.name,
 						},
 					});
+
+					if (enqueueResult.isErr()) {
+						this.logger.error(
+							`Failed to enqueue email: ${enqueueResult.error.message}`,
+							enqueueResult.error.stack
+						);
+						return err(enqueueResult.error);
+					}
 				}
 
 				this.logger.debug(
