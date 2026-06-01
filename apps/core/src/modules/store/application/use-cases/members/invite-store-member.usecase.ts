@@ -95,7 +95,7 @@ export class InviteStoreMemberUseCase implements IInviteStoreMemberUseCase {
 								`Failed to enqueue email for store invite: ${enqueueResult.error.message}`,
 								enqueueResult.error.stack
 							);
-							return err(enqueueResult.error);
+							throw enqueueResult.error;
 						}
 
 						return ok();
