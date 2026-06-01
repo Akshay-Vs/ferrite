@@ -128,8 +128,13 @@ export function ConfigureStoreForm({
 						disabled={isPending}
 						onClick={onBack}
 						tooltip="Back"
+						aria-label="Back"
 					>
-						<ArrowLeft className="size-5! group-hover:-translate-x-1 transition-transform duration-200" />
+						<ArrowLeft
+							aria-hidden="true"
+							className="size-5! transition-transform duration-200 group-hover:-translate-x-1"
+						/>
+						<span className="sr-only">Back</span>
 					</Button>
 				)}
 				<form.Subscribe selector={(state) => [state.canSubmit]}>
