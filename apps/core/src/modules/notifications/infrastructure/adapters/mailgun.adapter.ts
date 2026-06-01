@@ -69,7 +69,15 @@ export class MailgunAdapter implements IEmailProvider {
 						`Mailgun API Error: ${apiError.status} - ${apiError.message}`
 					);
 
-					if (apiError.status >= 400 && apiError.status < 500) {
+					// Too many requests (429) and Request timeout (408) are retriable
+					const isRetriableClientStatus =
+						apiError.status === 429 || apiError.status === 408;
+
+					if (
+						apiError.status >= 400 &&
+						apiError.status < 500 &&
+						!isRetriableClientStatus
+					) {
 						return err(
 							new EmailClientError(
 								`Client error from MTA: ${apiError.message}`,
