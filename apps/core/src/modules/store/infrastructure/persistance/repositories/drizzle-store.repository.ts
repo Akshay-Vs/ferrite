@@ -179,7 +179,7 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		return traceDbOp(
 			this.tracer,
 			'db.storeMembers.invite',
-			{ 'db.table': 'store_members', 'db.operation': 'insert' },
+			{ 'db.table': 'store_invitations', 'db.operation': 'insert' },
 			async () => {
 				await this.getExecutor(tx).insert(storeInvitations).values({
 					email,
