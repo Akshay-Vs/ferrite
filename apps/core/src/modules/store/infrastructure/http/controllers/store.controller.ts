@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
@@ -12,8 +13,8 @@ import type {
 import { RoleNotFoundError } from '@modules/store/domain/errors/role-not-found.error';
 import { SystemRoleProtectedError } from '@modules/store/domain/errors/system-role-protected.error';
 import {
-	ADD_STORE_MEMBERS_UC,
-	type IAddStoreMembersUseCase,
+	type IInviteStoreMemberUseCase,
+	INVITE_STORE_MEMBER_UC,
 } from '@modules/store/domain/ports/member-use-cases.port';
 import {
 	DELETE_STORE_UC,
@@ -45,15 +46,15 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AddStoreMembersDto } from '../dto/add-store-members.dto';
+import { InviteStoreMemberDto } from '../dto/invite-store-member.dto';
 import { CreateStoreDto, UpdateStoreDto } from '../dto/store.dto';
 import { StorePermissionGuard } from '../guards/store-permission.guard';
 import {
-	AddStoreMembersDocs,
 	CreateStoreDocs,
 	DeleteStoreDocs,
 	GetStoreByIdDocs,
 	GetStoresDocs,
+	InviteStoreMemberDocs,
 	UpdateStoreDocs,
 } from './docs/store.swaggerdocs';
 
@@ -73,8 +74,8 @@ export class StoreController {
 		private readonly updateStoreUc: IUpdateStoreUseCase,
 		@Inject(DELETE_STORE_UC)
 		private readonly deleteStoreUc: IDeleteStoreUseCase,
-		@Inject(ADD_STORE_MEMBERS_UC)
-		private readonly addStoreMembersUc: IAddStoreMembersUseCase,
+		@Inject(INVITE_STORE_MEMBER_UC)
+		private readonly inviteStoreMemberUc: IInviteStoreMemberUseCase,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer
 	) {}
 
@@ -171,19 +172,26 @@ export class StoreController {
 		});
 	}
 
-	@Post(':storeId/members')
+	@Post(':storeId/invites')
 	@HttpCode(HttpStatus.CREATED)
-	@AddStoreMembersDocs()
+	@InviteStoreMemberDocs()
 	@RequirePermission('staff.create')
-	async addMembers(
+	async inviteMember(
+		@AuthUserParam() user: AuthUser,
 		@Param('storeId', ParseUUIDPipe) storeId: string,
-		@Body() payload: AddStoreMembersDto
+		@Body() payload: InviteStoreMemberDto
 	): Promise<void> {
-		return this.tracer.withSpan('http.add-store-members', async () => {
-			const result = await this.addStoreMembersUc.execute({
+		return this.tracer.withSpan('http.invite-store-member', async () => {
+			const token = randomBytes(32).toString('hex');
+			const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+			const result = await this.inviteStoreMemberUc.execute({
 				storeId,
-				userIds: payload.userIds,
+				email: payload.email,
 				roleId: payload.roleId,
+				invitedBy: user.id,
+				token,
+				expiresAt,
 			});
 			if (result.isErr()) {
 				if (result.error instanceof RoleNotFoundError) {
@@ -194,7 +202,7 @@ export class StoreController {
 					throw new BadRequestException('Cannot assign protected role');
 				}
 
-				throw new UnprocessableEntityException('Failed to add members');
+				throw new UnprocessableEntityException('Failed to invite member');
 			}
 		});
 	}

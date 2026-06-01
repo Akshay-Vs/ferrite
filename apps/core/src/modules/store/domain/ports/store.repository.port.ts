@@ -51,6 +51,19 @@ export interface IStoreRepository {
 	): Promise<StoreRole>;
 
 	/**
+	 * Invites a user as a member of a store with a specific role.
+	 */
+	inviteStoreMember(
+		tx: ITransactionContext | undefined,
+		email: string,
+		storeId: string,
+		invitedBy: string,
+		expiresAt: Date,
+		token: string,
+		roleId: string
+	): Promise<void>;
+
+	/**
 	 * Adds a user as a member of a store with a specific role.
 	 */
 	addStoreMember(

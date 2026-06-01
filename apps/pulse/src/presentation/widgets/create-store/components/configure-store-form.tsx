@@ -1,6 +1,5 @@
-'use client';
-
 import { CURRENCY_OPTIONS } from '@ferrite/schema';
+import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/core/utils/cn';
 import { Button } from '@/presentation/primitives/button';
 import {
@@ -46,7 +45,7 @@ export function ConfigureStoreForm({
 
 	return (
 		<form
-			className={cn('flex w-full flex-col gap-6')}
+			className={cn('flex w-full flex-col gap-8')}
 			onSubmit={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
@@ -125,12 +124,12 @@ export function ConfigureStoreForm({
 				{onBack && (
 					<Button
 						type="button"
-						variant="outline"
-						className="w-full sm:flex-1"
+						className="w-36 group"
 						disabled={isPending}
 						onClick={onBack}
+						tooltip="Back"
 					>
-						Back
+						<ArrowLeft className="size-5! group-hover:-translate-x-1 transition-transform duration-200" />
 					</Button>
 				)}
 				<form.Subscribe selector={(state) => [state.canSubmit]}>

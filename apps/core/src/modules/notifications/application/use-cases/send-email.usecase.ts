@@ -5,6 +5,7 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { type EmailTransitPayload } from '@ferrite/schema';
 import { Inject, Injectable } from '@nestjs/common';
+import { EmailClientError } from '../../domain/errors/email-client.error';
 import { EmailTransitError } from '../../domain/errors/email-transit.error';
 import {
 	EMAIL_ADAPTER,
@@ -13,7 +14,8 @@ import {
 
 @Injectable()
 export class SendEmailUseCase
-	implements IUseCase<EmailTransitPayload, void, EmailTransitError>
+	implements
+		IUseCase<EmailTransitPayload, void, EmailTransitError | EmailClientError>
 {
 	constructor(
 		@Inject(EMAIL_ADAPTER)
@@ -26,7 +28,7 @@ export class SendEmailUseCase
 
 	async execute(
 		payload: EmailTransitPayload
-	): Promise<Result<void, EmailTransitError>> {
+	): Promise<Result<void, EmailTransitError | EmailClientError>> {
 		return this.tracer.withSpan('use-case.send-email', async () => {
 			this.logger.debug('Sending email');
 			return this.emailAdapter.sendEmail(payload);

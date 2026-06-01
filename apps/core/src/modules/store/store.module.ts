@@ -2,7 +2,6 @@ import { NotificationsModule } from '@modules/notifications';
 import { UsersModule } from '@modules/users/users.module';
 import { Module } from '@nestjs/common';
 import {
-	AddStoreMembersUseCase,
 	AddStoreMemberUseCase,
 	CheckStorePermissionUseCase,
 	CreateStoreRoleUseCase,
@@ -15,6 +14,7 @@ import {
 	GetStoreRolesUseCase,
 	GetStoresUseCase,
 	InitializeStoreOrchestratorUseCase,
+	InviteStoreMemberUseCase,
 	RemoveStoreMemberUseCase,
 	SuspendStoreMemberUseCase,
 	UnsuspendStoreMemberUseCase,
@@ -23,7 +23,7 @@ import {
 } from './application/use-cases';
 import {
 	ADD_STORE_MEMBER_UC,
-	ADD_STORE_MEMBERS_UC,
+	INVITE_STORE_MEMBER_UC,
 	REMOVE_STORE_MEMBER_UC,
 	SUSPEND_STORE_MEMBER_UC,
 	UNSUSPEND_STORE_MEMBER_UC,
@@ -83,8 +83,8 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 			useClass: AddStoreMemberUseCase,
 		},
 		{
-			provide: ADD_STORE_MEMBERS_UC,
-			useClass: AddStoreMembersUseCase,
+			provide: INVITE_STORE_MEMBER_UC,
+			useClass: InviteStoreMemberUseCase,
 		},
 		{
 			provide: INITIALIZE_STORE_ORCHESTRATOR_UC,

@@ -1,5 +1,5 @@
 export * from './members/add-store-member.usecase';
-export * from './members/add-store-members.usecase';
+export * from './members/invite-store-member.usecase';
 export * from './members/remove-store-member.usecase';
 export * from './members/suspend-store-member.usecase';
 export * from './members/unsuspend-store-member.usecase';

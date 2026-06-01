@@ -96,7 +96,7 @@ const CreateStoreDialog = ({ open, onOpenChange }: DialogProps) => {
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="w-120">
+			<DialogContent className="min-w-130!">
 				{step === 1 ? (
 					<div className="flex flex-col gap-10">
 						<DialogHeader>
