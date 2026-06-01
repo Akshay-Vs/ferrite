@@ -110,7 +110,7 @@ export class InviteStoreMemberUseCase implements IInviteStoreMemberUseCase {
 					}
 
 					this.logger.debug(
-						`Invited member to store: storeId=${input.storeId}, email=${input.email}`
+						`Invited member to store: storeId=${input.storeId}`
 					);
 					return ok();
 				} catch (e) {
