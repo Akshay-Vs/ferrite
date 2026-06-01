@@ -96,7 +96,7 @@ const CreateStoreDialog = ({ open, onOpenChange }: DialogProps) => {
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="min-w-130!">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[32.5rem] sm:max-w-[32.5rem]">
 				{step === 1 ? (
 					<div className="flex flex-col gap-10">
 						<DialogHeader>
