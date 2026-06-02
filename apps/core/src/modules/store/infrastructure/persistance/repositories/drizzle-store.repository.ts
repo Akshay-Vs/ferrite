@@ -231,7 +231,11 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.innerJoin(storeRoles, eq(storeInvitations.roleId, storeRoles.id))
 					.innerJoin(users, eq(storeInvitations.invitedBy, users.id))
 					.where(
-						and(eq(storeInvitations.id, id), eq(storeInvitations.email, email))
+						and(
+							eq(storeInvitations.id, id),
+							eq(storeInvitations.email, email),
+							sql`${stores.deletedAt} IS NULL`
+						)
 					);
 
 				if (!row) return null;
@@ -248,16 +252,23 @@ export class DrizzleStoreRepository implements IStoreRepository {
 	async acceptInvitation(
 		tx: ITransactionContext | undefined,
 		id: string
-	): Promise<void> {
+	): Promise<boolean> {
 		return traceDbOp(
 			this.tracer,
 			'db.storeInvitations.accept',
 			{ 'db.table': 'store_invitations', 'db.operation': 'update' },
 			async () => {
-				await this.getExecutor(tx)
+				const [row] = await this.getExecutor(tx)
 					.update(storeInvitations)
 					.set({ status: 'accepted' })
-					.where(eq(storeInvitations.id, id));
+					.where(
+						and(
+							eq(storeInvitations.id, id),
+							eq(storeInvitations.status, 'pending')
+						)
+					)
+					.returning({ id: storeInvitations.id });
+				return !!row;
 			}
 		);
 	}
@@ -274,12 +285,15 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.storeMembers.add',
 			{ 'db.table': 'store_members', 'db.operation': 'insert' },
 			async () => {
-				await this.getExecutor(tx).insert(storeMembers).values({
-					storeId,
-					userId,
-					roleId,
-					isOwner,
-				});
+				await this.getExecutor(tx)
+					.insert(storeMembers)
+					.values({
+						storeId,
+						userId,
+						roleId,
+						isOwner,
+					})
+					.onConflictDoNothing();
 			}
 		);
 	}
