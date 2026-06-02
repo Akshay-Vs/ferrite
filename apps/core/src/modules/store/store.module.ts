@@ -2,6 +2,7 @@ import { NotificationsModule } from '@modules/notifications';
 import { UsersModule } from '@modules/users/users.module';
 import { Module } from '@nestjs/common';
 import {
+	AcceptStoreInvitationUseCase,
 	AddStoreMemberUseCase,
 	CheckStorePermissionUseCase,
 	CreateStoreRoleUseCase,
@@ -11,6 +12,7 @@ import {
 	GetPublicStoreUseCase,
 	GetRoleMembersUseCase,
 	GetRolePermissionsUseCase,
+	GetStoreInvitationUseCase,
 	GetStoreRolesUseCase,
 	GetStoresUseCase,
 	InitializeStoreOrchestratorUseCase,
@@ -22,7 +24,9 @@ import {
 	UpdateStoreUseCase,
 } from './application/use-cases';
 import {
+	ACCEPT_STORE_INVITATION_UC,
 	ADD_STORE_MEMBER_UC,
+	GET_STORE_INVITATION_UC,
 	INVITE_STORE_MEMBER_UC,
 	REMOVE_STORE_MEMBER_UC,
 	SUSPEND_STORE_MEMBER_UC,
@@ -47,6 +51,7 @@ import {
 	INITIALIZE_STORE_ORCHESTRATOR_UC,
 	UPDATE_STORE_UC,
 } from './domain/ports/store-use-cases.port';
+import { InvitationController } from './infrastructure/http/controllers/invitation.controller';
 import { RoleController } from './infrastructure/http/controllers/role.controller';
 import { StoreController } from './infrastructure/http/controllers/store.controller';
 import { StorePermissionGuard } from './infrastructure/http/guards/store-permission.guard';
@@ -55,7 +60,7 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 
 @Module({
 	imports: [NotificationsModule, UsersModule],
-	controllers: [StoreController, RoleController],
+	controllers: [StoreController, RoleController, InvitationController],
 	providers: [
 		{
 			provide: STORE_REPOSITORY,
@@ -81,6 +86,14 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		{
 			provide: ADD_STORE_MEMBER_UC,
 			useClass: AddStoreMemberUseCase,
+		},
+		{
+			provide: GET_STORE_INVITATION_UC,
+			useClass: GetStoreInvitationUseCase,
+		},
+		{
+			provide: ACCEPT_STORE_INVITATION_UC,
+			useClass: AcceptStoreInvitationUseCase,
 		},
 		{
 			provide: INVITE_STORE_MEMBER_UC,
