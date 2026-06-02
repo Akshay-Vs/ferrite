@@ -13,6 +13,7 @@ import {
 	storeRolePermissions,
 	storeRoles,
 	stores,
+	users,
 } from '@core/database/schema';
 import type {
 	Store,
@@ -26,6 +27,7 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
+import { GetStoreInvitationResponse } from '@ferrite/schema/stores/get-store-invitation.zodschema';
 import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, desc, eq, sql } from 'drizzle-orm';
@@ -189,6 +191,73 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					expiresAt,
 					token,
 				});
+			}
+		);
+	}
+
+	async findInvitationByIdAndEmail(
+		id: string,
+		email: string
+	): Promise<GetStoreInvitationResponse | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeInvitations.findByIdAndEmail',
+			{ 'db.table': 'store_invitations', 'db.operation': 'select' },
+			async () => {
+				const [row] = await this.db
+					.select({
+						id: storeInvitations.id,
+						email: storeInvitations.email,
+						status: storeInvitations.status,
+						invitedAt: storeInvitations.createdAt,
+						expiresAt: storeInvitations.expiresAt,
+						store: {
+							id: stores.id,
+							name: stores.name,
+							slug: stores.slug,
+						},
+						role: {
+							id: storeRoles.id,
+							name: storeRoles.name,
+						},
+						invitedBy: {
+							fullName: sql<string>`trim(concat(${users.firstName}, ' ', COALESCE(${users.lastName}, '')))`,
+							email: users.email,
+							avatarUrl: users.avatarUrl,
+						},
+					})
+					.from(storeInvitations)
+					.innerJoin(stores, eq(storeInvitations.storeId, stores.id))
+					.innerJoin(storeRoles, eq(storeInvitations.roleId, storeRoles.id))
+					.innerJoin(users, eq(storeInvitations.invitedBy, users.id))
+					.where(
+						and(eq(storeInvitations.id, id), eq(storeInvitations.email, email))
+					);
+
+				if (!row) return null;
+
+				return {
+					...row,
+					invitedAt: row.invitedAt.toISOString(),
+					expiresAt: row.expiresAt.toISOString(),
+				};
+			}
+		);
+	}
+
+	async acceptInvitation(
+		tx: ITransactionContext | undefined,
+		id: string
+	): Promise<void> {
+		return traceDbOp(
+			this.tracer,
+			'db.storeInvitations.accept',
+			{ 'db.table': 'store_invitations', 'db.operation': 'update' },
+			async () => {
+				await this.getExecutor(tx)
+					.update(storeInvitations)
+					.set({ status: 'accepted' })
+					.where(eq(storeInvitations.id, id));
 			}
 		);
 	}
