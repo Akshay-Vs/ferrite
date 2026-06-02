@@ -121,7 +121,10 @@ export type IGetStoreInvitationUseCase = IUseCase<
 	GetStoreInvitationError
 >;
 
-export type AcceptStoreInvitationError = Error;
+export type AcceptStoreInvitationError =
+	| InvitationNotFoundError
+	| InvitationExpiredError
+	| Error;
 
 export type IAcceptStoreInvitationUseCase = IUseCase<
 	AcceptStoreInvitationInput,

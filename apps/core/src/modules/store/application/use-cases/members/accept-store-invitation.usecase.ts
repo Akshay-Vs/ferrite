@@ -40,6 +40,7 @@ export class AcceptStoreInvitationUseCase
 		return this.tracer.withSpan(
 			'use-case.accept-store-invitation',
 			async () => {
+				// Pre-flight read (outside tx) – acts as an early-exit fast path.
 				const invitation =
 					await this.storeRepository.findInvitationByIdAndEmail(
 						input.invitationId,
@@ -50,7 +51,6 @@ export class AcceptStoreInvitationUseCase
 					return err(new InvitationNotFoundError());
 				}
 
-				// If the invitation has already been accepted or declined, we treat it as not found to prevent any further actions on it.
 				if (
 					invitation.status === 'accepted' ||
 					invitation.status === 'declined'
@@ -62,7 +62,8 @@ export class AcceptStoreInvitationUseCase
 					return err(new InvitationExpiredError());
 				}
 
-				// If a transaction context is provided in the input, we use it directly. Otherwise, we create a new transaction using the unit of work.
+				// The actual state transition runs inside a transaction so that
+				// the conditional update + member insert are atomic.
 				const result = input.tx
 					? await this.accept(input.tx, input, invitation)
 					: await this.uow.execute(async (tx) =>
@@ -76,17 +77,26 @@ export class AcceptStoreInvitationUseCase
 
 	/**
 	 * Handles the acceptance of a store invitation within a transaction context.
-	 * @param tx - The transaction context to execute the operations within.
-	 * @param input - The input data for accepting the store invitation.
-	 * @param invitation - The store invitation details that are being accepted.
-	 * @returns A Result indicating the success or failure of the operation.
+	 *
+	 * The conditional update (`WHERE status = 'pending'`) inside acceptInvitation
+	 * addStoreMember uses conflict-safe insert so a duplicate membership is a no-op.
 	 */
 	private async accept(
 		tx: ITransactionContext,
 		input: AcceptStoreInvitationInput,
 		invitation: GetStoreInvitationResponse
 	): Promise<Result<void, AcceptStoreInvitationError>> {
-		await this.storeRepository.acceptInvitation(tx, input.invitationId);
+		const accepted = await this.storeRepository.acceptInvitation(
+			tx,
+			input.invitationId
+		);
+
+		// If no row was updated the invitation was already accepted/declined
+		// by a concurrent request — treat as not found.
+		if (!accepted) {
+			return err(new InvitationNotFoundError());
+		}
+
 		await this.storeRepository.addStoreMember(
 			tx,
 			invitation.store.id,

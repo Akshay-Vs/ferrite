@@ -74,12 +74,14 @@ export interface IStoreRepository {
 	): Promise<GetStoreInvitationResponse | null>;
 
 	/**
-	 * Accept a store invitation. Updates the status to 'accepted'.
+	 * Conditionally accept a store invitation.
+	 * Updates status to 'accepted' only if the current status is 'pending'.
+	 * @returns `true` if the update matched a row, `false` if no pending invitation was found.
 	 */
 	acceptInvitation(
 		tx: ITransactionContext | undefined,
 		id: string
-	): Promise<void>;
+	): Promise<boolean>;
 
 	/**
 	 * Adds a user as a member of a store with a specific role.
