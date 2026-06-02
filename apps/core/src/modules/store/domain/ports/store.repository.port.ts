@@ -7,6 +7,7 @@ import type {
 import type { PermissionKey } from '@ferrite/schema/common/permissions.zodschema';
 import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
+import { GetStoreInvitationResponse } from '@ferrite/schema/stores/get-store-invitation.zodschema';
 import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 
 export const STORE_REPOSITORY = Symbol('STORE_REPOSITORY');
@@ -61,6 +62,23 @@ export interface IStoreRepository {
 		expiresAt: Date,
 		token: string,
 		roleId: string
+	): Promise<void>;
+
+	/**
+	 * Find an invitation by ID and ensure it belongs to the given email.
+	 * Returns detailed invitation information including the store, role, and inviter.
+	 */
+	findInvitationByIdAndEmail(
+		id: string,
+		email: string
+	): Promise<GetStoreInvitationResponse | null>;
+
+	/**
+	 * Accept a store invitation. Updates the status to 'accepted'.
+	 */
+	acceptInvitation(
+		tx: ITransactionContext | undefined,
+		id: string
 	): Promise<void>;
 
 	/**
