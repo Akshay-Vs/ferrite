@@ -1,6 +1,9 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
 import { IUseCase } from '@common/interfaces/use-case.interface';
+import { GetStoreInvitationResponse } from '@ferrite/schema/stores/get-store-invitation.zodschema';
 import { EmailTransitError } from '@notifications/domain/errors/email-transit.error';
+import { InvitationExpiredError } from '../errors/invitation-expired.error';
+import { InvitationNotFoundError } from '../errors/invitation-not-found.error';
 import type { MemberAlreadySuspendedError } from '../errors/member-already-suspended.error';
 import type { MemberNotFoundError } from '../errors/member-not-found.error';
 import type { MemberNotSuspendedError } from '../errors/member-not-suspended.error';
@@ -11,6 +14,8 @@ export const REMOVE_STORE_MEMBER_UC = Symbol('REMOVE_STORE_MEMBER_UC');
 export const SUSPEND_STORE_MEMBER_UC = Symbol('SUSPEND_STORE_MEMBER_UC');
 export const UNSUSPEND_STORE_MEMBER_UC = Symbol('UNSUSPEND_STORE_MEMBER_UC');
 export const INVITE_STORE_MEMBER_UC = Symbol('INVITE_STORE_MEMBER_UC');
+export const GET_STORE_INVITATION_UC = Symbol('GET_STORE_INVITATION_UC');
+export const ACCEPT_STORE_INVITATION_UC = Symbol('ACCEPT_STORE_INVITATION_UC');
 
 export interface AddStoreMemberInput {
 	tx?: ITransactionContext;
@@ -49,6 +54,18 @@ export interface InviteStoreMemberInput {
 	expiresAt: Date;
 	token: string;
 	roleId: string;
+}
+
+export interface GetStoreInvitationInput {
+	invitationId: string;
+	userEmail: string;
+}
+
+export interface AcceptStoreInvitationInput {
+	tx?: ITransactionContext;
+	invitationId: string;
+	userId: string;
+	userEmail: string;
 }
 
 export type RemoveStoreMemberError =
@@ -91,4 +108,23 @@ export type IUnsuspendStoreMemberUseCase = IUseCase<
 	UnsuspendStoreMemberInput,
 	void,
 	UnsuspendStoreMemberError
+>;
+
+export type GetStoreInvitationError =
+	| InvitationNotFoundError
+	| InvitationExpiredError
+	| Error;
+
+export type IGetStoreInvitationUseCase = IUseCase<
+	GetStoreInvitationInput,
+	GetStoreInvitationResponse,
+	GetStoreInvitationError
+>;
+
+export type AcceptStoreInvitationError = Error;
+
+export type IAcceptStoreInvitationUseCase = IUseCase<
+	AcceptStoreInvitationInput,
+	void,
+	AcceptStoreInvitationError
 >;
