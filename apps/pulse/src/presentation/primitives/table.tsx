@@ -1,8 +1,7 @@
 'use client';
 
 import type * as React from 'react';
-
-import { cn } from '@/core/utils';
+import { cn } from '@/core/utils/cn';
 
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
 	return (
