@@ -1,5 +1,5 @@
+import MetricCard from '@presentation/primitives/metric-card';
 import FadeInItem from '@/presentation/animations/fade-in-item';
-import MetricCard from './metric-card';
 
 const KPIOverview = () => {
 	return (
