@@ -1,12 +1,31 @@
 @use "root.components.scss";
 @use "scroll-bar.scss";
 @use "debug-mode.scss";
+@use "animations.scss";
+
+html {
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
 
 body {
   min-height: 100vh;
+}
+
+#bg-gradient {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  // background-color: red;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.09), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(99, 179, 255, 0.01), transparent);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(99, 179, 255, 0.04), transparent);
+
 }
 
 /*
