@@ -6,8 +6,8 @@ import { NavLinks } from './nav-links';
 
 export const NavBar = () => {
 	return (
-		<div>
-			<nav className="flex items-center justify-between">
+		<div id="navigation-container" className="sticky top-0 z-50 py-4 mb-8">
+			<nav className="flex items-center justify-between px-5">
 				<Logo size={'lg'} />
 				<div className="flex items-center gap-6">
 					<NavLinks />
