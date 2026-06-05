@@ -23,6 +23,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={cn('font-sans', inter.variable)}>
 			<body className="antialiased bg-background text-content">
+				<div id="bg-gradient" />
 				<ClerkProvider>
 					<QueryClientProvider>
 						<FerriteCoreProvider>
