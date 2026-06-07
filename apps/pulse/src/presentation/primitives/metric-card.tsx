@@ -3,14 +3,21 @@ import { formatCompactNumber } from '@/core/utils/format-compact-number';
 import { Tooltip, TooltipTrigger } from '@/presentation/primitives/tooltip';
 import { TooltipContent } from './tooltip';
 
-interface MetricCardProps {
-	label: string;
-	valuePrefix?: string;
-	currentValue: number;
-	deltaPercent?: number;
-	trend?: 'up' | 'down';
-}
-
+type MetricCardProps =
+	| {
+			label: string;
+			valuePrefix?: string;
+			currentValue: number;
+			deltaPercent?: undefined;
+			trend?: undefined;
+	  }
+	| {
+			label: string;
+			valuePrefix?: string;
+			currentValue: number;
+			deltaPercent: number;
+			trend: 'up' | 'down';
+	  };
 const MetricCard = ({
 	label,
 	currentValue,
