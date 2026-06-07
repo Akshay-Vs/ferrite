@@ -2,7 +2,11 @@ import { Button } from '@/presentation/primitives/button';
 
 const AddNewOrder = () => {
 	return (
-		<Button size="lg" className="bg-active gradient-border">
+		<Button
+			size="lg"
+			variant="ghost"
+			className="bg-active border border-surface"
+		>
 			Add new order
 		</Button>
 	);
