@@ -1,0 +1,24 @@
+@keyframes bg-transparent-to-background {
+  from {
+    background: transparent;
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    background: rgb(from var(--color-background) r g b / 94%);
+    backdrop-filter: blur(24px);
+  }
+}
+
+#navigation-container,
+.bg-transparent-to-background {
+  animation-name: bg-transparent-to-background;
+  animation-duration: 1s; /* ignored, but required by some browsers */
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+
+  animation-timeline: scroll(root);
+
+  /* 0px -> 60px scroll */
+  animation-range: 0px 240px;
+}

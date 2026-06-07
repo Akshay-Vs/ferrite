@@ -1,3 +1,9 @@
+/* Force WebKit browsers to render a visible scrollbar structure */
+.scroll-container {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 2px;

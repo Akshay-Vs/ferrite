@@ -26,9 +26,9 @@ export default async function NavigatableLayout({
 	}
 
 	return (
-		<main className="py-4 px-5">
+		<div className="pb-4">
 			<NavBar />
-			{children}
-		</main>
+			<main className="px-5">{children}</main>
+		</div>
 	);
 }
