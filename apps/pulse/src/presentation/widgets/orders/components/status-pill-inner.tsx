@@ -27,7 +27,7 @@ const OrderStatusPillInner = ({
 	return (
 		<figure
 			aria-label="Order status breakdown"
-			className={`relative m-0 transition-all z-999!'}`}
+			className={`relative m-0 transition-all'}`}
 			style={{ width, height: PILL_HEIGHT }}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
@@ -144,7 +144,7 @@ const OrderStatusPillInner = ({
 						color: 'rgba(0,0,0,0.55)',
 					}}
 				>
-					{Math.round((slice.def.count / total) * 100)}%
+					{total > 0 ? Math.round((slice.def.count / total) * 100) : 0}%
 				</div>
 			))}
 

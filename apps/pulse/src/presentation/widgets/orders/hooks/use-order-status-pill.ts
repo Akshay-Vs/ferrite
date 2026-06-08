@@ -14,7 +14,7 @@ import {
 	PILL_HEIGHT,
 } from '../lib/orders-status-chart.types';
 
-// ─── legend item ──────────────────────────────────────────────────────────────
+// ─ legend item
 
 export interface LegendItem {
 	slice: SegmentSlice;
@@ -30,7 +30,7 @@ export interface LegendItem {
 	staggerIndex: number;
 }
 
-// ─── hook ─────────────────────────────────────────────────────────────────────
+// hook
 
 export function useOrderStatusPill(data: OrderData, width: number) {
 	const [hovered, setHovered] = useState(false);
@@ -40,9 +40,10 @@ export function useOrderStatusPill(data: OrderData, width: number) {
 		data.processing +
 		data.returned +
 		data.cancelled;
+
 	const radius = PILL_HEIGHT / 2;
 
-	// ── x-scale: proportion (0–1) → pixel ────────────────────────────────────
+	//  x-scale: proportion (0–1) → pixel
 	const xScale = useMemo(
 		() =>
 			scaleLinear<number>({
@@ -52,7 +53,7 @@ export function useOrderStatusPill(data: OrderData, width: number) {
 		[width]
 	);
 
-	// ── segment defs ─────────────────────────────────────────────────────────
+	//  segment defs
 	const defaultDefs = useMemo<SegDef[]>(
 		() => [
 			{
@@ -70,7 +71,7 @@ export function useOrderStatusPill(data: OrderData, width: number) {
 			{
 				key: 'returned',
 				count: data.cancelled + data.returned,
-				label: 'Returned',
+				label: 'Returned / Cancelled',
 				above: false,
 			},
 		],
@@ -125,14 +126,17 @@ export function useOrderStatusPill(data: OrderData, width: number) {
 		]
 	);
 
-	// ── slices (proportion-based) ────────────────────────────────────────────
+	//  slices (proportion-based)
 	const slices = useMemo(() => {
+		if (total === 0) return [];
 		const defs = hovered ? expandedDefs : defaultDefs;
 		return buildSlices(defs, total);
 	}, [hovered, defaultDefs, expandedDefs, total]);
 
-	// ── legends with pixel positions via xScale ──────────────────────────────
+	//  legends with pixel positions via xScale
 	const legends = useMemo<LegendItem[]>(() => {
+		if (total === 0) return [];
+
 		const aboveSlices = slices.filter((s) => s.def.above);
 		const belowSlices = slices.filter((s) => !s.def.above);
 
@@ -175,7 +179,7 @@ export function useOrderStatusPill(data: OrderData, width: number) {
 			}
 		}
 		return items;
-	}, [slices, xScale, width]);
+	}, [slices, xScale, width, total]);
 
 	return {
 		hovered,

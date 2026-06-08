@@ -18,7 +18,10 @@ export interface SegmentSlice {
  * No pixel math — call `xScale(slice.x0)` etc. to get pixel values.
  */
 export function buildSlices(defs: SegDef[], total: number): SegmentSlice[] {
+	if (total === 0) return [];
+
 	let cumulative = 0;
+
 	return defs.map((def) => {
 		const fraction = def.count / total;
 		const x0 = cumulative;
