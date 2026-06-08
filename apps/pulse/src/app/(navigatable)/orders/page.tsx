@@ -1,18 +1,30 @@
-import FadeInItem from '@/presentation/animations/fade-in-item';
+import AddNewOrder from '@/presentation/widgets/orders/components/add-new-order';
+import OrdersStatusChart from '@/presentation/widgets/orders/components/orders-status-chart';
+import OrdersTable from '@/presentation/widgets/orders/tables/orders-table';
+import TableHeaderControlls from '@/presentation/widgets/orders/tables/table-header-controlls';
 
 const ordersPage = () => {
 	return (
-		<FadeInItem className="min-h-0 min-w-0">
-			<div className="relative min-h-[200vh] rounded-container border border-border border-t-transparent bg-card">
-				<div className="sticky top-24">
-					<div className="absolute top-0 left-1/2 h-8 w-[99vw] -translate-x-1/2 bg-transparent-to-background -z-10" />
-
-					<div className="center rounded-t-container h-24 border-t border-border bg-card border-gradient">
-						Main Chart
-					</div>
+		<div className="w-full flex flex-col gap-6">
+			<div className="w-full flex justify-between items-center">
+				<div className="flex gap-4">
+					<AddNewOrder />
+					<TableHeaderControlls />
 				</div>
-			</div>{' '}
-		</FadeInItem>
+
+				<OrdersStatusChart
+					data={{
+						cancelled: 20,
+						delivered: 200,
+						inTransit: 100,
+						processing: 100,
+						returned: 10,
+					}}
+				/>
+			</div>
+
+			<OrdersTable />
+		</div>
 	);
 };
 

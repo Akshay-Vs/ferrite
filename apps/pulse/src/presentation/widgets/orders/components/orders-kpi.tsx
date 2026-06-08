@@ -11,7 +11,7 @@ const OrdersKPI = () => {
 				trend="up"
 			/>
 
-			<MetricCard label="Orders Pending" currentValue={992} />
+			{/* <MetricCard label="Orders Pending" currentValue={992} /> */}
 
 			<MetricCard label="Orders Delivered" currentValue={6192} />
 

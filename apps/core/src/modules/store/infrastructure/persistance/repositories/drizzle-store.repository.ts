@@ -30,7 +30,7 @@ import { GetAllStores } from '@ferrite/schema/stores/get-store.zodschema';
 import { GetStoreInvitationResponse } from '@ferrite/schema/stores/get-store-invitation.zodschema';
 import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, exists, gt, sql } from 'drizzle-orm';
 import type { IStoreRepository } from '../../../domain/ports/store.repository.port';
 
 @Injectable()
@@ -258,13 +258,26 @@ export class DrizzleStoreRepository implements IStoreRepository {
 			'db.storeInvitations.accept',
 			{ 'db.table': 'store_invitations', 'db.operation': 'update' },
 			async () => {
-				const [row] = await this.getExecutor(tx)
+				const executor = this.getExecutor(tx);
+				const [row] = await executor
 					.update(storeInvitations)
 					.set({ status: 'accepted' })
 					.where(
 						and(
 							eq(storeInvitations.id, id),
-							eq(storeInvitations.status, 'pending')
+							eq(storeInvitations.status, 'pending'),
+							gt(storeInvitations.expiresAt, sql`now()`),
+							exists(
+								executor
+									.select({ id: stores.id })
+									.from(stores)
+									.where(
+										and(
+											eq(stores.id, storeInvitations.storeId),
+											sql`${stores.deletedAt} IS NULL`
+										)
+									)
+							)
 						)
 					)
 					.returning({ id: storeInvitations.id });

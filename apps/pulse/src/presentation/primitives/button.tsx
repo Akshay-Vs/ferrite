@@ -6,13 +6,15 @@ import { cn } from '@/core/utils/cn';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 
 const buttonVariants = cva(
-	"group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding whitespace-nowrap transition-all duration-200 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer font-normal text-base active:scale-98",
+	"group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding whitespace-nowrap transition-colors duration-200 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer font-normal text-base active:scale-98",
 	{
 		variants: {
 			variant: {
 				default:
 					'bg-surface border-2 gradient-border hover:border-accent/30 text-content aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
 				secondary: 'bg-primary text-primary-foreground hover:bg-primary/80',
+				tertiary:
+					'bg-surface border border-active text-content aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
 				outline:
 					'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-transparent dark:hover:bg-input/30',
 				ghost: 'aria-expanded:bg-muted aria-expanded:text-foreground',
@@ -53,18 +55,20 @@ type ButtonProps = ButtonPrimitive.Props &
 		loadingText?: string;
 		children?: ReactNode;
 		tooltip?: string;
+		tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
 	};
 
 const Button = memo(function Button({
 	className,
-	variant = 'default',
-	size = 'default',
-	isLoading = false,
 	loadingText,
 	children,
 	tooltip,
 	disabled,
+	variant = 'default',
+	size = 'default',
+	isLoading = false,
 	type = 'button',
+	tooltipPosition = 'top',
 	...props
 }: ButtonProps) {
 	const isDisabled = disabled || isLoading;
@@ -97,7 +101,7 @@ const Button = memo(function Button({
 	return (
 		<Tooltip>
 			<TooltipTrigger render={button} />
-			<TooltipContent>{tooltip}</TooltipContent>
+			<TooltipContent side={tooltipPosition}>{tooltip}</TooltipContent>
 		</Tooltip>
 	);
 });
