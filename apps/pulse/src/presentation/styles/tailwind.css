@@ -127,7 +127,6 @@
 	--color-primary: var(--primary);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-card-foreground: var(--card-foreground);
-	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--radius: 0.5rem;
 	--radius-sm: calc(var(--radius) * 0.6);
