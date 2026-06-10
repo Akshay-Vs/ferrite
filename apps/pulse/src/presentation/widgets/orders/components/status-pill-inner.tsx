@@ -23,6 +23,7 @@ const OrderStatusPillInner = ({
 
 	const patternId = 'pill-diag-stripes';
 	const clipId = 'pill-clip';
+	const LABEL_VISIBILITY_THRESHOLD = 3;
 
 	return (
 		<figure
@@ -133,20 +134,26 @@ const OrderStatusPillInner = ({
 			</svg>
 
 			{/* percentage labels inside pill (HTML, absolutely positioned) */}
-			{slices.map((slice) => (
-				<div
-					key={`pct-${slice.def.key}`}
-					className="absolute flex items-center justify-center font-semibold text-[15px] pointer-events-none select-none"
-					style={{
-						left: xScale(slice.mid),
-						top: PILL_HEIGHT / 2,
-						transform: 'translate(-50%, -50%)',
-						color: 'rgba(0,0,0,0.55)',
-					}}
-				>
-					{total > 0 ? Math.round((slice.def.count / total) * 100) : 0}%
-				</div>
-			))}
+			{slices.map((slice) => {
+				const percentage =
+					total > 0 ? Math.round((slice.def.count / total) * 100) : 0;
+				if (percentage < LABEL_VISIBILITY_THRESHOLD) return null;
+
+				return (
+					<div
+						key={`pct-${slice.def.key}`}
+						className="absolute flex items-center justify-center font-semibold text-[15px] pointer-events-none select-none"
+						style={{
+							left: xScale(slice.mid),
+							top: PILL_HEIGHT / 2,
+							transform: 'translate(-50%, -50%)',
+							color: 'rgba(0,0,0,0.55)',
+						}}
+					>
+						{percentage}%
+					</div>
+				);
+			})}
 
 			{/* hover: HTML legend labels (Tailwind) */}
 			{/* {hovered && */}
