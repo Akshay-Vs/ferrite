@@ -11,6 +11,7 @@ import {
 	useOrdersTableStore,
 } from '../stores/orders-table.store';
 import { ordersColumns } from './table-columns';
+import { OrdersContextMenu } from './table-context-menu';
 
 const getRowClassName = (row: Row<Order>): string | undefined =>
 	row.original.transactionStatus === 'failed' ||
@@ -36,6 +37,9 @@ const OrdersTable = () => {
 			columnVisibility={columnVisibility}
 			onColumnVisibilityChange={updateOrdersTableVisibility}
 			getRowClassName={getRowClassName}
+			renderRowContextMenu={({ rowId, row }) => (
+				<OrdersContextMenu rowId={rowId} data={row.original} />
+			)}
 		/>
 	);
 };
