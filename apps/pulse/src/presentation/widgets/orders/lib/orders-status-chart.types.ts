@@ -1,3 +1,5 @@
+import type { TransactionStatus } from './orders-mock';
+
 // ─── domain types ─────────────────────────────────────────────────────────────
 
 export interface OrderData {
@@ -41,10 +43,16 @@ export const MIN_LABEL_GAP = 90;
 
 export const COLOR: Record<SegKey, string> = {
 	delivered: '#79FF89',
-	inTransit: '#3DB84A',
+	inTransit: '#79FFAF',
 	processing: '#79FDFF',
-	returned: '#FF7D79',
-	cancelled: '#C93835',
+	returned: '#FF797B',
+	cancelled: '#FF9F79',
 };
 
 export const STRIPED_KEYS: SegKey[] = ['delivered', 'inTransit'];
+
+export const TRANSACTION_STATUS_COLOR: Record<TransactionStatus, string> = {
+	success: '#79FF89',
+	pending: '#FFD579',
+	failed: '#FF797B',
+};
