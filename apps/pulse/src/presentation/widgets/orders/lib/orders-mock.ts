@@ -5,6 +5,15 @@ export type Product = {
 	image: string;
 };
 
+export type OrderStatus =
+	| 'delivered'
+	| 'inTransit'
+	| 'processing'
+	| 'returned'
+	| 'cancelled';
+export type TransactionStatus = 'success' | 'failed' | 'pending';
+export type TransactionMethod = 'card' | 'bankTransfer' | 'cash' | 'UPI';
+
 export type Order = {
 	id: string;
 	date: Date;
@@ -23,9 +32,9 @@ export type Order = {
 		landmark: string;
 		zip: string;
 	};
-	transactionStatus: 'success' | 'failed' | 'pending';
-	transactionMethod: 'card' | 'bankTransfer' | 'cash' | 'UPI';
-	status: 'delivered' | 'inTransit' | 'processing' | 'returned' | 'cancelled';
+	transactionStatus: TransactionStatus;
+	transactionMethod: TransactionMethod;
+	status: OrderStatus;
 };
 
 export const orders: Order[] = [
@@ -57,7 +66,7 @@ export const orders: Order[] = [
 		},
 		transactionStatus: 'success',
 		transactionMethod: 'card',
-		status: 'delivered',
+		status: 'cancelled',
 	},
 	{
 		id: 'ORD-1002',
