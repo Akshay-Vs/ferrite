@@ -1,5 +1,6 @@
 'use client';
 
+import { ContextMenu as BaseUIContextMenu } from '@base-ui/react/context-menu';
 import {
 	Table,
 	TableBody,
@@ -10,24 +11,40 @@ import {
 } from '@presentation/primitives/table';
 import { flexRender, type Row } from '@tanstack/react-table';
 import { ChevronRight } from 'lucide-react';
+import type { ReactNode } from 'react';
 import {
 	type UseDataTableProps,
 	useDataTable,
 } from '@/core/hooks/use-data-table';
+import { useHydration } from '@/core/hooks/use-hydration';
 import { cn } from '@/core/utils/cn';
 import { Button } from './button';
+
+/** Render prop for an optional row-level context menu.
+ *  Returns the ContextMenuContent to display when a row is right-clicked. */
+export type RowContextMenuRenderer<TData> = (props: {
+	rowId: string;
+	row: Row<TData>;
+}) => ReactNode;
 
 export interface DataTableProps<TData, TValue>
 	extends UseDataTableProps<TData, TValue> {
 	getRowClassName?: (row: Row<TData>) => string | undefined;
+	/** Optional render prop — when provided, right-clicking any row
+	 *  opens the returned context menu content. */
+	renderRowContextMenu?: RowContextMenuRenderer<TData>;
 }
 
 export function DataTable<TData, TValue>({
 	getRowClassName,
 	expandable = true,
+	renderRowContextMenu,
 	...props
 }: DataTableProps<TData, TValue>) {
 	const { table, getRowProps } = useDataTable({ expandable, ...props });
+
+	const { isHydrated } = useHydration();
+	const contextMenuActive = !!renderRowContextMenu && isHydrated;
 
 	return (
 		<div className="overflow-hidden border border-border rounded-container bg-card">
@@ -52,39 +69,70 @@ export function DataTable<TData, TValue>({
 				</TableHeader>
 				<TableBody>
 					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row, index) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && 'selected'}
-								onClick={expandable ? () => row.toggleExpanded() : undefined}
-								{...getRowProps(row.id, index, () => row.toggleExpanded())}
-								className={cn(
-									'group transition-all',
-									expandable && 'cursor-pointer',
-									row.getIsExpanded() && 'border-b border-border',
-									getRowClassName?.(row)
-								)}
-							>
-								{row.getVisibleCells().map((cell, index) => (
-									<TableCell
-										key={cell.id}
-										className={index === 0 ? 'relative' : ''}
-									>
-										{expandable && index === 0 && (
-											<div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-muted-foreground">
-												<ChevronRight
-													className={cn(
-														'h-4 w-4 transition-transform',
-														row.getIsExpanded() && 'rotate-90'
-													)}
+						table.getRowModel().rows.map((row, index) => {
+							const rowId = row.original
+								? (((row.original as Record<string, unknown>).id as string) ??
+									row.id)
+								: row.id;
+
+							const rowClassName = cn(
+								'group transition-all',
+								expandable && 'cursor-pointer',
+								row.getIsExpanded() && 'border-b border-border',
+								getRowClassName?.(row)
+							);
+
+							const rowProps = {
+								'data-state': row.getIsSelected() && 'selected',
+								onClick: expandable ? () => row.toggleExpanded() : undefined,
+								...getRowProps(row.id, index, () => row.toggleExpanded()),
+								className: rowClassName,
+							} as const;
+
+							const cells = row.getVisibleCells().map((cell, cellIndex) => (
+								<TableCell
+									key={cell.id}
+									className={cellIndex === 0 ? 'relative' : ''}
+								>
+									{expandable && cellIndex === 0 && (
+										<div className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity text-muted-foreground">
+											<ChevronRight
+												className={cn(
+													'h-4 w-4 transition-transform',
+													row.getIsExpanded() && 'rotate-90'
+												)}
+											/>
+										</div>
+									)}
+									{flexRender(cell.column.columnDef.cell, cell.getContext())}
+								</TableCell>
+							));
+
+							if (contextMenuActive) {
+								return (
+									<BaseUIContextMenu.Root key={row.id}>
+										<BaseUIContextMenu.Trigger
+											render={(triggerProps) => (
+												<TableRow
+													{...triggerProps}
+													{...rowProps}
+													className={cn(triggerProps.className, rowClassName)}
 												/>
-											</div>
-										)}
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
-								))}
-							</TableRow>
-						))
+											)}
+										>
+											{cells}
+										</BaseUIContextMenu.Trigger>
+										{renderRowContextMenu({ rowId, row })}
+									</BaseUIContextMenu.Root>
+								);
+							}
+
+							return (
+								<TableRow key={row.id} {...rowProps}>
+									{cells}
+								</TableRow>
+							);
+						})
 					) : (
 						<TableRow>
 							<TableCell
