@@ -1,6 +1,8 @@
 'use client';
 
+import type { Row } from '@tanstack/react-table';
 import { DataTable } from '@/presentation/primitives/data-table';
+import type { Order } from '../lib/orders-mock';
 import { orders } from '../lib/orders-mock';
 import {
 	updateOrdersTableExpanded,
@@ -9,6 +11,12 @@ import {
 	useOrdersTableStore,
 } from '../stores/orders-table.store';
 import { ordersColumns } from './table-columns';
+
+const getRowClassName = (row: Row<Order>): string | undefined =>
+	row.original.transactionStatus === 'failed' ||
+	row.original.status === 'cancelled'
+		? 'opacity-60 focus:opacity-80 grayscale-25 hover:grayscale-0 focus:grayscale-0 transition-all duration-200'
+		: undefined;
 
 const OrdersTable = () => {
 	const expandedState = useOrdersTableStore((state) => state.expandedState);
@@ -27,6 +35,7 @@ const OrdersTable = () => {
 			onColumnFiltersChange={updateOrdersTableFilters}
 			columnVisibility={columnVisibility}
 			onColumnVisibilityChange={updateOrdersTableVisibility}
+			getRowClassName={getRowClassName}
 		/>
 	);
 };
