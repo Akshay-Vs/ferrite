@@ -41,7 +41,6 @@ const buttonVariants = cva(
 	}
 );
 
-// Stable reference — defined outside the component so it is never recreated
 const DEFAULT_LOADING_CONTENT = (
 	<>
 		<Loader2 className="animate-spin" aria-hidden="true" />
@@ -56,6 +55,7 @@ type ButtonProps = ButtonPrimitive.Props &
 		children?: ReactNode;
 		tooltip?: string;
 		tooltipPosition?: 'top' | 'bottom' | 'left' | 'right';
+		unstyled?: boolean;
 	};
 
 const Button = memo(function Button({
@@ -69,13 +69,17 @@ const Button = memo(function Button({
 	isLoading = false,
 	type = 'button',
 	tooltipPosition = 'top',
+	unstyled = false,
 	...props
 }: ButtonProps) {
 	const isDisabled = disabled || isLoading;
 
 	const resolvedClassName = useMemo(
-		() => cn(buttonVariants({ variant, size, className })),
-		[variant, size, className]
+		() =>
+			unstyled
+				? cn(className)
+				: cn(buttonVariants({ variant, size, className })),
+		[unstyled, variant, size, className]
 	);
 
 	const content = isLoading
@@ -95,7 +99,6 @@ const Button = memo(function Button({
 		</ButtonPrimitive>
 	);
 
-	// Return the button if no tooltip is provided
 	if (!tooltip) return button;
 
 	return (
