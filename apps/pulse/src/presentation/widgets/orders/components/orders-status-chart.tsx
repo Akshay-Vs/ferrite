@@ -5,7 +5,7 @@ import OrderStatusPillInner from './status-pill-inner';
 
 export default function OrderStatusPill({ data }: { data: OrderData }) {
 	return (
-		<div className="w-2xl border">
+		<div className="w-2xl">
 			<ParentSize debounceTime={100}>
 				{({ width }) =>
 					width > 0 ? <OrderStatusPillInner data={data} width={width} /> : null

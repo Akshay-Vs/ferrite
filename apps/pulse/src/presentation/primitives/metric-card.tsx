@@ -27,7 +27,7 @@ const MetricCard = ({
 }: MetricCardProps) => {
 	return (
 		<Tooltip>
-			<TooltipTrigger>
+			<TooltipTrigger tabIndex={-1}>
 				<div className="flex gap-2">
 					{deltaPercent !== undefined && (
 						<div className="flex gap-1.5 -translate-y-4 translate-x-4">

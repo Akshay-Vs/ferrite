@@ -7,6 +7,7 @@ import { AmountCell } from './cells/amount-cell';
 import { DateCell } from './cells/date-cell';
 import { OrderIdCell } from './cells/order-id-cell';
 import ProductsCell from './cells/products-cell';
+import { StatusCell } from './cells/status-cell';
 import {
 	TransactionMethodCell,
 	TransactionStatusCell,
@@ -46,12 +47,12 @@ export const ordersColumns: ColumnDef<Order>[] = [
 	},
 	{
 		accessorKey: 'transactionStatus',
-		header: 'Transaction Status',
+		header: 'Payment Status',
 		cell: ({ row }) => <TransactionStatusCell row={row} />,
 	},
 	{
 		accessorKey: 'transactionMethod',
-		header: 'Transaction Method',
+		header: 'Payment Method',
 		cell: ({ row }) => <TransactionMethodCell row={row} />,
 	},
 	{
@@ -61,8 +62,6 @@ export const ordersColumns: ColumnDef<Order>[] = [
 			if (!value || value.length === 0) return true;
 			return value.includes(row.getValue(id));
 		},
-		cell: ({ row }) => (
-			<div className="w-30   capitalize">{row.getValue('status')}</div>
-		),
+		cell: ({ row }) => <StatusCell row={row} />,
 	},
 ];
