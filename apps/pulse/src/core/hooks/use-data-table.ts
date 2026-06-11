@@ -89,16 +89,23 @@ export function useDataTable<TData, TValue>({
 				onFocus: () => setFocusedRowId(rowId),
 				onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
 					if (e.key === 'Enter') {
+						e.preventDefault();
 						toggleExpanded();
 					} else if (e.key === 'ArrowDown') {
 						e.preventDefault();
 						const nextRow = e.currentTarget.nextElementSibling as HTMLElement;
-						if (nextRow) nextRow.focus();
+
+						if (nextRow?.tabIndex !== undefined && nextRow.tabIndex >= -1) {
+							nextRow.focus();
+						}
 					} else if (e.key === 'ArrowUp') {
 						e.preventDefault();
 						const prevRow = e.currentTarget
 							.previousElementSibling as HTMLElement;
-						if (prevRow) prevRow.focus();
+
+						if (prevRow?.tabIndex !== undefined && prevRow.tabIndex >= -1) {
+							prevRow.focus();
+						}
 					}
 				},
 			};
