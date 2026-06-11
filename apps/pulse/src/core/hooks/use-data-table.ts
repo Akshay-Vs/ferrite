@@ -5,7 +5,9 @@ import {
 	getCoreRowModel,
 	getExpandedRowModel,
 	getFilteredRowModel,
+	getSortedRowModel,
 	type OnChangeFn,
+	type SortingState,
 	useReactTable,
 	type VisibilityState,
 } from '@tanstack/react-table';
@@ -39,6 +41,7 @@ export function useDataTable<TData, TValue>({
 	const [localExpanded, setLocalExpanded] = useState<ExpandedState>({});
 	const [localColumnVisibility, setLocalColumnVisibility] =
 		useState<VisibilityState>({});
+	const [sorting, setSorting] = useState<SortingState>([]);
 
 	const [focusedRowId, setFocusedRowId] = useState<string | null>(null);
 
@@ -65,10 +68,14 @@ export function useDataTable<TData, TValue>({
 		onColumnFiltersChange: actualOnColumnFiltersChange,
 		onExpandedChange: actualOnExpandedChange,
 		onColumnVisibilityChange: actualOnColumnVisibilityChange,
+		onSortingChange: setSorting,
+		getSortedRowModel: getSortedRowModel(),
+
 		state: {
 			columnFilters: actualColumnFilters,
 			expanded: actualExpanded,
 			columnVisibility: actualColumnVisibility,
+			sorting,
 		},
 	});
 
