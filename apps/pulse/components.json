@@ -14,7 +14,7 @@
 	"rtl": false,
 	"aliases": {
 		"components": "@/presentation/layout",
-		"utils": "@/core/utils",
+		"utils": "@/core/utils/cn",
 		"ui": "@/presentation/primitives",
 		"lib": "@/core/utils",
 		"hooks": "@/application/queries"
