@@ -1,10 +1,19 @@
 import Image from 'next/image';
+import CellActionButton from '../../components/cell-action-button';
 import type { Order } from '../../lib/orders-mock';
+import { openOrderSheet } from '../../stores/order-sheet-store';
 import type { OrdersRowProps } from '../../types/orders-row';
 
 export const UserCell = ({ row }: OrdersRowProps) => {
 	const user = row.getValue('user') as Order['user'];
 	const isExpanded = row.getIsExpanded();
+
+	const handleOpenUserProfile = () => {
+		openOrderSheet({
+			activeSheet: 'user-profile',
+			userId: user.id,
+		});
+	};
 
 	if (isExpanded) {
 		return (
@@ -17,11 +26,12 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 						height={40}
 						className="h-10 w-10 shrink-0 rounded-full object-cover object-center"
 					/>
-					<div className="flex flex-col text-start min-w-0">
-						<p className="font-medium wrap-break-word" title={user.name}>
-							{user.name}
-						</p>
-
+					<div className="flex flex-col min-w-0">
+						<CellActionButton
+							className="font-medium wrap-break-word text-start"
+							value={user.name}
+							action={handleOpenUserProfile}
+						/>
 						<p
 							className="text-muted-foreground text-base font-medium truncate"
 							title={user.email}
@@ -29,7 +39,7 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 							{user.email}
 						</p>
 
-						<p className="text-muted-foreground text-sm font-mono mt-1 truncate">
+						<p className="text-muted-foreground text-sm font-mono mt-1 truncate text-start">
 							{user.id}
 						</p>
 					</div>
@@ -48,7 +58,11 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 					height={32}
 					className="h-8 w-8 shrink-0 rounded-full object-cover border"
 				/>
-				<span className="truncate">{user.name}</span>
+				<CellActionButton
+					className="truncate"
+					value={user.name}
+					action={handleOpenUserProfile}
+				/>
 			</div>
 		</div>
 	);
