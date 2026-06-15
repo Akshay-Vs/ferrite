@@ -6,6 +6,7 @@ import {
 	Command,
 	ContactRound,
 	Hash,
+	Landmark,
 	OctagonPause,
 	Package,
 	Printer,
@@ -19,6 +20,7 @@ import {
 	ContextMenuShortcut,
 } from '@/presentation/primitives/context-menu';
 import type { Order } from '../lib/orders-mock';
+import { openOrderSheet } from '../stores/order-sheet-store';
 
 export interface RawDetailsMenuProps {
 	rowId: string;
@@ -30,15 +32,35 @@ export interface RawDetailsMenuProps {
 export function OrdersContextMenu({ rowId, data }: RawDetailsMenuProps) {
 	return (
 		<ContextMenuContent>
-			<ContextMenuItem onClick={() => alert('Not implemented')}>
+			<ContextMenuItem
+				onClick={() =>
+					openOrderSheet({
+						activeSheet: 'order-details',
+						orderId: rowId,
+					})
+				}
+			>
 				<Package className="size-4" />
 				View Order Details
 			</ContextMenuItem>
 
-			<ContextMenuItem onClick={() => alert('Not implemented')}>
+			<ContextMenuItem
+				onClick={() =>
+					openOrderSheet({
+						activeSheet: 'user-profile',
+						userId: data.user.id,
+					})
+				}
+			>
 				<ContactRound className="size-4" />
 				View User Profile
 			</ContextMenuItem>
+
+			<ContextMenuItem onClick={() => alert('Not implemented')}>
+				<Landmark className="size-4" />
+				View Transaction Details
+			</ContextMenuItem>
+
 			<ContextMenuSeparator />
 
 			<ContextMenuItem onClick={() => copyToClipboard(rowId)}>
