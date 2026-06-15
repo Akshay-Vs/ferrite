@@ -52,7 +52,7 @@
 		"express": "^5.2.1",
 		"graphile-worker": "^0.16.6",
 		"helmet": "^8.1.0",
-		"mailgun.js": "^13.1.0",
+		"mailgun.js": "^13.2.0",
 		"nestjs-zod": "^5.1.1",
 		"pg": "^8.20.0",
 		"pg-logical-replication": "^2.4.0",
