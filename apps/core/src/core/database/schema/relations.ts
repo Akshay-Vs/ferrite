@@ -11,6 +11,7 @@ import {
 	storeRoles,
 	stores,
 } from './store.schema';
+import { storefrontUsers } from './storefront-user.schema';
 import { userAddresses, userPhones, users } from './user.schema';
 
 // ─────────────────────────────────────────
@@ -89,6 +90,7 @@ export const storesRelations = relations(stores, ({ one, many }) => ({
 	members: many(storeMembers),
 	roles: many(storeRoles),
 	invitations: many(storeInvitations),
+	storefrontUsers: many(storefrontUsers),
 }));
 
 export const storeRolesRelations = relations(storeRoles, ({ one, many }) => ({
@@ -140,6 +142,16 @@ export const storeInvitationsRelations = relations(
 		invitedBy: one(users, {
 			fields: [storeInvitations.invitedBy],
 			references: [users.id],
+		}),
+	})
+);
+
+export const storefrontUsersRelations = relations(
+	storefrontUsers,
+	({ one }) => ({
+		store: one(stores, {
+			fields: [storefrontUsers.storeId],
+			references: [stores.id],
 		}),
 	})
 );

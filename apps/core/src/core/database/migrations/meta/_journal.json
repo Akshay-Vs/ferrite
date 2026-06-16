@@ -64,6 +64,13 @@
 			"when": 1779862404627,
 			"tag": "0008_flippant_mac_gargan",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1781619100633,
+			"tag": "0009_wild_talkback",
+			"breakpoints": true
 		}
 	]
 }

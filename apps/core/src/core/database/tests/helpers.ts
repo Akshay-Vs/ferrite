@@ -16,6 +16,7 @@ import type {
 	NewStoreRole,
 	NewStoreRolePermission,
 } from '../schema/store.schema';
+import type { NewStorefrontUserTable } from '../schema/storefront-user.schema';
 import type {
 	NewUser,
 	NewUserAddress,
@@ -237,5 +238,19 @@ export function createTestExchangeRate(
 		fromCurrencyCode: fromCode,
 		toCurrencyCode: toCode,
 		rate,
+	};
+}
+
+// ── Storefront Users ─────────────────────
+export function createTestStorefrontUser(
+	storeId: string,
+	overrides: Partial<NewStorefrontUserTable> = {}
+): NewStorefrontUserTable {
+	emailCounter += 1;
+	return {
+		id: uuidv4(),
+		storeId,
+		email: `storefront-test-${emailCounter}-${Date.now()}@example.com`,
+		...overrides,
 	};
 }
