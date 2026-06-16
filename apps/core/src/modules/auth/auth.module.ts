@@ -13,7 +13,6 @@ import { JWT_TOKEN_UC } from './domain/ports/use-case.port';
 import { AuthProviderFactory } from './infrastructure/adapters/auth-provider.factory';
 import { ClerkAdapter } from './infrastructure/adapters/providers/clerk.adapter';
 import { AuthGuard } from './infrastructure/http/guards/auth.guard';
-import { PlatformRBACGuard } from './infrastructure/http/guards/platform-rbac.guard';
 import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 
 @Global()
@@ -44,11 +43,6 @@ import { WebhookGuard } from './infrastructure/http/guards/webhook.guard';
 			provide: APP_GUARD,
 			useClass: AuthGuard,
 		},
-		{
-			provide: APP_GUARD,
-			useClass: PlatformRBACGuard,
-		},
-
 		{
 			provide: AUTH_PROVIDER,
 			useFactory: (f: AuthProviderFactory) => f.getAdapter(),

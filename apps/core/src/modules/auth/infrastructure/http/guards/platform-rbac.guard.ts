@@ -1,9 +1,13 @@
+import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
 import { ROLES_KEY } from '@common/decorators/require-role.decorator';
+import { SKIP_ROLES } from '@common/decorators/skip-roles.decorator';
+import { IS_WEBHOOK_ROUTE } from '@common/decorators/webhook-route.decorator';
 import { AuthenticatedRequest } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import {
+	PlatformRoles,
 	platformRoleSchema,
 	ROLE_HIERARCHY,
 } from '@ferrite/schema/common/platform-roles.zodschema';
@@ -13,6 +17,7 @@ import {
 	ForbiddenException,
 	Inject,
 	Injectable,
+	InternalServerErrorException,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -43,14 +48,53 @@ export class PlatformRBACGuard implements CanActivate {
 					'http.route': request.route?.path ?? 'unknown',
 				});
 
+				const targets = [context.getHandler(), context.getClass()];
+
+				// Short-circuit: public routes bypass RBAC entirely
+				const isPublic = this.reflector.getAllAndOverride<boolean>(
+					IS_PUBLIC_ROUTE,
+					targets
+				);
+				if (isPublic) {
+					this.logger.debug('Public route — skipping RBAC check');
+					return true;
+				}
+
+				// Short-circuit: webhook routes have their own auth pipeline
+				const isWebhook = this.reflector.getAllAndOverride<boolean>(
+					IS_WEBHOOK_ROUTE,
+					targets
+				);
+				if (isWebhook) {
+					this.logger.debug('Webhook route — skipping RBAC check');
+					return true;
+				}
+
+				// Short-circuit: explicitly opted out of platform RBAC
+				const skipRoles = this.reflector.getAllAndOverride<boolean>(
+					SKIP_ROLES,
+					targets
+				);
+				if (skipRoles) {
+					this.logger.debug('@SkipRoles — skipping platform RBAC check');
+					return true;
+				}
+
 				const requiredRoles = this.reflector.getAllAndOverride<string[]>(
 					ROLES_KEY,
-					[context.getHandler(), context.getClass()]
+					targets
 				);
 
+				// FAIL-CLOSE: Guard applied but no roles declared
+				// → developer forgot to annotate this route with @RequireRole()
 				if (!requiredRoles || requiredRoles.length === 0) {
-					this.logger.debug('No required roles, bypassing guard');
-					return true;
+					this.logger.error(
+						`Route ${request.route?.path ?? 'unknown'} has PlatformRBACGuard but no @RequireRole(). ` +
+							'Add @RequireRole() or remove the guard.'
+					);
+					throw new InternalServerErrorException(
+						'Route has no platform role policy declared. Add @RequireRole() or remove the guard.'
+					);
 				}
 
 				const authUser = request.authUser;
@@ -60,7 +104,7 @@ export class PlatformRBACGuard implements CanActivate {
 					throw new UnauthorizedException('User is not authenticated');
 				}
 
-				if (!authUser.role) {
+				if (!authUser.role && !requiredRoles.includes(PlatformRoles.USER)) {
 					this.logger.debug('User does not have any roles assigned');
 					throw new ForbiddenException('User does not have any roles assigned');
 				}
