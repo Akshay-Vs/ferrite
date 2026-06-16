@@ -1,8 +1,10 @@
 import { type AuthUser } from '@auth/index';
 import { AuthUserParam } from '@common/decorators/auth-user.decorator';
 import { RequireRole } from '@common/decorators/require-role.decorator';
+import { SkipRoles } from '@common/decorators/skip-roles.decorator';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
+import { PlatformRBACGuard } from '@modules/auth/infrastructure/http/guards/platform-rbac.guard';
 import {
 	Body,
 	Controller,
@@ -18,6 +20,7 @@ import {
 	Patch,
 	Query,
 	UnprocessableEntityException,
+	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
@@ -51,6 +54,7 @@ const ME_ROUTE = 'me';
 
 @ApiTags('Users')
 @ApiBearerAuth('swagger-access-token')
+@UseGuards(PlatformRBACGuard)
 @Controller('users')
 export class UserController {
 	constructor(
@@ -76,6 +80,7 @@ export class UserController {
 	) {}
 
 	@Get(ME_ROUTE)
+	@SkipRoles()
 	@GetOwnProfileDocs()
 	async getOwnProfile(@AuthUserParam() authUser: AuthUser) {
 		return this.tracer.withSpan('http.get-own-profile', async () => {
@@ -89,6 +94,7 @@ export class UserController {
 
 	@Patch(ME_ROUTE)
 	@HttpCode(HttpStatus.OK)
+	@SkipRoles()
 	@UpdateOwnProfileDocs()
 	async updateOwnProfile(
 		@AuthUserParam() authUser: AuthUser,
@@ -108,6 +114,7 @@ export class UserController {
 
 	@Delete(ME_ROUTE)
 	@HttpCode(HttpStatus.OK)
+	@SkipRoles()
 	@DeleteOwnProfileDocs()
 	async deleteOwnProfile(@AuthUserParam() authUser: AuthUser) {
 		return this.tracer.withSpan('http.delete-own-profile', async () => {

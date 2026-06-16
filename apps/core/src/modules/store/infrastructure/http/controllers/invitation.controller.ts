@@ -11,6 +11,7 @@ import {
 	type IAcceptStoreInvitationUseCase,
 	type IGetStoreInvitationUseCase,
 } from '@modules/store/domain/ports/member-use-cases.port';
+import { StorePermissionGuard } from '@modules/store/infrastructure/http/guards/store-permission.guard';
 import {
 	Controller,
 	ForbiddenException,
@@ -23,6 +24,7 @@ import {
 	ParseUUIDPipe,
 	Post,
 	UnprocessableEntityException,
+	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
@@ -32,6 +34,7 @@ import {
 
 @ApiTags('Invitations')
 @ApiBearerAuth('swagger-access-token')
+@UseGuards(StorePermissionGuard)
 @Controller('invitations')
 export class InvitationController {
 	constructor(
