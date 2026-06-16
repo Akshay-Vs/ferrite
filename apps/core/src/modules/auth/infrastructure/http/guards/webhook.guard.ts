@@ -8,9 +8,9 @@ import { VerifyWebhookUseCase } from '@modules/auth/application/use-cases/verify
 import {
 	CanActivate,
 	ExecutionContext,
-	ForbiddenException,
 	Inject,
 	Injectable,
+	InternalServerErrorException,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -39,7 +39,7 @@ export class WebhookGuard implements CanActivate {
 
 			if (!isWebhook) {
 				this.logger.debug('Webhook route must be decorated with @WebhookRoute');
-				throw new ForbiddenException(
+				throw new InternalServerErrorException(
 					'Invalid webhook route: must be decorated with @WebhookRoute'
 				);
 			}
