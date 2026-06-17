@@ -72,7 +72,7 @@ export class StorePermissionGuard implements CanActivate {
 				);
 
 				this.logger.debug(
-					`Request ${request.path} authorized. User ${authUser.id} has permissions [${requiredPermissions.join(', ')}] in store ${storeId}.`
+					`Request ${request.url} authorized. User ${authUser.id} has permissions [${requiredPermissions.join(', ')}] in store ${storeId}.`
 				);
 				return true;
 			}
@@ -105,7 +105,7 @@ export class StorePermissionGuard implements CanActivate {
 	private setTraceAttributes(span: ISpan, request: AuthenticatedRequest): void {
 		span.setAttributes({
 			'guard.name': 'StorePermissionGuard',
-			'http.route': request.route?.path ?? 'unknown',
+			'http.route': request.routeOptions.url ?? 'unknown',
 		});
 	}
 
@@ -134,7 +134,7 @@ export class StorePermissionGuard implements CanActivate {
 	}
 
 	private getValidStoreId(request: AuthenticatedRequest): string {
-		const storeId = request.params?.storeId as string | undefined;
+		const storeId = request.params.storeId;
 
 		if (!storeId) {
 			this.logger.debug(

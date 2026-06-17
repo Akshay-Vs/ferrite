@@ -47,7 +47,7 @@ export class WebhookGuard implements CanActivate {
 			const request: WebhookRequest = context.switchToHttp().getRequest();
 
 			span.setAttributes({
-				'http.route': request.route?.path ?? 'unknown',
+				'http.route': request.routeOptions.url ?? 'unknown',
 			});
 
 			const webhookRequest: RawWebhookRequest = {

@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
 
 			span.setAttributes({
 				'guard.name': 'AuthGuard',
-				'http.route': request.route?.path ?? 'unknown',
+				'http.route': request.routeOptions.url ?? 'unknown',
 			});
 
 			const isPublic = this.reflector.getAllAndOverride<boolean>(
@@ -81,7 +81,7 @@ export class AuthGuard implements CanActivate {
 				throw new UnauthorizedException('Invalid or expired token');
 			}
 
-			this.logger.debug(`Request ${request.path} authorized`);
+			this.logger.debug(`Request ${request.url} authorized`);
 
 			const platformRequest = request as PlatformAuthenticatedRequest;
 			platformRequest.authUser = authUser.value;

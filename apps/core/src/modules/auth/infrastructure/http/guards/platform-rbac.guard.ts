@@ -57,7 +57,7 @@ export class PlatformRBACGuard implements CanActivate {
 				const userRole = this.checkUserRoleHierarchy(authUser, requiredRoles);
 
 				this.logger.debug(
-					`Request ${request.path} authorized. Role ${userRole} satisfied hierarchy.`
+					`Request ${request.url} authorized. Role ${userRole} satisfied hierarchy.`
 				);
 				return true;
 			}
@@ -67,7 +67,7 @@ export class PlatformRBACGuard implements CanActivate {
 	private setTraceAttributes(span: ISpan, request: AuthenticatedRequest): void {
 		span.setAttributes({
 			'guard.name': 'PlatformRBACGuard',
-			'http.route': request.route?.path ?? 'unknown',
+			'http.route': request.routeOptions.url ?? 'unknown',
 		});
 	}
 
@@ -120,7 +120,7 @@ export class PlatformRBACGuard implements CanActivate {
 		// → developer forgot to annotate this route with @RequireRole()
 		if (!requiredRoles || requiredRoles.length === 0) {
 			this.logger.error(
-				`Route ${request.route?.path ?? 'unknown'} has PlatformRBACGuard but no @RequireRole(). ` +
+				`Route ${request.routeOptions.url ?? 'unknown'} has PlatformRBACGuard but no @RequireRole(). ` +
 					'Add @RequireRole() or remove the guard.'
 			);
 			throw new InternalServerErrorException(
