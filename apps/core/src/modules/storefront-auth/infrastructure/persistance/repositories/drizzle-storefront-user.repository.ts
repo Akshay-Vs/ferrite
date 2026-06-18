@@ -6,18 +6,17 @@ import {
 import { DB } from '@core/database/db.provider';
 import type { TDatabase } from '@core/database/db.type';
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
-import {
-	type NewStorefrontUserTable,
-	storefrontUsers,
-} from '@core/database/schema/storefront-user.schema';
+import { storefrontUsers } from '@core/database/schema/storefront-user.schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import type { ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import {
+	CreateStorefrontUserInput,
+	StorefrontUser,
+} from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull, sql } from 'drizzle-orm';
-
 import type { IStorefrontUserRepository } from '../../../domain/ports/storefront-user-repository.port';
-import type { StorefrontUser } from '../../../domain/schemas/storefront-user.zodschema';
 import { StorefrontUserMapper } from '../mappers/storefront-user.mapper';
 
 @Injectable()
@@ -35,7 +34,7 @@ export class DrizzleStorefrontUserRepository
 	}
 
 	async create(
-		data: NewStorefrontUserTable,
+		data: CreateStorefrontUserInput,
 		tx?: ITransactionContext
 	): Promise<StorefrontUser> {
 		const normalizedData = StorefrontUserMapper.toPersistenceCreate(data);
@@ -56,14 +55,24 @@ export class DrizzleStorefrontUserRepository
 
 	private async runCreate(
 		ctx: ITransactionContext,
-		data: NewStorefrontUserTable
+		data: CreateStorefrontUserInput
 	): Promise<StorefrontUser> {
 		const executor = DrizzleUnitOfWork.unwrap(ctx);
 		const [inserted] = await traceDbOp(
 			this.tracer,
 			'db.storefrontUsers.insert',
 			{ 'db.table': 'storefront_users', 'db.operation': 'insert' },
-			() => executor.insert(storefrontUsers).values(data).returning()
+			() =>
+				executor
+					.insert(storefrontUsers)
+					.values({
+						id: data.id,
+						storeId: data.storeId,
+						email: data.email,
+						displayName: data.displayName,
+						passwordHash: data.passwordHash,
+					})
+					.returning()
 		);
 		return StorefrontUserMapper.toDomain(inserted);
 	}
