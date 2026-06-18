@@ -34,6 +34,7 @@
 		"@nestjs/platform-fastify": "^11.1.27",
 		"@nestjs/swagger": "^11.2.6",
 		"@nestjs/throttler": "^6.5.0",
+		"@node-rs/argon2": "^2.0.2",
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/auto-instrumentations-node": "^0.76.0",
 		"@opentelemetry/exporter-metrics-otlp-http": "^0.213.0",
@@ -111,6 +112,22 @@
 		],
 		"transformIgnorePatterns": [
 			"node_modules/(?!(\\.bun/.*?/node_modules/)?(uuid|zod|@ferrite/schema))"
-		]
+		],
+		"moduleNameMapper": {
+			"^@core/(.*)$": "<rootDir>/core/$1",
+			"^@modules/(.*)$": "<rootDir>/modules/$1",
+			"^@common/(.*)$": "<rootDir>/common/$1",
+			"^@database/(.*)$": "<rootDir>/core/database/$1",
+			"^@auth/(.*)$": "<rootDir>/modules/auth/$1",
+			"^@health/(.*)$": "<rootDir>/modules/health/$1",
+			"^@users/(.*)$": "<rootDir>/modules/users/$1",
+			"^@webhooks/(.*)$": "<rootDir>/modules/webhooks/$1",
+			"^@queue/(.*)$": "<rootDir>/modules/queue/$1",
+			"^@store/(.*)$": "<rootDir>/modules/store/$1",
+			"^@onboarding/(.*)$": "<rootDir>/modules/onboarding/$1",
+			"^@currency/(.*)$": "<rootDir>/modules/currency/$1",
+			"^@notifications/(.*)$": "<rootDir>/modules/notifications/$1",
+			"^@libs/(.*)$": "<rootDir>/libs/$1"
+		}
 	}
 }
