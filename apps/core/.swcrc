@@ -1,4 +1,9 @@
 {
+  "exclude": [
+    ".*\\.spec\\.ts$",
+    ".*/tests/.*",
+    ".*/testing/.*"
+  ],
   "jsc": {
     "baseUrl": "."
   }
