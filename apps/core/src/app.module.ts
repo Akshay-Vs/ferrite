@@ -10,6 +10,7 @@ import { HealthModule } from '@modules/health/health.module';
 import { OnboardingModule } from '@modules/onboarding/onboarding.module';
 import { QueueModule } from '@modules/queue';
 import { StoreModule } from '@modules/store';
+import { StorefrontAuthModule } from '@modules/storefront-auth';
 import { UsersModule } from '@modules/users/users.module';
 import { WebhooksModule } from '@modules/webhooks/webhooks.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -42,6 +43,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 		WebhooksModule,
 
 		AuthModule,
+		StorefrontAuthModule,
 		CurrencyModule,
 		StoreModule,
 		UsersModule,
