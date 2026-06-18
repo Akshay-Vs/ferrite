@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { AppLogger } from '@core/logger/logger.service';
 import helmet from '@fastify/helmet';
 import { registerShutdownHook } from '@libs/hooks/register-shutdown';
+import { logIncomingRequest } from '@libs/misc/log-incoming-req.lib';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
@@ -57,7 +58,7 @@ async function bootstrap() {
 	app.setGlobalPrefix(VERSION);
 
 	app.use((req: IncomingMessage, _res: ServerResponse, next: () => void) => {
-		logger.debug(`Request: ${req.method} ${req.url} received`);
+		logIncomingRequest(req, logger);
 		next();
 	});
 
