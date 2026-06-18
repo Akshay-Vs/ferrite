@@ -161,7 +161,8 @@ export class DrizzleStorefrontUserRepository
 					.where(
 						and(
 							eq(storefrontUsers.id, id),
-							eq(storefrontUsers.storeId, storeId)
+							eq(storefrontUsers.storeId, storeId),
+							isNull(storefrontUsers.deletedAt)
 						)
 					)
 		);
@@ -208,7 +209,8 @@ export class DrizzleStorefrontUserRepository
 					.where(
 						and(
 							eq(storefrontUsers.id, id),
-							eq(storefrontUsers.storeId, storeId)
+							eq(storefrontUsers.storeId, storeId),
+							isNull(storefrontUsers.deletedAt)
 						)
 					)
 		);
@@ -256,7 +258,8 @@ export class DrizzleStorefrontUserRepository
 					.where(
 						and(
 							eq(storefrontUsers.id, id),
-							eq(storefrontUsers.storeId, storeId)
+							eq(storefrontUsers.storeId, storeId),
+							isNull(storefrontUsers.deletedAt)
 						)
 					)
 		);
