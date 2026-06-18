@@ -1,12 +1,14 @@
 import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
-import type { NewStorefrontUserTable } from '@core/database/schema/storefront-user.schema';
-import type { StorefrontUser } from '../schemas/storefront-user.zodschema';
+import {
+	CreateStorefrontUserInput,
+	StorefrontUser,
+} from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
 
 export const STOREFRONT_USER_REPOSITORY = Symbol('IStorefrontUserRepository');
 
 export interface IStorefrontUserRepository {
 	create(
-		data: NewStorefrontUserTable,
+		data: CreateStorefrontUserInput,
 		tx?: ITransactionContext
 	): Promise<StorefrontUser>;
 	findByStoreIdAndEmail(
