@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
-import { LoginUseCase } from './application/use-cases/login.usecase';
 import { RegisterUserUseCase } from './application/use-cases/register-user.usecase';
-import { STOREFRONT_LOGIN_UC } from './domain/ports/login-usecase.port';
 import { STOREFRONT_PASSWORD_HASHER } from './domain/ports/password-hasher.port';
 import { STOREFRONT_REGISTER_UC } from './domain/ports/register-usecase.port';
 import { STOREFRONT_USER_REPOSITORY } from './domain/ports/storefront-user-repository.port';
@@ -29,10 +27,6 @@ import { DrizzleStorefrontUserRepository } from './infrastructure/persistance/re
 		{
 			provide: STOREFRONT_REGISTER_UC,
 			useClass: RegisterUserUseCase,
-		},
-		{
-			provide: STOREFRONT_LOGIN_UC,
-			useClass: LoginUseCase,
 		},
 	],
 })
