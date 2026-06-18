@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
 
 export function createDrizzleQueryBuilderMock() {
