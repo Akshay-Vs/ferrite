@@ -39,43 +39,13 @@ export type Order = {
 
 export const orders: Order[] = [
 	{
-		id: 'ORD-1001',
-		date: new Date('2026-05-12'),
+		id: 'ORD-1011',
+		date: new Date('2026-06-05'),
 		user: {
-			id: 'USR-001',
-			name: 'Sophia Johnson',
-			email: 'sophia.johnson@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=1',
-		},
-		products: [
-			{
-				id: '1',
-				name: 'Velvet Matte Lipstick With Glitter',
-				price: 12.99,
-				image:
-					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
-			},
-		],
-		address: {
-			street: '42 Maple Street',
-			city: 'Austin',
-			state: 'Texas',
-			country: 'USA',
-			landmark: 'Near Central Library',
-			zip: '78701',
-		},
-		transactionStatus: 'success',
-		transactionMethod: 'card',
-		status: 'cancelled',
-	},
-	{
-		id: 'ORD-1002',
-		date: new Date('2026-05-15'),
-		user: {
-			id: 'USR-002',
-			name: 'Emma Wilson',
-			email: 'emma.wilson@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=2',
+			id: 'USR-011',
+			name: 'Liam Harris',
+			email: 'liam.harris@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=12',
 		},
 		products: [
 			{
@@ -87,62 +57,25 @@ export const orders: Order[] = [
 			},
 		],
 		address: {
-			street: '12 Sunset Avenue',
-			city: 'Seattle',
-			state: 'Washington',
+			street: '221 Pine Street',
+			city: 'Dallas',
+			state: 'Texas',
 			country: 'USA',
-			landmark: 'Opposite Green Mall',
-			zip: '98101',
-		},
-		transactionStatus: 'pending',
-		transactionMethod: 'UPI',
-		status: 'processing',
-	},
-	{
-		id: 'ORD-1003',
-		date: new Date('2026-05-18'),
-		user: {
-			id: 'USR-003',
-			name: 'Olivia Brown',
-			email: 'olivia.brown@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=31',
-		},
-		products: [
-			{
-				id: '3',
-				name: 'Circuit Glow Highlighter',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
-			},
-			{
-				id: '4',
-				name: 'Urban Hydrating Mist',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795846/pexels-photo-7795846.jpeg',
-			},
-		],
-		address: {
-			street: '89 River Road',
-			city: 'Denver',
-			state: 'Colorado',
-			country: 'USA',
-			landmark: 'Near City Park',
-			zip: '80202',
+			landmark: 'City Hall',
+			zip: '75201',
 		},
 		transactionStatus: 'success',
 		transactionMethod: 'card',
-		status: 'inTransit',
+		status: 'delivered',
 	},
 	{
-		id: 'ORD-1004',
-		date: new Date('2026-05-20'),
+		id: 'ORD-1012',
+		date: new Date('2026-06-06'),
 		user: {
-			id: 'USR-004',
-			name: 'Ava Martinez',
-			email: 'ava.martinez@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=16',
+			id: 'USR-012',
+			name: 'Noah Walker',
+			email: 'noah.walker@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=13',
 		},
 		products: [
 			{
@@ -154,25 +87,62 @@ export const orders: Order[] = [
 			},
 		],
 		address: {
-			street: '210 Oak Drive',
-			city: 'Miami',
-			state: 'Florida',
+			street: '14 Cedar Avenue',
+			city: 'Atlanta',
+			state: 'Georgia',
 			country: 'USA',
-			landmark: 'Palm Grove',
-			zip: '33101',
+			landmark: 'Peachtree Center',
+			zip: '30303',
 		},
-		transactionStatus: 'failed',
+		transactionStatus: 'pending',
 		transactionMethod: 'bankTransfer',
-		status: 'cancelled',
+		status: 'processing',
 	},
 	{
-		id: 'ORD-1005',
-		date: new Date('2026-05-22'),
+		id: 'ORD-1013',
+		date: new Date('2026-06-07'),
 		user: {
-			id: 'USR-005',
-			name: 'Mia Davis',
-			email: 'mia.davis@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=5',
+			id: 'USR-013',
+			name: 'James Young',
+			email: 'james.young@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=14',
+		},
+		products: [
+			{
+				id: '1',
+				name: 'Velvet Matte Lipstick',
+				price: 12.99,
+				image:
+					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
+			},
+			{
+				id: '3',
+				name: 'Circuit Glow Highlighter',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
+			},
+		],
+		address: {
+			street: '88 King Street',
+			city: 'Charlotte',
+			state: 'North Carolina',
+			country: 'USA',
+			landmark: 'Freedom Park',
+			zip: '28202',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'UPI',
+		status: 'inTransit',
+	},
+	{
+		id: 'ORD-1014',
+		date: new Date('2026-06-08'),
+		user: {
+			id: 'USR-014',
+			name: 'Benjamin Hall',
+			email: 'benjamin.hall@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=15',
 		},
 		products: [
 			{
@@ -182,64 +152,64 @@ export const orders: Order[] = [
 				image:
 					'https://images.pexels.com/photos/10825663/pexels-photo-10825663.jpeg',
 			},
+		],
+		address: {
+			street: '72 Elm Street',
+			city: 'Detroit',
+			state: 'Michigan',
+			country: 'USA',
+			landmark: 'Riverfront',
+			zip: '48201',
+		},
+		transactionStatus: 'failed',
+		transactionMethod: 'card',
+		status: 'cancelled',
+	},
+	{
+		id: 'ORD-1015',
+		date: new Date('2026-06-09'),
+		user: {
+			id: 'USR-015',
+			name: 'Lucas King',
+			email: 'lucas.king@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=17',
+		},
+		products: [
 			{
-				id: '1',
-				name: 'Velvet Matte Lipstick',
-				price: 12.99,
+				id: '4',
+				name: 'Urban Hydrating Mist',
+				price: 9.99,
 				image:
-					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
+					'https://images.pexels.com/photos/7795846/pexels-photo-7795846.jpeg',
+			},
+			{
+				id: '5',
+				name: 'Midnight Muse Perfume',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/36833967/pexels-photo-36833967.jpeg',
 			},
 		],
 		address: {
-			street: '18 Cherry Lane',
-			city: 'Chicago',
-			state: 'Illinois',
+			street: '34 Aspen Road',
+			city: 'Salt Lake City',
+			state: 'Utah',
 			country: 'USA',
-			landmark: 'Union Square',
-			zip: '60601',
+			landmark: 'Temple Square',
+			zip: '84101',
 		},
 		transactionStatus: 'success',
 		transactionMethod: 'cash',
 		status: 'delivered',
 	},
 	{
-		id: 'ORD-1006',
-		date: new Date('2026-05-25'),
+		id: 'ORD-1016',
+		date: new Date('2026-06-10'),
 		user: {
-			id: 'USR-006',
-			name: 'Charlotte Taylor',
-			email: 'charlotte.taylor@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=6',
-		},
-		products: [
-			{
-				id: '4',
-				name: 'Urban Hydrating Mist',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795846/pexels-photo-7795846.jpeg',
-			},
-		],
-		address: {
-			street: '54 Hill Street',
-			city: 'Boston',
-			state: 'Massachusetts',
-			country: 'USA',
-			landmark: 'Near Metro Station',
-			zip: '02108',
-		},
-		transactionStatus: 'success',
-		transactionMethod: 'UPI',
-		status: 'returned',
-	},
-	{
-		id: 'ORD-1007',
-		date: new Date('2026-05-27'),
-		user: {
-			id: 'USR-007',
-			name: 'Amelia Anderson',
-			email: 'amelia.anderson@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=7',
+			id: 'USR-016',
+			name: 'Henry Scott',
+			email: 'henry.scott@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=18',
 		},
 		products: [
 			{
@@ -249,34 +219,27 @@ export const orders: Order[] = [
 				image:
 					'https://images.pexels.com/photos/8140898/pexels-photo-8140898.jpeg',
 			},
-			{
-				id: '6',
-				name: 'Petal Rose Facial Serum',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/10825663/pexels-photo-10825663.jpeg',
-			},
 		],
 		address: {
-			street: '76 Garden Street',
-			city: 'Portland',
-			state: 'Oregon',
+			street: '56 Willow Drive',
+			city: 'Las Vegas',
+			state: 'Nevada',
 			country: 'USA',
-			landmark: 'Rose Garden',
-			zip: '97201',
+			landmark: 'The Strip',
+			zip: '89101',
 		},
 		transactionStatus: 'success',
 		transactionMethod: 'card',
-		status: 'inTransit',
+		status: 'returned',
 	},
 	{
-		id: 'ORD-1008',
-		date: new Date('2026-05-30'),
+		id: 'ORD-1017',
+		date: new Date('2026-06-11'),
 		user: {
-			id: 'USR-008',
-			name: 'Harper Thomas',
-			email: 'harper.thomas@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=11',
+			id: 'USR-017',
+			name: 'Alexander Green',
+			email: 'alexander.green@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=19',
 		},
 		products: [
 			{
@@ -286,55 +249,64 @@ export const orders: Order[] = [
 				image:
 					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
 			},
-			{
-				id: '32',
-				name: 'Circuit Glow Highlighter',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
-			},
-			{
-				id: '37',
-				name: 'Circuit Glow Highlighter',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
-			},
-			{
-				id: '31',
-				name: 'Circuit Glow Highlighter',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
-			},
-			{
-				id: '13',
-				name: 'Circuit Glow Highlighter',
-				price: 9.99,
-				image:
-					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
-			},
 		],
 		address: {
-			street: '99 Ocean Boulevard',
-			city: 'San Diego',
-			state: 'California',
+			street: '91 Birch Avenue',
+			city: 'Minneapolis',
+			state: 'Minnesota',
 			country: 'USA',
-			landmark: 'Harbor Point',
-			zip: '92101',
+			landmark: 'Stone Arch Bridge',
+			zip: '55401',
 		},
 		transactionStatus: 'pending',
-		transactionMethod: 'bankTransfer',
+		transactionMethod: 'UPI',
 		status: 'processing',
 	},
 	{
-		id: 'ORD-1009',
-		date: new Date('2026-06-01'),
+		id: 'ORD-1018',
+		date: new Date('2026-06-12'),
 		user: {
-			id: 'USR-009',
-			name: 'Evelyn Moore',
-			email: 'evelyn.moore@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=9',
+			id: 'USR-018',
+			name: 'Michael Adams',
+			email: 'michael.adams@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=20',
+		},
+		products: [
+			{
+				id: '1',
+				name: 'Velvet Matte Lipstick',
+				price: 12.99,
+				image:
+					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
+			},
+			{
+				id: '6',
+				name: 'Petal Rose Facial Serum',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/10825663/pexels-photo-10825663.jpeg',
+			},
+		],
+		address: {
+			street: '10 Lake View',
+			city: 'Orlando',
+			state: 'Florida',
+			country: 'USA',
+			landmark: 'Lake Eola',
+			zip: '32801',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'card',
+		status: 'inTransit',
+	},
+	{
+		id: 'ORD-1019',
+		date: new Date('2026-06-13'),
+		user: {
+			id: 'USR-019',
+			name: 'Daniel Baker',
+			email: 'daniel.baker@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=21',
 		},
 		products: [
 			{
@@ -344,13 +316,29 @@ export const orders: Order[] = [
 				image:
 					'https://images.pexels.com/photos/36833967/pexels-photo-36833967.jpeg',
 			},
-			{
-				id: '1',
-				name: 'Velvet Matte Lipstick',
-				price: 12.99,
-				image:
-					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
-			},
+		],
+		address: {
+			street: '62 Harbor Street',
+			city: 'Tampa',
+			state: 'Florida',
+			country: 'USA',
+			landmark: 'Harbor Bay',
+			zip: '33602',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'bankTransfer',
+		status: 'delivered',
+	},
+	{
+		id: 'ORD-1020',
+		date: new Date('2026-06-14'),
+		user: {
+			id: 'USR-020',
+			name: 'Matthew Nelson',
+			email: 'matthew.nelson@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=22',
+		},
+		products: [
 			{
 				id: '4',
 				name: 'Urban Hydrating Mist',
@@ -360,25 +348,58 @@ export const orders: Order[] = [
 			},
 		],
 		address: {
-			street: '145 Birch Street',
-			city: 'Phoenix',
-			state: 'Arizona',
+			street: '19 Valley Road',
+			city: 'Raleigh',
+			state: 'North Carolina',
 			country: 'USA',
-			landmark: 'Downtown Plaza',
-			zip: '85001',
+			landmark: 'Research Triangle',
+			zip: '27601',
+		},
+		transactionStatus: 'failed',
+		transactionMethod: 'card',
+		status: 'cancelled',
+	},
+
+	// ORD-1021 to ORD-1030 follow same pattern
+
+	{
+		id: 'ORD-1021',
+		date: new Date('2026-06-15'),
+		user: {
+			id: 'USR-021',
+			name: 'David Carter',
+			email: 'david.carter@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=23',
+		},
+		products: [
+			{
+				id: '2',
+				name: 'Evergreen Aloe Face Gel',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/8140898/pexels-photo-8140898.jpeg',
+			},
+		],
+		address: {
+			street: '42 Brook Lane',
+			city: 'Kansas City',
+			state: 'Missouri',
+			country: 'USA',
+			landmark: 'Union Station',
+			zip: '64106',
 		},
 		transactionStatus: 'success',
-		transactionMethod: 'card',
+		transactionMethod: 'cash',
 		status: 'delivered',
 	},
 	{
-		id: 'ORD-1010',
-		date: new Date('2026-06-04'),
+		id: 'ORD-1022',
+		date: new Date('2026-06-16'),
 		user: {
-			id: 'USR-010',
-			name: 'Isabella White',
-			email: 'isabella.white@example.com',
-			avatar: 'https://i.pravatar.cc/150?img=10',
+			id: 'USR-022',
+			name: 'Joseph Mitchell',
+			email: 'joseph.mitchell@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=24',
 		},
 		products: [
 			{
@@ -390,15 +411,262 @@ export const orders: Order[] = [
 			},
 		],
 		address: {
-			street: '67 Magnolia Drive',
-			city: 'Nashville',
-			state: 'Tennessee',
+			street: '11 Forest Drive',
+			city: 'Columbus',
+			state: 'Ohio',
 			country: 'USA',
-			landmark: 'Music Square',
-			zip: '37201',
+			landmark: 'State Capitol',
+			zip: '43215',
+		},
+		transactionStatus: 'pending',
+		transactionMethod: 'UPI',
+		status: 'processing',
+	},
+	{
+		id: 'ORD-1023',
+		date: new Date('2026-06-17'),
+		user: {
+			id: 'USR-023',
+			name: 'Samuel Perez',
+			email: 'samuel.perez@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=25',
+		},
+		products: [
+			{
+				id: '3',
+				name: 'Circuit Glow Highlighter',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
+			},
+		],
+		address: {
+			street: '87 Oak Street',
+			city: 'Indianapolis',
+			state: 'Indiana',
+			country: 'USA',
+			landmark: 'Monument Circle',
+			zip: '46204',
 		},
 		transactionStatus: 'success',
+		transactionMethod: 'card',
+		status: 'inTransit',
+	},
+	{
+		id: 'ORD-1024',
+		date: new Date('2026-06-18'),
+		user: {
+			id: 'USR-024',
+			name: 'John Roberts',
+			email: 'john.roberts@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=26',
+		},
+		products: [
+			{
+				id: '5',
+				name: 'Midnight Muse Perfume',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/36833967/pexels-photo-36833967.jpeg',
+			},
+		],
+		address: {
+			street: '45 River Lane',
+			city: 'Richmond',
+			state: 'Virginia',
+			country: 'USA',
+			landmark: 'Canal Walk',
+			zip: '23219',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'bankTransfer',
+		status: 'delivered',
+	},
+	{
+		id: 'ORD-1025',
+		date: new Date('2026-06-19'),
+		user: {
+			id: 'USR-025',
+			name: 'Andrew Phillips',
+			email: 'andrew.phillips@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=27',
+		},
+		products: [
+			{
+				id: '1',
+				name: 'Velvet Matte Lipstick',
+				price: 12.99,
+				image:
+					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
+			},
+		],
+		address: {
+			street: '73 Cedar Court',
+			city: 'Milwaukee',
+			state: 'Wisconsin',
+			country: 'USA',
+			landmark: 'RiverWalk',
+			zip: '53202',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'card',
+		status: 'returned',
+	},
+	{
+		id: 'ORD-1026',
+		date: new Date('2026-06-20'),
+		user: {
+			id: 'USR-026',
+			name: 'Christopher Evans',
+			email: 'christopher.evans@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=28',
+		},
+		products: [
+			{
+				id: '4',
+				name: 'Urban Hydrating Mist',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/7795846/pexels-photo-7795846.jpeg',
+			},
+		],
+		address: {
+			street: '90 Lake Drive',
+			city: 'Omaha',
+			state: 'Nebraska',
+			country: 'USA',
+			landmark: 'Old Market',
+			zip: '68102',
+		},
+		transactionStatus: 'failed',
+		transactionMethod: 'card',
+		status: 'cancelled',
+	},
+	{
+		id: 'ORD-1027',
+		date: new Date('2026-06-21'),
+		user: {
+			id: 'USR-027',
+			name: 'Joshua Turner',
+			email: 'joshua.turner@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=29',
+		},
+		products: [
+			{
+				id: '2',
+				name: 'Evergreen Aloe Face Gel',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/8140898/pexels-photo-8140898.jpeg',
+			},
+		],
+		address: {
+			street: '37 Maple Avenue',
+			city: 'Boise',
+			state: 'Idaho',
+			country: 'USA',
+			landmark: 'Capitol Park',
+			zip: '83702',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'cash',
+		status: 'delivered',
+	},
+	{
+		id: 'ORD-1028',
+		date: new Date('2026-06-22'),
+		user: {
+			id: 'USR-028',
+			name: 'Ryan Parker',
+			email: 'ryan.parker@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=30',
+		},
+		products: [
+			{
+				id: '6',
+				name: 'Petal Rose Facial Serum',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/10825663/pexels-photo-10825663.jpeg',
+			},
+		],
+		address: {
+			street: '58 Sunset Blvd',
+			city: 'Albuquerque',
+			state: 'New Mexico',
+			country: 'USA',
+			landmark: 'Old Town',
+			zip: '87102',
+		},
+		transactionStatus: 'pending',
 		transactionMethod: 'UPI',
+		status: 'processing',
+	},
+	{
+		id: 'ORD-1029',
+		date: new Date('2026-06-23'),
+		user: {
+			id: 'USR-029',
+			name: 'Nathan Collins',
+			email: 'nathan.collins@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=32',
+		},
+		products: [
+			{
+				id: '3',
+				name: 'Circuit Glow Highlighter',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/7795688/pexels-photo-7795688.jpeg',
+			},
+		],
+		address: {
+			street: '17 Park Street',
+			city: 'Louisville',
+			state: 'Kentucky',
+			country: 'USA',
+			landmark: 'Waterfront Park',
+			zip: '40202',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'card',
+		status: 'inTransit',
+	},
+	{
+		id: 'ORD-1030',
+		date: new Date('2026-06-24'),
+		user: {
+			id: 'USR-030',
+			name: 'Aaron Murphy',
+			email: 'aaron.murphy@example.com',
+			avatar: 'https://i.pravatar.cc/150?img=33',
+		},
+		products: [
+			{
+				id: '1',
+				name: 'Velvet Matte Lipstick',
+				price: 12.99,
+				image:
+					'https://images.pexels.com/photos/7797527/pexels-photo-7797527.jpeg',
+			},
+			{
+				id: '5',
+				name: 'Midnight Muse Perfume',
+				price: 9.99,
+				image:
+					'https://images.pexels.com/photos/36833967/pexels-photo-36833967.jpeg',
+			},
+		],
+		address: {
+			street: '120 Main Street',
+			city: 'Birmingham',
+			state: 'Alabama',
+			country: 'USA',
+			landmark: 'Railroad Park',
+			zip: '35203',
+		},
+		transactionStatus: 'success',
+		transactionMethod: 'card',
 		status: 'delivered',
 	},
 ];

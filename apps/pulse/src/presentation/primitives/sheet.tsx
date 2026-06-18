@@ -45,6 +45,7 @@ function Sheet({
 	const [baseOpen, setBaseOpen] = React.useState(defaultOpen ?? false);
 
 	const open = isControlled ? (openProp ?? false) : internalOpen;
+	const openRef = React.useRef(open);
 
 	// Called by Base UI Root — receives (open, event) so signature matches exactly.
 	const handleRootChange = React.useCallback<
@@ -61,11 +62,12 @@ function Sheet({
 
 	// If controlled and open flips to true externally, sync baseOpen.
 	React.useEffect(() => {
+		openRef.current = open;
 		if (open) setBaseOpen(true);
 	}, [open]);
 
 	const onExitComplete = React.useCallback(() => {
-		setBaseOpen(false);
+		if (!openRef.current) setBaseOpen(false);
 	}, []);
 
 	return (

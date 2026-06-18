@@ -13,7 +13,6 @@ export const useOrderSheetStore = create<OrderSheetState>()(() => null);
 
 export const openOrderSheet = (state: NonNullable<OrderSheetState>) => {
 	useOrderSheetStore.setState(state, true);
-	console.log(state);
 };
 
 export const closeOrderSheet = () => {
@@ -22,6 +21,5 @@ export const closeOrderSheet = () => {
 
 export const isSheetActive = (sheet: Sheet): boolean => {
 	const state = useOrderSheetStore.getState()?.activeSheet === sheet;
-	console.log(sheet, state);
 	return state;
 };

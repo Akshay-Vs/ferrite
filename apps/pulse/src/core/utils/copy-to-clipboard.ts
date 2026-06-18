@@ -5,7 +5,7 @@ export const copyToClipboard = (
 	onSuccess?: () => void,
 	onError?: () => void
 ) => {
-	if (!navigator.clipboard) {
+	if (typeof navigator === 'undefined' || !navigator.clipboard) {
 		const fallbackError =
 			onError ?? (() => toast.error('Clipboard not available'));
 		fallbackError();
