@@ -1,10 +1,14 @@
+import { IncomingMessage, ServerResponse } from 'node:http';
 import { AppLogger } from '@core/logger/logger.service';
+import helmet from '@fastify/helmet';
 import { registerShutdownHook } from '@libs/hooks/register-shutdown';
+import { logIncomingRequest } from '@libs/misc/log-incoming-req.lib';
 import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import type { NextFunction, Request, Response } from 'express';
-import express from 'express';
-import helmet from 'helmet';
+import {
+	FastifyAdapter,
+	NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 import { ferriteConfig } from './core/config/ferrite.config';
 import type { FerriteConfig } from './core/config/ferrite.schema';
@@ -21,10 +25,14 @@ const logger = new NestLogger('Main');
  * sets up Swagger; starts the HTTP server on the configured port and logs the active port.
  */
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule, {
-		bufferLogs: true,
-		rawBody: true,
-	});
+	const app = await NestFactory.create<NestFastifyApplication>(
+		AppModule,
+		new FastifyAdapter(),
+		{
+			bufferLogs: true,
+			rawBody: true,
+		}
+	);
 
 	const ferriteVars = app.get<FerriteConfig>(ferriteConfig.KEY);
 	const VERSION = ferriteVars.version;
@@ -38,11 +46,8 @@ async function bootstrap() {
 
 	registerShutdownHook(app);
 
-	// Enable raw body parsing for webhooks
-	app.use('/webhooks', express.raw({ type: 'application/json' }));
-
 	app.useLogger(await app.resolve(AppLogger));
-	app.use(helmet());
+	await app.register(helmet);
 
 	app.enableCors({
 		methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -52,8 +57,8 @@ async function bootstrap() {
 
 	app.setGlobalPrefix(VERSION);
 
-	app.use((req: Request, _res: Response, next: NextFunction) => {
-		logger.debug(`Request: ${req.method} ${req.path} received`);
+	app.use((req: IncomingMessage, _res: ServerResponse, next: () => void) => {
+		logIncomingRequest(req, logger);
 		next();
 	});
 

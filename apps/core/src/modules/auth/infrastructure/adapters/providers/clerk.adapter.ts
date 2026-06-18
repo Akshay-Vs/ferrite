@@ -111,7 +111,7 @@ export class ClerkAdapter
 			email: claims.email,
 			emailVerified: claims.email_verified,
 			fullName: claims.full_name,
-			role: (claims.metadata?.role as string) ?? null,
+			role: (claims.metadata?.role as string) ?? undefined,
 			metadata: claims.metadata ?? {},
 			provider: authProvidersEnum.clerk,
 		};

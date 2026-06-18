@@ -22,7 +22,7 @@ export function SortableHeader<T>({
 
 	return (
 		<div
-			className="center gap-1.5 hover:cursor-pointer h-ful group"
+			className="center gap-1.5 hover:cursor-pointer h-full group"
 			onClick={toggleSort}
 			tabIndex={-1}
 			aria-hidden

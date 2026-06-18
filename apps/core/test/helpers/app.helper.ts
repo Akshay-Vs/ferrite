@@ -1,4 +1,8 @@
 import type { INestApplication } from '@nestjs/common';
+import {
+	FastifyAdapter,
+	NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { Test, type TestingModule } from '@nestjs/testing';
 import type { App } from 'supertest/types';
 import { AppModule } from '../../src/app.module';
@@ -34,7 +38,10 @@ export async function createTestApp(
 	}
 
 	const moduleFixture: TestingModule = await builder.compile();
-	const app = moduleFixture.createNestApplication<INestApplication<App>>();
+	const app = moduleFixture.createNestApplication<NestFastifyApplication>(
+		new FastifyAdapter()
+	);
 	await app.init();
-	return app;
+	await app.getHttpAdapter().getInstance().ready();
+	return app as any;
 }

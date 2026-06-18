@@ -6,7 +6,7 @@ import {
 	HttpException,
 	HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
 @Catch()
 export class UnhandledExceptionFilter implements ExceptionFilter {
@@ -16,8 +16,8 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 
 	catch(exception: unknown, host: ArgumentsHost): void {
 		const ctx = host.switchToHttp();
-		const response = ctx.getResponse<Response>();
-		const request = ctx.getRequest<Request>();
+		const response = ctx.getResponse<FastifyReply>();
+		const request = ctx.getRequest<FastifyRequest>();
 
 		let status = HttpStatus.INTERNAL_SERVER_ERROR;
 		let message: any = 'Something went wrong. Please try again later.';
@@ -57,7 +57,7 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 			);
 		}
 
-		response.status(status).json({
+		response.status(status).send({
 			...extraData,
 			statusCode: status,
 			error,

@@ -3,7 +3,7 @@ import { RequireRole } from '@common/decorators/require-role.decorator';
 import type { Currency } from '@core/database/schema/currency.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
-
+import { PlatformRBACGuard } from '@modules/auth/infrastructure/http/guards/platform-rbac.guard';
 import { CreateCurrencyUseCase } from '@modules/currency/application/use-cases/create-currency.usecase';
 import { DeleteCurrencyUseCase } from '@modules/currency/application/use-cases/delete-currency.usecase';
 import { GetCurrenciesUseCase } from '@modules/currency/application/use-cases/get-currencies.usecase';
@@ -27,6 +27,7 @@ import {
 	Post,
 	Query,
 	UnprocessableEntityException,
+	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateCurrencyDto, UpdateCurrencyDto } from '../dto/currency.dto';
@@ -40,6 +41,7 @@ import {
 
 @ApiTags('Currencies')
 @ApiBearerAuth('swagger-access-token')
+@UseGuards(PlatformRBACGuard)
 @Controller('currencies')
 export class CurrencyController {
 	constructor(

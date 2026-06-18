@@ -9,4 +9,5 @@ export * from './payment.schema';
 export * from './preferences.schema';
 export * from './relations';
 export * from './store.schema';
+export * from './storefront-user.schema';
 export * from './user.schema';

@@ -27,14 +27,12 @@ export class VerifyWebhookUseCase
 
 	async execute(payload: RawWebhookRequest): Promise<Result<WebhookEnvelope>> {
 		return this.tracer.withSpan('use-case.verify-webhook', async () => {
-			return await this.tracer.withSpan('use-case.verify-webhook', async () => {
-				const result = await this.webhookAuth.verifyWebhook(payload);
-				if (result.isErr()) {
-					this.logger.error('Failed to verify webhook', result.error.stack);
-					return err(result.error);
-				}
-				return ok(result.unwrap());
-			});
+			const result = await this.webhookAuth.verifyWebhook(payload);
+			if (result.isErr()) {
+				this.logger.error('Failed to verify webhook', result.error.stack);
+				return err(result.error);
+			}
+			return ok(result.unwrap());
 		});
 	}
 }

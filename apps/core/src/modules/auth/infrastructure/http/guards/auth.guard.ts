@@ -4,7 +4,7 @@ import {
 } from '@auth/domain/ports/use-case.port';
 import { IS_PUBLIC_ROUTE } from '@common/decorators/public-route.decorator';
 import { IS_WEBHOOK_ROUTE } from '@common/decorators/webhook-route.decorator';
-import { AuthenticatedRequest, Request } from '@common/types/request';
+import { PlatformAuthenticatedRequest, Request } from '@common/types/request';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
 
 			span.setAttributes({
 				'guard.name': 'AuthGuard',
-				'http.route': request.route?.path ?? 'unknown',
+				'http.route': request.routeOptions.url ?? 'unknown',
 			});
 
 			const isPublic = this.reflector.getAllAndOverride<boolean>(
@@ -81,9 +81,11 @@ export class AuthGuard implements CanActivate {
 				throw new UnauthorizedException('Invalid or expired token');
 			}
 
-			this.logger.debug(`Request ${request.path} authorized`);
+			this.logger.debug(`Request ${request.url} authorized`);
 
-			(request as AuthenticatedRequest).authUser = authUser.value;
+			const platformRequest = request as PlatformAuthenticatedRequest;
+			platformRequest.authUser = authUser.value;
+			platformRequest.__authRealm = 'platform';
 			return true;
 		});
 	}

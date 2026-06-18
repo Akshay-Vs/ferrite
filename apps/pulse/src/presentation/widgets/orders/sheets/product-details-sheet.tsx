@@ -26,7 +26,7 @@ const ProductDetailsSheet = () => {
 		<Sheet open={isOpen} onOpenChange={(open) => !open && closeOrderSheet()}>
 			<SheetContent>
 				<SheetHeader>
-					<SheetTitle>Order Details</SheetTitle>
+					<SheetTitle>Product Details</SheetTitle>
 					<SheetDescription>{idRef.current}</SheetDescription>
 				</SheetHeader>
 			</SheetContent>

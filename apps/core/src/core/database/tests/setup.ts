@@ -78,6 +78,7 @@ export async function cleanupTables(): Promise<void> {
 			store_invitations,
 			store_members,
 			stores,
+			storefront_users,
 			user_phones,
 			user_addresses,
 			users,

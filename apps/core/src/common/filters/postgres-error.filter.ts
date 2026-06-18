@@ -6,7 +6,7 @@ import {
 	ExceptionFilter,
 	HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { PostgresError } from 'postgres';
 
 @Catch(PostgresError)
@@ -17,8 +17,8 @@ export class PostgresErrorFilter implements ExceptionFilter {
 
 	catch(exception: PostgresError, host: ArgumentsHost) {
 		const ctx = host.switchToHttp();
-		const response = ctx.getResponse<Response>();
-		const request = ctx.getRequest<Request>();
+		const response = ctx.getResponse<FastifyReply>();
+		const request = ctx.getRequest<FastifyRequest>();
 
 		const errCode = exception.code;
 
@@ -28,7 +28,7 @@ export class PostgresErrorFilter implements ExceptionFilter {
 				`Postgres 23503 Error: Translating to UserNotSyncedError`
 			);
 			const userNotSynced = new UserNotSyncedError('Unknown');
-			return response.status(HttpStatus.NOT_FOUND).json({
+			return response.status(HttpStatus.NOT_FOUND).send({
 				statusCode: HttpStatus.NOT_FOUND,
 				message: userNotSynced.message,
 				error: 'Not Found',
@@ -44,7 +44,7 @@ export class PostgresErrorFilter implements ExceptionFilter {
 		);
 
 		// Fallback to masked internal server error to prevent leakage
-		response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+		response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
 			statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
 			error: 'Internal Server Error',
 			message: 'Something went wrong. Please try again later.',

@@ -1,7 +1,8 @@
+import { storefrontAuth } from '@modules/storefront-auth';
 import { z } from 'zod';
 
 export const ferriteConfigSchema = z.object({
-	version: z.enum(['v1', 'v2']).default('v1'),
+	version: z.enum(['v1']).default('v1'),
 	port: z.coerce.number().int().positive().default(4000),
 	origin: z.preprocess((val) => {
 		if (typeof val === 'string') {
@@ -9,6 +10,8 @@ export const ferriteConfigSchema = z.object({
 		}
 		return val;
 	}, z.array(z.string()).default([])),
+
+	storefrontAuth,
 });
 
 export type FerriteConfig = z.infer<typeof ferriteConfigSchema>;
