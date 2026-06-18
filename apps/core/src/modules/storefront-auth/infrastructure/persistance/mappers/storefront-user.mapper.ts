@@ -1,4 +1,7 @@
-import type { StorefrontUserTable } from '@core/database/schema/storefront-user.schema';
+import type {
+	NewStorefrontUserTable,
+	StorefrontUserTable,
+} from '@core/database/schema/storefront-user.schema';
 import {
 	type StorefrontUser,
 	StorefrontUserSchema,
@@ -9,5 +12,18 @@ export class StorefrontUserMapper {
 		return StorefrontUserSchema.parse({
 			...row,
 		});
+	}
+
+	static toPersistenceCreate(
+		data: NewStorefrontUserTable
+	): NewStorefrontUserTable {
+		return {
+			...data,
+			email: StorefrontUserMapper.normalizeEmail(data.email),
+		};
+	}
+
+	static normalizeEmail(email: string): string {
+		return email.toLowerCase();
 	}
 }

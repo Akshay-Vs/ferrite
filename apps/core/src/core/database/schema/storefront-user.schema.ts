@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
 	boolean,
 	index,
@@ -7,6 +8,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from 'drizzle-orm/pg-core';
@@ -50,9 +52,12 @@ export const storefrontUsers = pgTable(
 		deletedAt: timestamp('deleted_at', { withTimezone: true }),
 	},
 	(t) => [
-		unique('uq_storefront_users_store_email').on(t.storeId, t.email),
+		uniqueIndex('uq_storefront_users_store_email').on(
+			t.storeId,
+			sql`lower(${t.email})`
+		),
 		index('idx_storefront_users_store_id').on(t.storeId),
-		index('idx_storefront_users_email').on(t.email),
+		index('idx_storefront_users_email').on(sql`lower(${t.email})`),
 		index('idx_storefront_users_created_at').on(t.createdAt),
 	]
 );

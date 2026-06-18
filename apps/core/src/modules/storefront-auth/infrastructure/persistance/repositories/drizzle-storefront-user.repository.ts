@@ -38,15 +38,18 @@ export class DrizzleStorefrontUserRepository
 		data: NewStorefrontUserTable,
 		tx?: ITransactionContext
 	): Promise<StorefrontUser> {
+		const normalizedData = StorefrontUserMapper.toPersistenceCreate(data);
 		return traceDbOp(
 			this.tracer,
 			'db.storefrontUsers.create',
 			{ 'db.table': 'storefront_users', 'db.operation': 'insert' },
 			async () => {
 				if (tx) {
-					return this.runCreate(tx, data);
+					return this.runCreate(tx, normalizedData);
 				}
-				return this.uow.execute(async (ctx) => this.runCreate(ctx, data));
+				return this.uow.execute(async (ctx) =>
+					this.runCreate(ctx, normalizedData)
+				);
 			}
 		);
 	}
@@ -69,6 +72,7 @@ export class DrizzleStorefrontUserRepository
 		storeId: string,
 		email: string
 	): Promise<StorefrontUser | null> {
+		const normalizedEmail = StorefrontUserMapper.normalizeEmail(email);
 		return traceDbOp(
 			this.tracer,
 			'db.storefrontUsers.findByStoreIdAndEmail',
@@ -80,7 +84,7 @@ export class DrizzleStorefrontUserRepository
 					.where(
 						and(
 							eq(storefrontUsers.storeId, storeId),
-							eq(storefrontUsers.email, email),
+							eq(sql`lower(${storefrontUsers.email})`, normalizedEmail),
 							isNull(storefrontUsers.deletedAt)
 						)
 					)
