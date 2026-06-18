@@ -151,7 +151,11 @@ export class PlatformRBACGuard implements CanActivate {
 		authUser: PlatformAuthenticatedRequest['authUser'],
 		requiredRoles: string[]
 	): string {
-		if (!authUser.role && !requiredRoles.includes(PlatformRoles.USER)) {
+		if (!authUser.role) {
+			if (requiredRoles.includes(PlatformRoles.USER)) {
+				return PlatformRoles.USER;
+			}
+
 			this.logger.debug('User does not have any roles assigned');
 			throw new ForbiddenException('User does not have any roles assigned');
 		}
