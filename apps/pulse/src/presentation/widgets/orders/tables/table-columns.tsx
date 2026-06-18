@@ -1,6 +1,7 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
+import { SortableHeader } from '@/presentation/primitives/sortable-header';
 import type { Order } from '../lib/orders-mock';
 import { AddressCell } from './cells/address-cell';
 import { AmountCell } from './cells/amount-cell';
@@ -17,7 +18,7 @@ import { UserCell } from './cells/user-cell';
 export const ordersColumns: ColumnDef<Order>[] = [
 	{
 		accessorKey: 'id',
-		header: 'Order ID',
+		header: ({ column }) => <SortableHeader column={column} title="Order ID" />,
 		cell: ({ row }) => <OrderIdCell row={row} />,
 	},
 	{
@@ -27,32 +28,48 @@ export const ordersColumns: ColumnDef<Order>[] = [
 	},
 	{
 		accessorKey: 'date',
-		header: 'Date',
+		header: ({ column }) => <SortableHeader column={column} title="Date" />,
 		cell: ({ row }) => <DateCell row={row} />,
 	},
 	{
 		accessorKey: 'user',
-		header: 'User',
+		header: ({ column }) => <SortableHeader column={column} title="User" />,
 		cell: ({ row }) => <UserCell row={row} />,
+		sortingFn: (rowA, rowB) => {
+			const a = (rowA.getValue('user') as { name: string }).name ?? '';
+			const b = (rowB.getValue('user') as { name: string }).name ?? '';
+			return a.localeCompare(b);
+		},
 	},
 	{
 		accessorKey: 'address',
-		header: 'Address',
+		header: ({ column }) => <SortableHeader column={column} title="Address" />,
 		cell: ({ row }) => <AddressCell row={row} />,
+		sortingFn: (rowA, rowB) => {
+			const a = (rowA.getValue('address') as { city: string }).city ?? '';
+			const b = (rowB.getValue('address') as { city: string }).city ?? '';
+			return a.localeCompare(b);
+		},
 	},
 	{
-		accessorKey: 'amount',
-		header: 'Amount',
+		id: 'amount',
+		accessorFn: (row) => row.products.reduce((sum, p) => sum + p.price, 0),
+		header: ({ column }) => <SortableHeader column={column} title="Amount" />,
 		cell: ({ row }) => <AmountCell row={row} />,
+		sortingFn: 'basic',
 	},
 	{
 		accessorKey: 'transactionStatus',
-		header: 'Payment Status',
+		header: ({ column }) => (
+			<SortableHeader column={column} title="Payment Status" />
+		),
 		cell: ({ row }) => <TransactionStatusCell row={row} />,
 	},
 	{
 		accessorKey: 'transactionMethod',
-		header: 'Payment Method',
+		header: ({ column }) => (
+			<SortableHeader column={column} title="Payment Method" />
+		),
 		cell: ({ row }) => <TransactionMethodCell row={row} />,
 	},
 	{

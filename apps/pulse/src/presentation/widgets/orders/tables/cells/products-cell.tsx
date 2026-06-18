@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import { AvatarRings } from '@/presentation/primitives/avatar-rings';
+import CellActionButton from '../../components/cell-action-button';
 import type { Product } from '../../lib/orders-mock';
+import { openOrderSheet } from '../../stores/order-sheet-store';
 import type { OrdersRowProps } from '../../types/orders-row';
 
 const ProductsCell = ({ row }: OrdersRowProps) => {
@@ -12,7 +14,7 @@ const ProductsCell = ({ row }: OrdersRowProps) => {
 			<div className="w-full h-fit center">
 				<div className="flex flex-col gap-3 py-1 w-65">
 					{products.map((p) => (
-						<div key={p.id} className="flex gap-3">
+						<div key={p.id} className="flex gap-3 items-center">
 							<Image
 								src={p.image}
 								alt={p.name}
@@ -20,9 +22,16 @@ const ProductsCell = ({ row }: OrdersRowProps) => {
 								height={40}
 								className="h-10 w-10 shrink-0 rounded-full object-cover border"
 							/>
-							<span className="font-medium whitespace-normal text-start">
-								{p.name}
-							</span>
+							<CellActionButton
+								className="font-medium whitespace-normal text-start w-full"
+								value={p.name}
+								action={() =>
+									openOrderSheet({
+										activeSheet: 'product-details',
+										productId: p.id,
+									})
+								}
+							/>
 						</div>
 					))}
 				</div>

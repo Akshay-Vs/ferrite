@@ -71,8 +71,7 @@ export function DataTable<TData, TValue>({
 					{table.getRowModel().rows?.length ? (
 						table.getRowModel().rows.map((row, index) => {
 							const rowId = row.original
-								? (((row.original as Record<string, unknown>).id as string) ??
-									row.id)
+								? String((row.original as Record<string, unknown>).id ?? row.id)
 								: row.id;
 
 							const rowClassName = cn(

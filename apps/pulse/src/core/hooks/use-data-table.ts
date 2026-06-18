@@ -5,7 +5,9 @@ import {
 	getCoreRowModel,
 	getExpandedRowModel,
 	getFilteredRowModel,
+	getSortedRowModel,
 	type OnChangeFn,
+	type SortingState,
 	useReactTable,
 	type VisibilityState,
 } from '@tanstack/react-table';
@@ -39,6 +41,7 @@ export function useDataTable<TData, TValue>({
 	const [localExpanded, setLocalExpanded] = useState<ExpandedState>({});
 	const [localColumnVisibility, setLocalColumnVisibility] =
 		useState<VisibilityState>({});
+	const [sorting, setSorting] = useState<SortingState>([]);
 
 	const [focusedRowId, setFocusedRowId] = useState<string | null>(null);
 
@@ -65,10 +68,14 @@ export function useDataTable<TData, TValue>({
 		onColumnFiltersChange: actualOnColumnFiltersChange,
 		onExpandedChange: actualOnExpandedChange,
 		onColumnVisibilityChange: actualOnColumnVisibilityChange,
+		onSortingChange: setSorting,
+		getSortedRowModel: getSortedRowModel(),
+
 		state: {
 			columnFilters: actualColumnFilters,
 			expanded: actualExpanded,
 			columnVisibility: actualColumnVisibility,
+			sorting,
 		},
 	});
 
@@ -82,16 +89,23 @@ export function useDataTable<TData, TValue>({
 				onFocus: () => setFocusedRowId(rowId),
 				onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
 					if (e.key === 'Enter') {
+						e.preventDefault();
 						toggleExpanded();
 					} else if (e.key === 'ArrowDown') {
 						e.preventDefault();
 						const nextRow = e.currentTarget.nextElementSibling as HTMLElement;
-						if (nextRow) nextRow.focus();
+
+						if (nextRow?.tabIndex !== undefined && nextRow.tabIndex >= -1) {
+							nextRow.focus();
+						}
 					} else if (e.key === 'ArrowUp') {
 						e.preventDefault();
 						const prevRow = e.currentTarget
 							.previousElementSibling as HTMLElement;
-						if (prevRow) prevRow.focus();
+
+						if (prevRow?.tabIndex !== undefined && prevRow.tabIndex >= -1) {
+							prevRow.focus();
+						}
 					}
 				},
 			};

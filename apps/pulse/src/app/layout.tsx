@@ -21,7 +21,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className={cn('font-sans', inter.variable)}>
+		<html
+			suppressHydrationWarning
+			lang="en"
+			className={cn('font-sans', inter.variable)}
+		>
 			<body className="antialiased bg-background text-content">
 				<div id="bg-gradient" />
 				<ClerkProvider>

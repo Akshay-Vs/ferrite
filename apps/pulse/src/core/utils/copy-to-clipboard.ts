@@ -5,6 +5,13 @@ export const copyToClipboard = (
 	onSuccess?: () => void,
 	onError?: () => void
 ) => {
+	if (!navigator.clipboard) {
+		const fallbackError =
+			onError ?? (() => toast.error('Clipboard not available'));
+		fallbackError();
+		return;
+	}
+
 	navigator.clipboard
 		.writeText(text)
 		.then(() =>
