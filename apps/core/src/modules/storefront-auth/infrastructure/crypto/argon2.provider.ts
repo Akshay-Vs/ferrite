@@ -16,6 +16,8 @@ export const Argon2Provider: Provider<IArgon2> = {
 	useValue: { hash, verify },
 };
 
+export type Argon2Options = Options;
+
 export const Argon2OptionsProvider: Provider<Options> = {
 	provide: ARGON2_OPTIONS,
 	inject: [ConfigService],
