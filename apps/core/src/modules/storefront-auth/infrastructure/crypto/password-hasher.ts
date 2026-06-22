@@ -2,8 +2,12 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { IStorefrontPasswordHasher } from '@modules/storefront-auth/domain/ports/password-hasher.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { type Options } from '@node-rs/argon2';
-import { ARGON2, ARGON2_OPTIONS, type IArgon2 } from './argon2.provider';
+import {
+	ARGON2,
+	ARGON2_OPTIONS,
+	type Argon2Options,
+	type IArgon2,
+} from './argon2.provider';
 
 @Injectable()
 export class Argon2PasswordHasher implements IStorefrontPasswordHasher {
@@ -11,7 +15,7 @@ export class Argon2PasswordHasher implements IStorefrontPasswordHasher {
 		private readonly logger: AppLogger,
 		@Inject(OTEL_TRACER) private readonly otelTracer: ITracer,
 		@Inject(ARGON2) private readonly argon2: IArgon2,
-		@Inject(ARGON2_OPTIONS) private readonly options: Options
+		@Inject(ARGON2_OPTIONS) private readonly options: Argon2Options
 	) {
 		this.logger.setContext(this.constructor.name);
 	}

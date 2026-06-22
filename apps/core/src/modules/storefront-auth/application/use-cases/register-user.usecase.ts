@@ -48,8 +48,9 @@ export class RegisterUserUseCase implements IStorefrontRegisterUser {
 
 				return ok(StorefrontUserMapper.formatResponse(res));
 			} catch (error: any) {
+				//Todo: Add proper error handling and logging for different error scenarios (e.g., duplicate email, validation errors, etc.)
 				this.logger.error('Failed to register user', error);
-				return err(error instanceof Error ? error : new Error(String(error)));
+				return err(new Error('Registration failed'));
 			}
 		});
 	}

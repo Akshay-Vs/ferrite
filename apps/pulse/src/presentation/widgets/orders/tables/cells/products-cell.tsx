@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { AvatarRings } from '@/presentation/primitives/avatar-rings';
+import { sheetRouter } from '@/presentation/sheet-router/sheet-router.store';
 import CellActionButton from '../../components/cell-action-button';
 import type { Product } from '../../lib/orders-mock';
-import { openOrderSheet } from '../../stores/order-sheet-store';
 import type { OrdersRowProps } from '../../types/orders-row';
 
 const ProductsCell = ({ row }: OrdersRowProps) => {
@@ -26,8 +26,7 @@ const ProductsCell = ({ row }: OrdersRowProps) => {
 								className="font-medium whitespace-normal text-start w-full"
 								value={p.name}
 								action={() =>
-									openOrderSheet({
-										activeSheet: 'product-details',
+									sheetRouter.push('product-details', {
 										productId: p.id,
 									})
 								}

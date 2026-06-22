@@ -1,7 +1,7 @@
 import Image from 'next/image';
+import { sheetRouter } from '@/presentation/sheet-router/sheet-router.store';
 import CellActionButton from '../../components/cell-action-button';
 import type { Order } from '../../lib/orders-mock';
-import { openOrderSheet } from '../../stores/order-sheet-store';
 import type { OrdersRowProps } from '../../types/orders-row';
 
 export const UserCell = ({ row }: OrdersRowProps) => {
@@ -9,10 +9,7 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 	const isExpanded = row.getIsExpanded();
 
 	const handleOpenUserProfile = () => {
-		openOrderSheet({
-			activeSheet: 'user-profile',
-			userId: user.id,
-		});
+		sheetRouter.push('user-profile', { userId: user.id });
 	};
 
 	if (isExpanded) {

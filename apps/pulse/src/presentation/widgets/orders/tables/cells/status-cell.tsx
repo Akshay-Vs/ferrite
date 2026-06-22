@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/core/utils/cn';
+import { Button } from '@/presentation/primitives/button';
 import type { OrderStatus } from '../../lib/orders-mock';
 import { COLOR } from '../../lib/orders-status-chart.types';
 import type { OrdersRowProps } from '../../types/orders-row';
@@ -16,7 +17,8 @@ export const StatusCell = ({ row }: OrdersRowProps) => {
 
 	return (
 		<div className="full center select-none">
-			<button
+			<Button
+				unstyled
 				type="button"
 				aria-label="Orders status"
 				aria-haspopup="true"
@@ -34,7 +36,7 @@ export const StatusCell = ({ row }: OrdersRowProps) => {
 			>
 				{status}
 				<ChevronDown strokeWidth={1.2} size={20} />
-			</button>
+			</Button>
 		</div>
 	);
 };

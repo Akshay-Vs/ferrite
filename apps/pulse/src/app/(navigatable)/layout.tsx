@@ -6,6 +6,7 @@ import {
 } from '@/core/constants/routes.constants';
 import { resolveOnboardingState } from '@/core/server/onboarding-ressolver';
 import { NavBar } from '@/presentation/layout/navigation/nav-bar';
+import { SheetRouter } from '@/presentation/sheet-router/sheet-router';
 
 const ONBOARDING_REDIRECT_MAP = {
 	ABOUT_ME: ONBOARDING_ABOUT_USER,
@@ -29,6 +30,7 @@ export default async function NavigatableLayout({
 		<div className="pb-4">
 			<NavBar />
 			<main className="px-5">{children}</main>
+			<SheetRouter />
 		</div>
 	);
 }

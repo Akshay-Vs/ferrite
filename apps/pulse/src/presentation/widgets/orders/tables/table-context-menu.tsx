@@ -10,6 +10,7 @@ import {
 	OctagonPause,
 	Package,
 	Printer,
+	Truck,
 	User2,
 } from 'lucide-react';
 import { copyToClipboard } from '@/core/utils/copy-to-clipboard';
@@ -19,8 +20,8 @@ import {
 	ContextMenuSeparator,
 	ContextMenuShortcut,
 } from '@/presentation/primitives/context-menu';
+import { sheetRouter } from '@/presentation/sheet-router/sheet-router.store';
 import type { Order } from '../lib/orders-mock';
-import { openOrderSheet } from '../stores/order-sheet-store';
 
 export interface RawDetailsMenuProps {
 	rowId: string;
@@ -34,8 +35,7 @@ export function OrdersContextMenu({ rowId, data }: RawDetailsMenuProps) {
 		<ContextMenuContent>
 			<ContextMenuItem
 				onClick={() =>
-					openOrderSheet({
-						activeSheet: 'order-details',
+					sheetRouter.push('order-details', {
 						orderId: rowId,
 					})
 				}
@@ -46,8 +46,7 @@ export function OrdersContextMenu({ rowId, data }: RawDetailsMenuProps) {
 
 			<ContextMenuItem
 				onClick={() =>
-					openOrderSheet({
-						activeSheet: 'user-profile',
+					sheetRouter.push('user-profile', {
 						userId: data.user.id,
 					})
 				}
@@ -56,7 +55,24 @@ export function OrdersContextMenu({ rowId, data }: RawDetailsMenuProps) {
 				View User Profile
 			</ContextMenuItem>
 
-			<ContextMenuItem onClick={() => alert('Not implemented')}>
+			<ContextMenuItem
+				onClick={() =>
+					sheetRouter.push('shipment-details', {
+						orderId: rowId,
+					})
+				}
+			>
+				<Truck className="size-4" />
+				View Shipment Details
+			</ContextMenuItem>
+
+			<ContextMenuItem
+				onClick={() =>
+					sheetRouter.push('payment-details', {
+						transactionId: 'NOT IMPLEMENTED',
+					})
+				}
+			>
 				<Landmark className="size-4" />
 				View Transaction Details
 			</ContextMenuItem>
@@ -75,7 +91,7 @@ export function OrdersContextMenu({ rowId, data }: RawDetailsMenuProps) {
 				</span>
 			</ContextMenuItem>
 
-			<ContextMenuItem onClick={() => copyToClipboard(data.user.id)}>
+			<ContextMenuItem onClick={() => copyToClipboard(data.user.id)} hidden>
 				<User2 className="size-4" />
 				Copy User ID
 				<span className="ml-auto flex items-center text-xs text-muted-foreground opacity-60 font-mono">

@@ -4,9 +4,6 @@ import type { Row } from '@tanstack/react-table';
 import { DataTable } from '@/presentation/primitives/data-table';
 import type { Order } from '../lib/orders-mock';
 import { orders } from '../lib/orders-mock';
-import OrderDetailsSheet from '../sheets/order-details-sheet';
-import ProductDetailsSheet from '../sheets/product-details-sheet';
-import UserProfileSheet from '../sheets/user-profile-sheet';
 import {
 	updateOrdersTableExpanded,
 	updateOrdersTableFilters,
@@ -15,6 +12,9 @@ import {
 } from '../stores/orders-table.store';
 import { ordersColumns } from './table-columns';
 import { OrdersContextMenu } from './table-context-menu';
+
+// Ensure order screens are registered in the sheet router.
+import '../sheets/order-routes';
 
 const getRowClassName = (row: Row<Order>): string | undefined =>
 	row.original.transactionStatus === 'failed' ||
@@ -30,26 +30,20 @@ const OrdersTable = () => {
 	);
 
 	return (
-		<>
-			<DataTable
-				columns={ordersColumns}
-				data={orders}
-				expanded={expandedState}
-				onExpandedChange={updateOrdersTableExpanded}
-				columnFilters={columnFilters}
-				onColumnFiltersChange={updateOrdersTableFilters}
-				columnVisibility={columnVisibility}
-				onColumnVisibilityChange={updateOrdersTableVisibility}
-				getRowClassName={getRowClassName}
-				renderRowContextMenu={({ rowId, row }) => (
-					<OrdersContextMenu rowId={rowId} data={row.original} />
-				)}
-			/>
-
-			<OrderDetailsSheet />
-			<UserProfileSheet />
-			<ProductDetailsSheet />
-		</>
+		<DataTable
+			columns={ordersColumns}
+			data={orders}
+			expanded={expandedState}
+			onExpandedChange={updateOrdersTableExpanded}
+			columnFilters={columnFilters}
+			onColumnFiltersChange={updateOrdersTableFilters}
+			columnVisibility={columnVisibility}
+			onColumnVisibilityChange={updateOrdersTableVisibility}
+			getRowClassName={getRowClassName}
+			renderRowContextMenu={({ rowId, row }) => (
+				<OrdersContextMenu rowId={rowId} data={row.original} />
+			)}
+		/>
 	);
 };
 

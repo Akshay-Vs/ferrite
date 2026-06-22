@@ -16,7 +16,7 @@ export const registerSchema = z.object({
 		.regex(/[^a-zA-Z0-9]/, {
 			message: 'Password must contain at least one special character/symbol',
 		}),
-	termsAndConditions: z.boolean().default(false),
+	termsAndConditions: z.boolean(),
 });
 
 export type StorefrontUserRegister = z.infer<typeof registerSchema>;

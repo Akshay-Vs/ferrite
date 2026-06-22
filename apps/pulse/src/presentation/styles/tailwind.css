@@ -21,6 +21,10 @@
 		@apply flex justify-center items-center flex-col;
 	}
 
+	.flex-between {
+		@apply flex justify-between items-center;
+	}
+
 	.abs-center {
 		@apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 	}
