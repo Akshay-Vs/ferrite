@@ -1,5 +1,5 @@
 import { Result } from '@common/interfaces/result.interface';
-import { StorefrontUser } from '@ferrite/schema/auth/storefront-user.zodschema';
+import { StorefrontUser } from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
 import { InvalidTokenError } from '../errors/invalid-token.error';
 
 export interface IStorefrontTokenAuth {

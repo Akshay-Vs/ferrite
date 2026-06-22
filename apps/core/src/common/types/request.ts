@@ -1,6 +1,6 @@
 import { AuthUser } from '@ferrite/schema/auth/index';
-import { StorefrontUser } from '@ferrite/schema/auth/storefront-user.zodschema';
 import { WebhookEnvelope } from '@ferrite/schema/common/webhook-envelope.zodschema';
+import { StorefrontUser } from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
 import { FastifyRequest } from 'fastify';
 
 export interface Request extends FastifyRequest {

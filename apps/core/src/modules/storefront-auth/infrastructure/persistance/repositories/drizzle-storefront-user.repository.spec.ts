@@ -55,6 +55,7 @@ describe('DrizzleStorefrontUserRepository', () => {
 	describe('create', () => {
 		it('should execute inside UOW, insert, and return mapped user', async () => {
 			const newUserData = {
+				id: 'usr_123',
 				email: 'new@example.com',
 				storeId: 'store_123',
 			} as any;
@@ -83,6 +84,7 @@ describe('DrizzleStorefrontUserRepository', () => {
 
 		it('should use provided transaction context if passed', async () => {
 			const newUserData = {
+				id: 'usr_123',
 				email: 'new@example.com',
 				storeId: 'store_123',
 			} as any;
