@@ -3,6 +3,7 @@
 import { TabBar } from '@presentation/primitives/tab-bar';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'nextjs-toploader/app';
+import { useEffect } from 'react';
 import { NavRoutes } from './nav-routes';
 
 export const NavLinks = () => {
@@ -11,6 +12,12 @@ export const NavLinks = () => {
 
 	const activeId =
 		NavRoutes.find((link) => link.href === pathname)?.id ?? NavRoutes[0].id;
+
+	useEffect(() => {
+		NavRoutes.forEach((link) => {
+			router.prefetch(link.href);
+		});
+	}, [router]);
 
 	return (
 		<TabBar

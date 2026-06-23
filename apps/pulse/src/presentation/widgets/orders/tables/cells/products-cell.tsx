@@ -20,7 +20,7 @@ const ProductsCell = ({ row }: OrdersRowProps) => {
 								alt={p.name}
 								width={40}
 								height={40}
-								className="h-10 w-10 shrink-0 rounded-full object-cover border"
+								className="h-10 w-10 shrink-0 rounded-full object-cover border bg-muted-foreground"
 							/>
 							<CellActionButton
 								className="font-medium whitespace-normal text-start w-full"
@@ -49,7 +49,7 @@ const ProductsCell = ({ row }: OrdersRowProps) => {
 					images={products.map((p) => ({ id: p.id, src: p.image }))}
 					max={3}
 					className="shrink-0 items-start justify-start"
-					imageClassName="h-8 w-8 -ml-5"
+					imageClassName="h-8 w-8 -ml-5 bg-muted-foreground"
 				/>
 			</div>
 		</div>

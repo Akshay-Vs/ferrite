@@ -24,6 +24,20 @@ export default function config(phase: string) {
 					port: '',
 					pathname: '/0ujcywips/**',
 				},
+
+				// Temporary
+				{
+					protocol: 'https',
+					hostname: 'i.pravatar.cc',
+					port: '',
+					pathname: '/**',
+				},
+				{
+					protocol: 'https',
+					hostname: 'images.pexels.com',
+					port: '',
+					pathname: '/**',
+				},
 			],
 		},
 	};
@@ -61,6 +75,12 @@ export default function config(phase: string) {
 
 	const prodConfig = {
 		productionBrowserSourceMaps: false,
+		experimental: {
+			staleTimes: {
+				dynamic: 60, // 1 min
+				static: 300,
+			},
+		},
 	};
 
 	return {

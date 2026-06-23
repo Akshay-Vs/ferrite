@@ -8,12 +8,12 @@ interface OrderDetailsScreenProps {
 
 const OrderDetailsScreen = ({ params }: OrderDetailsScreenProps) => {
 	return (
-		<div className="col gap-5 px-6">
-			<p className="text-sm font-mono text-muted-foreground">
+		<div className="col gap-5  h-full relative">
+			<p className="text-sm font-mono text-muted-foreground px-6">
 				{params.orderId}
 			</p>
 
-			<div className="col gap-10">
+			<div className="col gap-10 h-full px-6">
 				<OrderItems />
 				<ShipmentDetails />
 				<PaymentDetails />

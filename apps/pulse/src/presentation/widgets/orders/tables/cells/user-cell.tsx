@@ -21,7 +21,7 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 						alt={`${user.name}'s avatar`}
 						width={40}
 						height={40}
-						className="h-10 w-10 shrink-0 rounded-full object-cover object-center"
+						className="h-10 w-10 shrink-0 rounded-full object-cover object-center bg-muted-foreground"
 					/>
 					<div className="flex flex-col min-w-0">
 						<CellActionButton
@@ -53,7 +53,7 @@ export const UserCell = ({ row }: OrdersRowProps) => {
 					alt={user.name}
 					width={32}
 					height={32}
-					className="h-8 w-8 shrink-0 rounded-full object-cover border"
+					className="h-8 w-8 shrink-0 rounded-full object-cover border bg-muted-foreground"
 				/>
 				<CellActionButton
 					className="truncate"
