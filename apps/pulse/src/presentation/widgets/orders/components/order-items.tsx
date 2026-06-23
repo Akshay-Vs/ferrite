@@ -103,7 +103,7 @@ const OrderItems = () => {
 							alt={product.name}
 							width={80}
 							height={80}
-							className="rounded-xl h-20 w-20 object-center object-cover aspect-square"
+							className="rounded-xl h-20 w-20 object-center object-cover aspect-square bg-muted-foreground"
 						/>
 						<div className="flex full justify-between">
 							<div className="flex flex-col gap-2">
