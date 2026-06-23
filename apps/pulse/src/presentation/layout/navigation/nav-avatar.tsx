@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import { Avatar, AvatarImage } from '@presentation/primitives/avatar';
 import { Skeleton } from '@presentation/primitives/skeleton';
-import { ReceiptText, UserCog2, Users2 } from 'lucide-react';
+import { DollarSign, UserCog2, Users2 } from 'lucide-react';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -53,11 +53,11 @@ export const NavAvatar = () => {
 					<DropdownMenuLabel>My Account</DropdownMenuLabel>
 					<DropdownMenuItem>
 						<UserCog2 />
-						Profile Settings
+						Settings
 					</DropdownMenuItem>
 					<DropdownMenuItem>
-						<ReceiptText />
-						Billing Settings
+						<DollarSign />
+						Billing
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
