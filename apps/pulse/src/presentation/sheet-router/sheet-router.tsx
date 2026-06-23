@@ -88,7 +88,7 @@ export const SheetRouter = () => {
 		<Sheet open={isOpen} onOpenChange={(open) => !open && sheetRouter.close()}>
 			<SheetContent
 				showCloseButton={!canGoBack}
-				className="overflow-y-auto overflow-x-hidden full"
+				className="overflow-y-auto overflow-x-hidden full pb-0"
 			>
 				<div className="relative">
 					{/* Close button when navigated deep — placed at fixed position */}
@@ -112,7 +112,7 @@ export const SheetRouter = () => {
 								className="flex h-full flex-col"
 							>
 								<SheetScreenHeader route={topRoute} canGoBack={canGoBack} />
-								<div className="flex-1 pb-6 full">
+								<div className="flex-1 pb-5 full">
 									<Suspense
 										fallback={
 											<DelayedRender delay={300}>
