@@ -21,13 +21,13 @@ processors:
 
 exporters:
   otlp/jaeger:
-    endpoint: jaeger:4317
+    endpoint: ferrite-jaeger:4317
     tls:
       insecure: true
   prometheusremotewrite:
-    endpoint: http://prometheus:9090/api/v1/write
+    endpoint: http://ferrite-prometheus:9090/api/v1/write
   otlphttp/loki:
-    endpoint: http://loki:3100/otlp
+    endpoint: http://ferrite-loki:3100/otlp
     tls:
       insecure: true
   debug:
