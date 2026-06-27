@@ -89,11 +89,16 @@ const rateLimitingSchema = z.object({
 				.parse({})
 		),
 	verifyEmail: rateLimitConfigSchema.default(() =>
-		rateLimitConfigSchema.parse({})
+		rateLimitConfigSchema.parse({
+			windowMs: 60 * 1000,
+			maxAttempts: 10,
+		})
 	),
 	mfaVerify: rateLimitConfigSchema.default(() =>
 		rateLimitConfigSchema.parse({})
 	),
+	/** Minimum milliseconds a user must wait before requesting another verification email. */
+	resendCooldownMs: z.coerce.number().int().positive().default(60_000),
 });
 
 const storefrontAuthSchema = z.object({
