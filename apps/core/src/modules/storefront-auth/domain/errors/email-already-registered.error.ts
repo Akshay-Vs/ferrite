@@ -1,6 +1,8 @@
 export class EmailAlreadyRegisteredError extends Error {
 	readonly _tag = 'EmailAlreadyRegisteredError';
-	constructor() {
-		super('Email address is already registered');
+
+	constructor(message: string = 'Email already exists') {
+		super(message);
+		this.name = 'EmailAlreadyRegisteredError';
 	}
 }
