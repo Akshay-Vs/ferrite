@@ -5,6 +5,7 @@ import {
 	primaryKey,
 	timestamp,
 	uuid,
+	varchar,
 } from 'drizzle-orm/pg-core';
 import { notificationChannelEnum, notificationTypeEnum } from './enum';
 import { users } from './user.schema';
@@ -44,3 +45,15 @@ export type UserNotificationPreference =
 	typeof userNotificationPreferences.$inferSelect;
 export type NewUserNotificationPreference =
 	typeof userNotificationPreferences.$inferInsert;
+
+export const storePreferences = pgTable('store_preferences', {
+	storeId: uuid('store_id').primaryKey(),
+	frontendUrl: varchar('frontend_url', { length: 255 }),
+	htmlTemplate: varchar('html_template', { length: 255 }),
+	updatedAt: timestamp('updated_at', { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export type StorePreference = typeof storePreferences.$inferSelect;
+export type NewStorePreference = typeof storePreferences.$inferInsert;
