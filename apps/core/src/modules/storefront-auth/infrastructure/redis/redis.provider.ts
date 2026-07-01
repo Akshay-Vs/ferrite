@@ -13,7 +13,7 @@ export const StorefrontRedisProvider: Provider = {
 
 		const redisPassword = config.getOrThrow('REDIS_SESSIONS_PASSWORD');
 		const redisHost = config.getOrThrow('REDIS_SESSIONS_HOST');
-		const redisPort = config.getOrThrow('REDIS_SESSIONS_PORT');
+		const redisPort = Number(config.getOrThrow('REDIS_SESSIONS_PORT'));
 
 		const redisConfig = ferriteConfig.storefrontAuth.redis;
 
