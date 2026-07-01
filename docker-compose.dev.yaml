@@ -1,6 +1,7 @@
 services:
-  postgres:
+  ferrite-postgres:
     image: postgres:18-alpine
+    container_name: ferrite-postgres
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -31,54 +32,103 @@ services:
     networks:
       - observability
 
-  postgres-exporter:
+  ferrite-postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
+    container_name: ferrite-postgres-exporter
     environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ferrite-postgres:5432/${POSTGRES_DB}?sslmode=disable
     ports:
       - "127.0.0.1:9187:9187"
     depends_on:
-      postgres:
+      ferrite-postgres:
         condition: service_healthy
     networks:
       - observability
 
-  redis:
+  ferrite-redis-cache:
     image: redis:8-alpine
-    container_name: redis
+    container_name: ferrite-redis-cache
     restart: unless-stopped
     ports:
       - "127.0.0.1:${REDIS_PORT:-6379}:6379"
-    command:  redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
     volumes:
       - redis_data:/data
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$${REDIS_PASSWORD}\" ping | grep -qx PONG"]
+      test:
+        [
+          "CMD-SHELL",
+          'redis-cli --no-auth-warning -a "$${REDIS_PASSWORD}" ping | grep -qx PONG',
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
     networks:
       - observability
 
-  redis_exporter:
+  ferrite-redis-exporter:
     image: oliver006/redis_exporter:alpine
-    container_name: redis_exporter
+    container_name: ferrite-redis-exporter
     restart: unless-stopped
     ports:
       - "127.0.0.1:${REDIS_EXPORTER_PORT:-9121}:9121"
     environment:
-      - REDIS_ADDR=redis://redis:6379
+      - REDIS_ADDR=redis://ferrite-redis-cache:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     depends_on:
-      redis:
+      ferrite-redis-cache:
         condition: service_healthy
     networks:
       - observability
 
-  otel-collector:
+  ferrite-redis-sessions:
+    image: redis:8-alpine
+    container_name: ferrite-redis-sessions
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_SESSIONS_PORT:-6380}:6379"
+    command: >
+      redis-server
+      --requirepass "${REDIS_SESSIONS_PASSWORD}"
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis_sessions_data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_SESSIONS_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'redis-cli --no-auth-warning -a "$${REDIS_PASSWORD}" ping | grep -qx PONG',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - observability
+
+  ferrite-redis-sessions-exporter:
+    image: oliver006/redis_exporter:alpine
+    container_name: ferrite-redis-sessions-exporter
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_SESSIONS_EXPORTER_PORT:-9122}:9121"
+    environment:
+      - REDIS_ADDR=redis://ferrite-redis-sessions:6379
+      - REDIS_PASSWORD=${REDIS_SESSIONS_PASSWORD}
+    depends_on:
+      ferrite-redis-sessions:
+        condition: service_healthy
+    networks:
+      - observability
+
+  ferrite-otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
+    container_name: ferrite-otel-collector
     command: ["--config=/etc/otel/config.yaml"]
     volumes:
       - ./monitoring/open-telemetry/config.yaml:/etc/otel/config.yaml:ro
@@ -87,14 +137,15 @@ services:
       - "127.0.0.1:4318:4318"
       - "127.0.0.1:8888:8888"
     depends_on:
-      - jaeger
-      - prometheus
-      - loki
+      - ferrite-jaeger
+      - ferrite-prometheus
+      - ferrite-loki
     networks:
       - observability
 
-  jaeger:
+  ferrite-jaeger:
     image: jaegertracing/all-in-one:latest
+    container_name: ferrite-jaeger
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
@@ -102,21 +153,23 @@ services:
     networks:
       - observability
 
-  prometheus:
+  ferrite-prometheus:
     image: prom/prometheus:latest
+    container_name: ferrite-prometheus
     volumes:
       - ./monitoring/open-telemetry/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.enable-remote-write-receiver'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
     ports:
       - "127.0.0.1:9090:9090"
     networks:
       - observability
 
-  loki:
+  ferrite-loki:
     image: grafana/loki:3.3.2
+    container_name: ferrite-loki
     user: "0"
     command: -config.file=/etc/loki/config.yaml
     volumes:
@@ -127,8 +180,9 @@ services:
     networks:
       - observability
 
-  grafana:
+  ferrite-grafana:
     image: grafana/grafana:latest
+    container_name: ferrite-grafana
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -139,9 +193,9 @@ services:
     ports:
       - "3200:3000"
     depends_on:
-      - prometheus
-      - loki
-      - jaeger
+      - ferrite-prometheus
+      - ferrite-loki
+      - ferrite-jaeger
     networks:
       - observability
 
@@ -151,6 +205,7 @@ volumes:
   grafana-data:
   postgres_data:
   redis_data:
+  redis_sessions_data:
 
 networks:
   observability:

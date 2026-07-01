@@ -3,14 +3,14 @@ datasources:
   - name: Prometheus
     type: prometheus
     uid: prometheus
-    url: http://prometheus:9090
+    url: http://ferrite-prometheus:9090
     isDefault: true
     editable: true
 
   - name: Loki
     type: loki
     uid: loki
-    url: http://loki:3100
+    url: http://ferrite-loki:3100
     editable: true
     jsonData:
       derivedFields:
@@ -23,7 +23,7 @@ datasources:
   - name: Jaeger
     type: jaeger
     uid: jaeger
-    url: http://jaeger:16686
+    url: http://ferrite-jaeger:16686
     editable: true
     jsonData:
       tracesToLogsV2:

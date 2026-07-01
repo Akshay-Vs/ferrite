@@ -2,6 +2,7 @@ import { inter } from '@app/(config)/fonts';
 import { appMetadata } from '@app/(config)/metadata';
 import { ClerkProvider } from '@clerk/nextjs';
 import { cn } from '@core/utils/cn';
+import { SerwistProvider } from '@serwist/next/react';
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import FerriteCoreProvider from '@/core/providers/ferrite-core.provider';
@@ -27,21 +28,26 @@ export default function RootLayout({
 			className={cn('font-sans', inter.variable)}
 		>
 			<body className="antialiased bg-background text-content">
-				<div id="bg-gradient" />
-				<ClerkProvider>
-					<QueryClientProvider>
-						<FerriteCoreProvider>
-							<ThemeProvider>
-								<TooltipProvider>
-									<TopLoaderProvider>
-										<Toaster />
-										{children}
-									</TopLoaderProvider>
-								</TooltipProvider>
-							</ThemeProvider>
-						</FerriteCoreProvider>
-					</QueryClientProvider>
-				</ClerkProvider>
+				<SerwistProvider
+					swUrl="/sw.js"
+					// disable={process.env.NODE_ENV === 'development'}
+				>
+					<div id="bg-gradient" />
+					<ClerkProvider>
+						<QueryClientProvider>
+							<FerriteCoreProvider>
+								<ThemeProvider>
+									<TooltipProvider>
+										<TopLoaderProvider>
+											<Toaster />
+											{children}
+										</TopLoaderProvider>
+									</TooltipProvider>
+								</ThemeProvider>
+							</FerriteCoreProvider>
+						</QueryClientProvider>
+					</ClerkProvider>
+				</SerwistProvider>
 			</body>
 		</html>
 	);

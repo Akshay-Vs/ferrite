@@ -1,10 +1,12 @@
 {
 	"name": "@ferrite/pulse",
 	"version": "0.1.0",
+	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
-		"build": "next build",
+		"dev": "concurrently -p none 'serwist build --watch' 'NODE_OPTIONS=--max-old-space-size=4096 next dev'",
+		"dev:once": "NODE_ENV=development serwist build && NODE_OPTIONS='--max-old-space-size=4096' next dev",
+		"build": "serwist build && next build",
 		"start": "next start",
 		"lint": "biome check --fix ."
 	},
@@ -33,6 +35,7 @@
 		"@visx/tooltip": "^3.12.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
+		"idb": "^8.0.3",
 		"input-otp": "^1.4.2",
 		"lint-staged": "^17.0.5",
 		"lucide-react": "^1.8.0",
@@ -52,11 +55,16 @@
 		"zustand": "^5.0.12"
 	},
 	"devDependencies": {
-		"@visx/mock-data": "^3.12.0",
+		"@serwist/cli": "^9.5.11",
+		"@serwist/next": "^9.5.11",
 		"@tailwindcss/postcss": "^4.3.0",
 		"@types/node": "^25.6.0",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
+		"@visx/mock-data": "^3.12.0",
+		"concurrently": "^10.0.3",
+		"esbuild": "^0.28.1",
+		"serwist": "^9.5.11",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^6"
 	},
