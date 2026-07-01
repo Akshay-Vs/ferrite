@@ -53,12 +53,13 @@ export class SendVerificationEmailUseCase implements ISendVerificationEmail {
 					const rawToken = randomBytes(32).toString('hex');
 					const tokenHash = createHash('sha256').update(rawToken).digest('hex');
 					const expiresAt = new Date(Date.now() + VERIFICATION_TTL_MS);
+					const verificationId = crypto.randomUUID();
 
 					const performWork = async (txn: ITransactionContext) => {
 						// Upsert: wipe old tokens, insert new one — atomically
 						await this.verificationRepo.upsert(
 							{
-								id: crypto.randomUUID(),
+								id: verificationId,
 								storeId: input.storeId,
 								userId: input.userId,
 								tokenHash,
@@ -82,6 +83,7 @@ export class SendVerificationEmailUseCase implements ISendVerificationEmail {
 						const frontendUrl = prefs.frontendUrl;
 
 						const enqueueResult = await this.enqueueEmail.execute(txn, {
+							id: `email:storefront-verify-email:${verificationId}`,
 							recipient: input.email,
 							template: EmailTemplate.STOREFRONT_VERIFY_EMAIL,
 							subject: 'Verify your email address',

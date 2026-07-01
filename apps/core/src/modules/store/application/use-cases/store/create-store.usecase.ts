@@ -51,6 +51,7 @@ export class CreateStoreUseCase implements ICreateStoreUseCase {
 				const user = await this.userRepo.findById(input.createdBy);
 				if (user) {
 					const enqueueResult = await this.enqueueEmail.execute(input.tx, {
+						id: `email:welcome-aboard:${store.id}`,
 						recipient: user.email,
 						template: EmailTemplate.WELCOME_ABOARD,
 						subject: 'Welcome aboard',

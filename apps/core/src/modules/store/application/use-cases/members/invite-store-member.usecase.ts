@@ -69,7 +69,7 @@ export class InviteStoreMemberUseCase implements IInviteStoreMemberUseCase {
 							return err(new Error('Store not found'));
 						}
 
-						await this.repo.inviteStoreMember(
+						const invitation = await this.repo.inviteStoreMember(
 							txn,
 							input.email,
 							input.storeId,
@@ -80,6 +80,7 @@ export class InviteStoreMemberUseCase implements IInviteStoreMemberUseCase {
 						);
 
 						const enqueueResult = await this.enqueueEmail.execute(txn, {
+							id: `email:org-invite:${invitation.id}`,
 							recipient: input.email,
 							template: EmailTemplate.ORGANIZATION_INVITE,
 							subject: 'You have been invited to a store',
