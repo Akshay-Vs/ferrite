@@ -1,2 +1,0 @@
-ALTER TABLE "stores" ADD COLUMN "currency_code" char(3) NOT NULL;--> statement-breakpoint
-ALTER TABLE "stores" ADD CONSTRAINT "stores_currency_code_currencies_code_fk" FOREIGN KEY ("currency_code") REFERENCES "public"."currencies"("code") ON DELETE restrict ON UPDATE no action;

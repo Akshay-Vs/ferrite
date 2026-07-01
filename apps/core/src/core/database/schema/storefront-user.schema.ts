@@ -130,9 +130,7 @@ export const storefrontEmailVerifications = pgTable(
 			.defaultNow(),
 	},
 	(t) => [
-		// Primary lookup: verify an inbound token
-		index('idx_email_verifications_token_hash').on(t.tokenHash),
-		// Check whether a user has a pending verification in flight
+		// Primary lookup: verify an inbound token (also checks expiry)
 		index('idx_email_verifications_user_id').on(t.userId),
 		// Batch expiry cleanup
 		index('idx_email_verifications_expires_at').on(t.expiresAt),
