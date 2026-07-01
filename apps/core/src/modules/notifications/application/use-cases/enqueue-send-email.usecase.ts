@@ -36,10 +36,10 @@ export class EnqueueSendEmailUseCase implements IEnqueueSendEmail {
 			try {
 				const eventId = randomUUID();
 				const outboxEvent: QueueParams<Record<string, unknown>> = {
-					payload: payload as unknown as Record<string, unknown>,
 					eventId,
+					payload: payload as unknown as Record<string, unknown>,
+					jobKey: payload.id, // idempotency key
 					eventType: 'notification.send_email',
-					queueName: SEND_EMAIL_QUEUE,
 					identifier: SEND_EMAIL_QUEUE,
 					maxAttempts: 5,
 				};
