@@ -7,8 +7,8 @@ import type { Store } from '@core/database/schema/store.schema';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { AuthUser } from '@ferrite/schema/auth/auth-user.zodschema';
 import type {
-	GetAllStores,
 	GetStore,
+	ListOwnStores,
 } from '@ferrite/schema/stores/get-store.zodschema';
 import { RoleNotFoundError } from '@modules/store/domain/errors/role-not-found.error';
 import { SystemRoleProtectedError } from '@modules/store/domain/errors/system-role-protected.error';
@@ -42,6 +42,7 @@ import {
 	ParseUUIDPipe,
 	Patch,
 	Post,
+	Query,
 	UnprocessableEntityException,
 	UseGuards,
 } from '@nestjs/common';
@@ -113,9 +114,17 @@ export class StoreController {
 	@Get()
 	@GetStoresDocs()
 	@SkipPermissions()
-	async getOwnStores(@AuthUserParam() user: AuthUser): Promise<GetAllStores[]> {
+	async getOwnStores(
+		@AuthUserParam() user: AuthUser,
+		@Query('cursor') cursor?: string,
+		@Query('limit') limit?: string
+	): Promise<ListOwnStores> {
 		return this.tracer.withSpan('http.get-own-stores', async () => {
-			const result = await this.getStoresUc.execute(user.id);
+			const result = await this.getStoresUc.execute({
+				userId: user.id,
+				cursor,
+				limit: limit ? parseInt(limit, 10) : undefined,
+			});
 			if (result.isErr()) {
 				throw new UnprocessableEntityException('Failed to get stores');
 			}
