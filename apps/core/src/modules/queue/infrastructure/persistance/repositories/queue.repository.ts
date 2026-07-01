@@ -13,17 +13,20 @@ export class QueueRepository implements IQueueRepository {
 	): Promise<void> {
 		{
 			const drizzleTx = DrizzleUnitOfWork.unwrap(tx);
-			const { identifier, maxAttempts, ...jobPayloadData } = queueParams;
+			const { jobKey, identifier, maxAttempts, ...jobPayloadData } =
+				queueParams;
 			const jobPayload = JSON.stringify(jobPayloadData);
 
 			await drizzleTx.execute(sql`
-        SELECT graphile_worker.add_job(
-          identifier := ${identifier},
-          payload := ${jobPayload}::json,
-          queue_name := ${queueParams.queueName},
-          max_attempts := ${maxAttempts}
-        )
-    `);
+    SELECT graphile_worker.add_job(
+      identifier := ${identifier},
+      payload := ${jobPayload}::json,
+      queue_name := coalesce(${queueParams.queueName || null}::text, null),
+      max_attempts := ${maxAttempts},
+      job_key := ${jobKey},
+      job_key_mode := ${'preserve_run_at'}
+    )
+`);
 		}
 	}
 }
