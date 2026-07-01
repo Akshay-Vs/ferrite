@@ -123,7 +123,7 @@
         "@visx/event": "^3.12.0",
         "@visx/group": "^3.12.0",
         "@visx/legend": "^3.12.0",
-        "@visx/pattern": "^3.12.0",
+        "@visx/pattern": "^4.0.0",
         "@visx/responsive": "^3.12.0",
         "@visx/scale": "^4.0.0",
         "@visx/shape": "^3.12.0",
@@ -1719,7 +1719,7 @@
 
     "@visx/mock-data": ["@visx/mock-data@3.12.0", "", { "dependencies": { "@types/d3-random": "^2.2.0", "d3-random": "^2.2.2" } }, "sha512-HI8LKdO3sU2tIBv16ZYRTc2JYsu0Ai/hQc7YUOBqbjhXUW993iCBe98pAgEdHDrSWqK2yvXY4En5ceBTAP34Jw=="],
 
-    "@visx/pattern": ["@visx/pattern@3.12.0", "", { "dependencies": { "@types/react": "*", "classnames": "^2.3.1", "prop-types": "^15.5.10" }, "peerDependencies": { "react": "^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0" } }, "sha512-ZkNA/2TkULNiiY4cw2IkuQcQRp9zI3SQ0/JoZMQ+UmUvY5RNBcsdTmic7649egHq0FRYCbY0DDQVJicccW5JUg=="],
+    "@visx/pattern": ["@visx/pattern@4.0.0", "", { "dependencies": { "classnames": "^2.3.1" }, "peerDependencies": { "@types/react": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react"] }, "sha512-vhViDwBVRvKR0kcLSZELpn5c3zQm0LIsGMIhs1Qk5VMTeRo29jY0rb4IqplXDc9/6HRXgMYhGKWTpurQ5HVReg=="],
 
     "@visx/point": ["@visx/point@3.12.0", "", {}, "sha512-I6UrHoJAEVbx3RORQNupgTiX5EzjuZpiwLPxn8L2mI5nfERotPKi1Yus12Cq2WtXqEBR/WgqTnoImlqOXBykcA=="],
 
