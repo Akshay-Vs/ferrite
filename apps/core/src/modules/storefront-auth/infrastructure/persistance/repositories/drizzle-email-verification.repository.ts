@@ -64,8 +64,9 @@ export class DrizzleEmailVerificationRepository
 		);
 	}
 
-	async findByTokenHash(
+	async findByUserId(
 		storeId: string,
+		userId: string,
 		tokenHash: string
 	): Promise<EmailVerification | null> {
 		return traceDbOp(
@@ -84,6 +85,7 @@ export class DrizzleEmailVerificationRepository
 						and(
 							eq(storefrontEmailVerifications.storeId, storeId),
 							eq(storefrontEmailVerifications.tokenHash, tokenHash),
+							eq(storefrontEmailVerifications.userId, userId),
 							// filter out expired tokens at the DB level: expiresAt > now
 							gt(storefrontEmailVerifications.expiresAt, now)
 						)
