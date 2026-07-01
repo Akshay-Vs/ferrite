@@ -187,6 +187,9 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - ./monitoring/open-telemetry/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
@@ -196,6 +199,7 @@ services:
       - ferrite-prometheus
       - ferrite-loki
       - ferrite-jaeger
+      - ferrite-postgres
     networks:
       - observability
 
