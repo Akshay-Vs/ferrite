@@ -69,8 +69,9 @@ export class VerifyEmailUseCase implements IVerifyEmail {
 					.digest('hex');
 
 				// Look up the record by hashed token (also checks expiry)
-				const verification = await this.verificationRepo.findByTokenHash(
+				const verification = await this.verificationRepo.findByUserId(
 					input.storeId,
+					input.userId,
 					tokenHash
 				);
 
