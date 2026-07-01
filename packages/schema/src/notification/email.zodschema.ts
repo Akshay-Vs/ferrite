@@ -7,6 +7,7 @@ export enum EmailTemplate {
 	STOREFRONT_VERIFY_EMAIL = 'storefront_verify_email',
 }
 export const EmailTransitPayloadSchema = z.object({
+	id: z.string(),
 	recipient: z.email(),
 	template: z.enum(EmailTemplate),
 	senderDesignator: z.string().min(1).optional(),
