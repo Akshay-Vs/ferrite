@@ -1,3 +1,4 @@
+import { pgErrorCode } from '@common/errors/handlers/pg-error-code';
 import {
 	type ITransactionContext,
 	type IUnitOfWork,
@@ -16,6 +17,7 @@ import {
 } from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, isNull, sql } from 'drizzle-orm';
+import { EmailAlreadyRegisteredError } from '../../../domain/errors/email-already-registered.error';
 import type { IStorefrontUserRepository } from '../../../domain/ports/storefront-user-repository.port';
 import { StorefrontUserMapper } from '../mappers/storefront-user.mapper';
 
@@ -58,23 +60,30 @@ export class DrizzleStorefrontUserRepository
 		data: CreateStorefrontUserInput
 	): Promise<StorefrontUser> {
 		const executor = DrizzleUnitOfWork.unwrap(ctx);
-		const [inserted] = await traceDbOp(
-			this.tracer,
-			'db.storefrontUsers.insert',
-			{ 'db.table': 'storefront_users', 'db.operation': 'insert' },
-			() =>
-				executor
-					.insert(storefrontUsers)
-					.values({
-						id: data.id,
-						storeId: data.storeId,
-						email: data.email,
-						displayName: data.displayName,
-						passwordHash: data.passwordHash,
-					})
-					.returning()
-		);
-		return StorefrontUserMapper.toDomain(inserted);
+		try {
+			const [inserted] = await traceDbOp(
+				this.tracer,
+				'db.storefrontUsers.insert',
+				{ 'db.table': 'storefront_users', 'db.operation': 'insert' },
+				() =>
+					executor
+						.insert(storefrontUsers)
+						.values({
+							id: data.id,
+							storeId: data.storeId,
+							email: data.email,
+							displayName: data.displayName,
+							passwordHash: data.passwordHash,
+						})
+						.returning()
+			);
+			return StorefrontUserMapper.toDomain(inserted);
+		} catch (error: any) {
+			if (pgErrorCode(error) === '23505') {
+				throw new EmailAlreadyRegisteredError();
+			}
+			throw error;
+		}
 	}
 
 	async findByStoreIdAndEmail(
@@ -392,6 +401,53 @@ export class DrizzleStorefrontUserRepository
 				const users = await query;
 				return users.map((user) => StorefrontUserMapper.toDomain(user));
 			}
+		);
+	}
+
+	async markEmailVerified(
+		id: string,
+		storeId: string,
+		tx?: ITransactionContext
+	): Promise<void> {
+		return traceDbOp(
+			this.tracer,
+			'db.storefrontUsers.markEmailVerified',
+			{ 'db.table': 'storefront_users', 'db.operation': 'update' },
+			async () => {
+				if (tx) {
+					return this.runMarkEmailVerified(tx, id, storeId);
+				}
+				return this.uow.execute((ctx) =>
+					this.runMarkEmailVerified(ctx, id, storeId)
+				);
+			}
+		);
+	}
+
+	private async runMarkEmailVerified(
+		ctx: ITransactionContext,
+		id: string,
+		storeId: string
+	): Promise<void> {
+		const executor = DrizzleUnitOfWork.unwrap(ctx);
+		await traceDbOp(
+			this.tracer,
+			'db.storefrontUsers.updateEmailVerifiedAt',
+			{ 'db.table': 'storefront_users', 'db.operation': 'update' },
+			() =>
+				executor
+					.update(storefrontUsers)
+					.set({
+						emailVerifiedAt: new Date(),
+						updatedAt: new Date(),
+					})
+					.where(
+						and(
+							eq(storefrontUsers.id, id),
+							eq(storefrontUsers.storeId, storeId),
+							isNull(storefrontUsers.deletedAt)
+						)
+					)
 		);
 	}
 }

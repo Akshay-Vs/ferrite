@@ -4,6 +4,7 @@ export enum EmailTemplate {
 	ORGANIZATION_INVITE = 'organization_invite',
 	PASSWORD_RESET = 'password_reset',
 	WELCOME_ABOARD = 'welcome_aboard',
+	STOREFRONT_VERIFY_EMAIL = 'storefront_verify_email',
 }
 export const EmailTransitPayloadSchema = z.object({
 	recipient: z.email(),

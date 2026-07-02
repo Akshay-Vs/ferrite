@@ -23,6 +23,8 @@ import {
 	UpdateRolePermissionsUseCase,
 	UpdateStoreUseCase,
 } from './application/use-cases';
+import { GetStoreConfigUseCase } from './application/use-cases/config/get-store-config.usecase';
+import { UpdateStoreConfigUseCase } from './application/use-cases/config/update-store-config.usecase';
 import {
 	ACCEPT_STORE_INVITATION_UC,
 	ADD_STORE_MEMBER_UC,
@@ -42,6 +44,11 @@ import {
 	UPDATE_ROLE_PERMISSIONS_UC,
 } from './domain/ports/role-use-cases.port';
 import { STORE_REPOSITORY } from './domain/ports/store.repository.port';
+import { STORE_CONFIG_REPOSITORY } from './domain/ports/store-config.repository.port';
+import {
+	GET_STORE_CONFIG_UC,
+	UPDATE_STORE_CONFIG_UC,
+} from './domain/ports/store-config-usecase.port';
 import { STORE_PERMISSION_CHECKER } from './domain/ports/store-permission-checker.port';
 import {
 	CREATE_STORE_UC,
@@ -51,16 +58,23 @@ import {
 	INITIALIZE_STORE_ORCHESTRATOR_UC,
 	UPDATE_STORE_UC,
 } from './domain/ports/store-use-cases.port';
+import { ConfigController } from './infrastructure/http/controllers/config.controller';
 import { InvitationController } from './infrastructure/http/controllers/invitation.controller';
 import { RoleController } from './infrastructure/http/controllers/role.controller';
 import { StoreController } from './infrastructure/http/controllers/store.controller';
 import { StorePermissionGuard } from './infrastructure/http/guards/store-permission.guard';
 import { DrizzleStoreRepository } from './infrastructure/persistance/repositories/drizzle-store.repository';
+import { DrizzleStoreConfigRepository } from './infrastructure/persistance/repositories/drizzle-store-config.repository';
 import { DrizzleStorePermissionRepository } from './infrastructure/persistance/repositories/drizzle-store-permission.repository';
 
 @Module({
 	imports: [NotificationsModule, UsersModule],
-	controllers: [StoreController, RoleController, InvitationController],
+	controllers: [
+		StoreController,
+		RoleController,
+		InvitationController,
+		ConfigController,
+	],
 	providers: [
 		{
 			provide: STORE_REPOSITORY,
@@ -150,6 +164,18 @@ import { DrizzleStorePermissionRepository } from './infrastructure/persistance/r
 		{
 			provide: UNSUSPEND_STORE_MEMBER_UC,
 			useClass: UnsuspendStoreMemberUseCase,
+		},
+		{
+			provide: STORE_CONFIG_REPOSITORY,
+			useClass: DrizzleStoreConfigRepository,
+		},
+		{
+			provide: GET_STORE_CONFIG_UC,
+			useClass: GetStoreConfigUseCase,
+		},
+		{
+			provide: UPDATE_STORE_CONFIG_UC,
+			useClass: UpdateStoreConfigUseCase,
 		},
 	],
 	exports: [

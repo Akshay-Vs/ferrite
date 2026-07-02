@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify your email address</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0a0d;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(108, 99, 255, 0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(99, 179, 255, 0.04), transparent);
+            color: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .gradient-text {
+            /* Fallback */
+            color: #B3A5E7;
+            /* Gradient */
+            background: linear-gradient(to top left, #E1DBFF, #B3A5E7, #D5E0FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 72px;
+            font-weight: 100;
+            margin: 0;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+        .subtitle {
+            font-size: 24px;
+            font-weight: 300;
+            color: #e8e8f0;
+            margin-bottom: 48px;
+            line-height: 1.5;
+        }
+        .button {
+            display: inline-block;
+            background-color: #e8e8f0;
+            color: #0b0a0d;
+            text-decoration: none;
+            padding: 16px 40px;
+            border-radius: 9999px;
+            font-size: 18px;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        .footer {
+            margin-top: 80px;
+            font-size: 14px;
+            color: rgba(250, 250, 250, 0.709);
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="gradient-text">Verify Email</h1>
+        
+        <p class="subtitle">
+            Welcome to the store. Please verify your email address to complete your registration.
+        </p>
+
+        <!-- Replace YOUR_FRONTEND_URL with the actual frontend app verification route -->
+        <a href="{{frontendUrl}}/verify?token={{token}}&storeId={{storeId}}&userId={{userId}}" target="_blank" class="button">
+            Verify Email Address
+        </a>
+
+        <p class="footer">
+            If you did not request this, you can safely ignore this email.
+        </p>
+    </div>
+</body>
+</html>

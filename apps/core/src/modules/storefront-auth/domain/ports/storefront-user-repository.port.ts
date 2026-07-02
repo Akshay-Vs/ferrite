@@ -52,4 +52,10 @@ export interface IStorefrontUserRepository {
 		storeId: string,
 		includeBanned?: boolean
 	): Promise<StorefrontUser[]>;
+
+	markEmailVerified(
+		id: string,
+		storeId: string,
+		tx?: ITransactionContext
+	): Promise<void>;
 }

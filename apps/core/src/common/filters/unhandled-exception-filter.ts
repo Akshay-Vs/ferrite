@@ -24,12 +24,18 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 		let error = 'Internal Server Error';
 		let extraData: Record<string, any> = {};
 
+		let isPublic = false;
+
 		if (exception instanceof HttpException) {
 			status = exception.getStatus();
 			const responseBody = exception.getResponse() as any;
 
-			// Mask all server-side failures (5xx) to prevent leakage
-			if (status < HttpStatus.INTERNAL_SERVER_ERROR) {
+			if (typeof responseBody === 'object' && responseBody.isPublic) {
+				isPublic = true;
+			}
+
+			// Mask all server-side failures (5xx) to prevent leakage, unless explicitly marked public
+			if (status < HttpStatus.INTERNAL_SERVER_ERROR || isPublic) {
 				message =
 					typeof responseBody === 'string'
 						? responseBody
@@ -43,6 +49,7 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 						message: _msg,
 						error: _err,
 						statusCode: _sc,
+						isPublic: _ip,
 						...rest
 					} = responseBody;
 					extraData = rest;
@@ -50,7 +57,7 @@ export class UnhandledExceptionFilter implements ExceptionFilter {
 			}
 		}
 
-		if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+		if (status >= HttpStatus.INTERNAL_SERVER_ERROR && !isPublic) {
 			this.logger.error(
 				`Unhandled exception [${request.method}] ${request.url}`,
 				exception instanceof Error ? exception.stack : String(exception)
