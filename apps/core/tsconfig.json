@@ -26,7 +26,7 @@
 			// modules
 			"@auth/*": ["./src/modules/auth/*"],
 			"@health/*": ["./src/modules/health/*"],
-			"@users/*": ["./src/modules/users/*"],
+			"@users/*": ["./src/modules/platform-users/*"],
 			"@webhooks/*": ["./src/modules/webhooks/*"],
 			"@queue/*": ["./src/modules/queue/*"],
 			"@store/*": ["./src/modules/store/*"],

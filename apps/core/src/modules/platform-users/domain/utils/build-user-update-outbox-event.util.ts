@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { AuthProvider } from '@auth/index';
 import type { UserUpdatedEvent } from '@ferrite/schema/users/user-updated.zodschema';
+import { USER_SYNC_QUEUE } from '@modules/platform-users/infrastructure/queue/queue.constraints';
 import type { QueueParams } from '@modules/queue';
-import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
 
 /**
  * Builds the outbox event payload for a user profile update.

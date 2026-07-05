@@ -2,7 +2,6 @@ import { UnsupportedEventTypeError } from '@common/errors/unsupported-event-type
 import { err, Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
-import { Inject, Injectable } from '@nestjs/common';
 import {
 	CREATE_USER_UC,
 	type ICreateUserUseCase,
@@ -11,7 +10,8 @@ import {
 	type ISyncUserProfileUpdateUseCase,
 	SYNC_USER_DELETION_UC,
 	SYNC_USER_UPDATE_UC,
-} from '@users/domain/ports/use-cases.port';
+} from '@modules/platform-users/domain/ports/use-cases.port';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RouteUserEventsUsecase implements IRouteUserEventsUseCase {

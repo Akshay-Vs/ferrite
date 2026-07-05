@@ -5,6 +5,22 @@ import { SkipRoles } from '@common/decorators/skip-roles.decorator';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { PlatformRoles } from '@ferrite/schema/common/platform-roles.zodschema';
 import { PlatformRBACGuard } from '@modules/auth/infrastructure/http/guards/platform-rbac.guard';
+import { MissingAuthProviderError } from '@modules/platform-users/domain/errors/missing-auth-provider.error';
+import { UserNotFoundError } from '@modules/platform-users/domain/errors/user-not-found.error';
+import {
+	GET_ALL_USERS_UC,
+	GET_OWN_PROFILE_UC,
+	GET_USER_BY_ID_UC,
+	type IGetAllUsersUseCase,
+	type IGetOwnProfileUseCase,
+	type IGetUserByIdUseCase,
+	type IInitiateDeleteUserUseCase,
+	type IInitiateProfileUpdateUseCase,
+	type IInitiateRoleUpdateUseCase,
+	INITIATE_DELETE_USER_UC,
+	INITIATE_PROFILE_UPDATE_UC,
+	INITIATE_ROLE_UPDATE_UC,
+} from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	Body,
 	Controller,
@@ -23,22 +39,6 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
-import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import {
-	GET_ALL_USERS_UC,
-	GET_OWN_PROFILE_UC,
-	GET_USER_BY_ID_UC,
-	type IGetAllUsersUseCase,
-	type IGetOwnProfileUseCase,
-	type IGetUserByIdUseCase,
-	type IInitiateDeleteUserUseCase,
-	type IInitiateProfileUpdateUseCase,
-	type IInitiateRoleUpdateUseCase,
-	INITIATE_DELETE_USER_UC,
-	INITIATE_PROFILE_UPDATE_UC,
-	INITIATE_ROLE_UPDATE_UC,
-} from '@users/domain/ports/use-cases.port';
 import { UpdateProfileInputDTO } from '../dto/update-profile.dto';
 import { UpdateRoleInputDTO } from '../dto/update-role.dto';
 import {
@@ -52,7 +52,7 @@ import {
 
 const ME_ROUTE = 'me';
 
-@ApiTags('Users')
+@ApiTags('Platform Users')
 @ApiBearerAuth('swagger-access-token')
 @UseGuards(PlatformRBACGuard)
 @Controller('users')

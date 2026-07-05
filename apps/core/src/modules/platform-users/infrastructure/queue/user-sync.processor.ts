@@ -9,13 +9,13 @@ import {
 	EventPayload,
 	eventPayloadSchema,
 } from '@ferrite/schema/common/event-payload.zodschema';
-import { Inject } from '@nestjs/common';
-import { UserConflictError } from '@users/domain/errors/user-conflict.error';
-import { UserExistsError } from '@users/domain/errors/user-exists.error';
+import { UserConflictError } from '@modules/platform-users/domain/errors/user-conflict.error';
+import { UserExistsError } from '@modules/platform-users/domain/errors/user-exists.error';
 import {
 	type IRouteUserEventsUseCase,
 	ROUTE_USER_EVENTS_UC,
-} from '@users/domain/ports/use-cases.port';
+} from '@modules/platform-users/domain/ports/use-cases.port';
+import { Inject } from '@nestjs/common';
 import type { JobHelpers } from 'graphile-worker';
 import { USER_SYNC_QUEUE } from './queue.constraints';
 

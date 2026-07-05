@@ -6,8 +6,8 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
 import { userDeletedEventSchema } from '@ferrite/schema/users/user-deleted.zodschema';
+import { ISyncUserDeletionUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { ISyncUserDeletionUseCase } from '@users/domain/ports/use-cases.port';
 
 @Injectable()
 export class SyncUserDeletionUseCase implements ISyncUserDeletionUseCase {

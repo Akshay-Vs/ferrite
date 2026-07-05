@@ -6,8 +6,8 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { EventPayload } from '@ferrite/schema/common/event-payload.zodschema';
 import { userUpdatedEventSchema } from '@ferrite/schema/users/index';
+import { ISyncUserProfileUpdateUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import { Inject, Injectable } from '@nestjs/common';
-import { ISyncUserProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
 
 @Injectable()
 export class SyncProfileUpdateUseCase implements ISyncUserProfileUpdateUseCase {

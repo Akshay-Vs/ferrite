@@ -5,12 +5,12 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { ListAllUsers } from '@ferrite/schema';
 import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
-import { Inject, Injectable } from '@nestjs/common';
-import type { IGetAllUsersUseCase } from '@users/domain/ports/use-cases.port';
+import type { IGetAllUsersUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
+} from '@modules/platform-users/domain/ports/user-repository.port';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetAllUsersUseCase implements IGetAllUsersUseCase {

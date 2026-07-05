@@ -8,18 +8,18 @@ import {
 	type UserCreatedEvent,
 	userCreatedEventSchema,
 } from '@ferrite/schema/users/user-created.zodschema';
-import { Inject, Injectable } from '@nestjs/common';
-import { UserConflictError } from '@users/domain/errors/user-conflict.error';
-import { UserExistsError } from '@users/domain/errors/user-exists.error';
-import type { ICreateUserUseCase } from '@users/domain/ports/use-cases.port';
+import { UserConflictError } from '@modules/platform-users/domain/errors/user-conflict.error';
+import { UserExistsError } from '@modules/platform-users/domain/errors/user-exists.error';
+import type { ICreateUserUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
+} from '@modules/platform-users/domain/ports/user-repository.port';
 import {
 	type IWebhookMapperRegistry,
 	WEBHOOK_MAPPER_REGISTRY,
-} from '@users/domain/ports/webhook-mapper.registry.port';
+} from '@modules/platform-users/domain/ports/webhook-mapper.registry.port';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CreateUserUseCase implements ICreateUserUseCase {

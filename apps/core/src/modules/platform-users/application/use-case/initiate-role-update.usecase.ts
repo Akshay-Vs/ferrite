@@ -7,16 +7,16 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { UserUpdatedEvent } from '@ferrite/schema/users/index';
 import type { UpdateRoleInput } from '@ferrite/schema/users/update-role.zodschema';
 import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
-import type { QueueParams } from '@modules/queue';
-import { Inject, Injectable } from '@nestjs/common';
-import { MissingAuthProviderError } from '@users/domain/errors/missing-auth-provider.error';
-import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import type { IInitiateRoleUpdateUseCase } from '@users/domain/ports/use-cases.port';
+import { MissingAuthProviderError } from '@modules/platform-users/domain/errors/missing-auth-provider.error';
+import { UserNotFoundError } from '@modules/platform-users/domain/errors/user-not-found.error';
+import type { IInitiateRoleUpdateUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
-import { USER_SYNC_QUEUE } from '@users/infrastructure/queue/queue.constraints';
+} from '@modules/platform-users/domain/ports/user-repository.port';
+import { USER_SYNC_QUEUE } from '@modules/platform-users/infrastructure/queue/queue.constraints';
+import type { QueueParams } from '@modules/queue';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InitiateRoleUpdateUseCase implements IInitiateRoleUpdateUseCase {

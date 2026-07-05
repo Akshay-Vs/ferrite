@@ -3,8 +3,8 @@ import { GENERATE_USER_ID } from '@common/providers/generate-user-id.provider';
 import { type GenerateUserId } from '@common/utils/generate-user-id.util';
 import { AppLogger } from '@core/logger/logger.service';
 import { UserSyncEvent } from '@ferrite/schema/users/user-sync-event.zodschema';
+import { IWebhookMapper } from '@modules/platform-users/domain/ports/webhook-mapper.port';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { IWebhookMapper } from '@users/domain/ports/webhook-mapper.port';
 
 @Injectable()
 export class ClerkWebhookMapper implements IWebhookMapper {

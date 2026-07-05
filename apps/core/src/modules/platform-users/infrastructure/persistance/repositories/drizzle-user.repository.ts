@@ -19,13 +19,13 @@ import {
 import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
 import { UserCreatedEvent } from '@ferrite/schema/users/user-created.zodschema';
 import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
+import type { IUserRepository } from '@modules/platform-users/domain/ports/user-repository.port';
 import {
 	ENQUEUE_GRAPHILE_EVENT_UC,
 	type IEnqueue,
 	QueueParams,
 } from '@modules/queue';
 import { Inject, Injectable } from '@nestjs/common';
-import type { IUserRepository } from '@users/domain/ports/user-repository.port';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { UserMapper } from '../mappers/user.mapper';
 

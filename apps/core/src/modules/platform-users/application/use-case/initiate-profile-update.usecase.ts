@@ -5,14 +5,14 @@ import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
 import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
-import { Inject, Injectable } from '@nestjs/common';
-import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import type { IInitiateProfileUpdateUseCase } from '@users/domain/ports/use-cases.port';
+import { UserNotFoundError } from '@modules/platform-users/domain/errors/user-not-found.error';
+import type { IInitiateProfileUpdateUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
-import { buildUserUpdateOutboxEvent } from '@users/domain/utils/build-user-update-outbox-event.util';
+} from '@modules/platform-users/domain/ports/user-repository.port';
+import { buildUserUpdateOutboxEvent } from '@modules/platform-users/domain/utils/build-user-update-outbox-event.util';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class InitiateProfileUpdateUseCase

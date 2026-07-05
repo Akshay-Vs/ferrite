@@ -1,10 +1,10 @@
 import { AuthProvider, authProvidersEnum } from '@auth/index';
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
 	IWebhookMapper,
 	WEBHOOK_MAPPER,
-} from '@users/domain/ports/webhook-mapper.port';
-import { IWebhookMapperRegistry } from '@users/domain/ports/webhook-mapper.registry.port';
+} from '@modules/platform-users/domain/ports/webhook-mapper.port';
+import { IWebhookMapperRegistry } from '@modules/platform-users/domain/ports/webhook-mapper.registry.port';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class WebhookMapperRegistry implements IWebhookMapperRegistry {

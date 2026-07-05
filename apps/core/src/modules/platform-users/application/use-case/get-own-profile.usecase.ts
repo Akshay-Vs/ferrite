@@ -4,13 +4,13 @@ import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer } from '@core/tracer';
 import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
-import { Inject, Injectable } from '@nestjs/common';
-import { UserNotFoundError } from '@users/domain/errors/user-not-found.error';
-import type { IGetOwnProfileUseCase } from '@users/domain/ports/use-cases.port';
+import { UserNotFoundError } from '@modules/platform-users/domain/errors/user-not-found.error';
+import type { IGetOwnProfileUseCase } from '@modules/platform-users/domain/ports/use-cases.port';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
+} from '@modules/platform-users/domain/ports/user-repository.port';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetOwnProfileUseCase implements IGetOwnProfileUseCase {
