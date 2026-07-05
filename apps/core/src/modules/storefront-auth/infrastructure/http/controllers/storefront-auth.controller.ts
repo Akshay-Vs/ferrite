@@ -9,7 +9,10 @@ import {
 	STOREFRONT_RESEND_VERIFICATION_EMAIL_UC,
 	STOREFRONT_VERIFY_EMAIL_UC,
 } from '@modules/storefront-auth/domain/ports/email-verification-usecase.port';
-import { STOREFRONT_LOGIN_UC } from '@modules/storefront-auth/domain/ports/login-usecase.port';
+import {
+	type IStorefrontLoginUser,
+	STOREFRONT_LOGIN_UC,
+} from '@modules/storefront-auth/domain/ports/login-usecase.port';
 import type { IStorefrontRegisterUser } from '@modules/storefront-auth/domain/ports/register-usecase.port';
 import { STOREFRONT_REGISTER_UC } from '@modules/storefront-auth/domain/ports/register-usecase.port';
 import {
@@ -20,7 +23,6 @@ import {
 	HttpStatus,
 	Inject,
 	InternalServerErrorException,
-	NotImplementedException,
 	Param,
 	ParseUUIDPipe,
 	Post,
@@ -43,6 +45,7 @@ import { VerifyEmailDTO } from '../dto/verify-email.dto';
 export class StorefrontAuthController {
 	constructor(
 		@Inject(STOREFRONT_LOGIN_UC)
+		private readonly loginUseCase: IStorefrontLoginUser,
 		@Inject(STOREFRONT_REGISTER_UC)
 		private readonly registerUseCase: IStorefrontRegisterUser,
 		@Inject(STOREFRONT_VERIFY_EMAIL_UC)
@@ -57,11 +60,9 @@ export class StorefrontAuthController {
 	@PublicRoute()
 	async login(
 		@Param('storeId', ParseUUIDPipe) _storeId: string,
-		@Body() _payload: LoginInputDTO
+		@Body() payload: LoginInputDTO
 	) {
-		throw new NotImplementedException(
-			'Login functionality is not implemented yet.'
-		);
+		const result = await this.loginUseCase.execute(payload);
 	}
 
 	@Post('register')

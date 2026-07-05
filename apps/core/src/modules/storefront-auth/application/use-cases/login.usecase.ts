@@ -1,17 +1,22 @@
+import { Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
-import { Login } from '@ferrite/schema/storefront-auth/login.zodschema';
-import { ILogin } from '@modules/storefront-auth/domain/ports/login-usecase.port';
-import { Injectable } from '@nestjs/common';
+import { StorefrontUserLogin } from '@ferrite/schema/storefront-auth/login.zodschema';
+import { StorefrontUserResponse } from '@ferrite/schema/storefront-auth/storefront-user.zodschema';
+import { IStorefrontLoginUser } from '@modules/storefront-auth/domain/ports/login-usecase.port';
+import { Injectable, NotImplementedException } from '@nestjs/common';
+import { IncompleteConfigurationError } from '@store/domain/errors/incomplete-configuration.error';
 
 @Injectable()
-export class LoginUseCase implements ILogin {
+export class LoginUseCase implements IStorefrontLoginUser {
 	constructor(private readonly logger: AppLogger) {
 		this.logger.setContext(this.constructor.name);
 	}
 
-	async execute(props: Login): Promise<boolean> {
-		this.logger.log(`Attempting to login user: ${props.email}`);
-		// TODO: Implement actual login logic (compare password hash, etc)
-		return true;
+	async execute(
+		_input: StorefrontUserLogin
+	): Promise<
+		Result<StorefrontUserResponse, IncompleteConfigurationError | Error>
+	> {
+		throw new NotImplementedException('Not implemended yet');
 	}
 }
