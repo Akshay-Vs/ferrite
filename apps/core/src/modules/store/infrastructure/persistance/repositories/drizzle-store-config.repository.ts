@@ -7,7 +7,7 @@ import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
 import { type StoreConfig } from '@ferrite/schema/stores/store-config.zodschema';
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { IStoreConfigRepository } from '../../../domain/ports/store-config.repository.port';
+import { type IStoreConfigRepository } from '../../../domain/ports/store-config.repository.port';
 import { StoreConfigMapper } from '../mappers/store-config.mapper';
 
 @Injectable()
