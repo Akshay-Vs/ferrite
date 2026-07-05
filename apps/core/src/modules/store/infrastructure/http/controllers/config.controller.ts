@@ -45,7 +45,7 @@ export class ConfigController {
 	async getConfig(@Param('storeId', ParseUUIDPipe) storeId: string) {
 		const result = await this.getConfigUC.execute({ storeId });
 		if (result.isErr()) {
-			throw new InternalServerErrorException(result.error.message);
+			throw new InternalServerErrorException('Something Went Wrong');
 		}
 		return result.value;
 	}
@@ -64,7 +64,7 @@ export class ConfigController {
 		});
 
 		if (result.isErr()) {
-			throw new InternalServerErrorException(result.error.message);
+			throw new InternalServerErrorException('Something Went Wrong');
 		}
 		return result.value;
 	}
