@@ -11,7 +11,7 @@ import {
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@modules/users/domain/ports/user-repository.port';
+} from '@modules/platform-users/domain/ports/user-repository.port';
 import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IStoreRepository,
