@@ -1,5 +1,5 @@
+import { UsersModule } from '@modules/platform-users/users.module';
 import { StoreModule } from '@modules/store';
-import { UsersModule } from '@modules/users/users.module';
 import { Module } from '@nestjs/common';
 import { GetOnboardingSessionUseCase } from './application/use-cases/get-onboarding-session.usecase';
 import { SubmitAboutMeUseCase } from './application/use-cases/submit-about-me.usecase';

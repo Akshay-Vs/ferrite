@@ -1,5 +1,5 @@
 import { NotificationsModule } from '@modules/notifications';
-import { UsersModule } from '@modules/users/users.module';
+import { UsersModule } from '@modules/platform-users/users.module';
 import { Module } from '@nestjs/common';
 import {
 	AcceptStoreInvitationUseCase,

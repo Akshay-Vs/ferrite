@@ -10,7 +10,7 @@ import {
 	type IStoreConfigRepository,
 	STORE_CONFIG_REPOSITORY,
 } from '../../../domain/ports/store-config.repository.port';
-import { IUpdateStoreConfigUC } from '../../../domain/ports/store-config-usecase.port';
+import { type IUpdateStoreConfigUC } from '../../../domain/ports/store-config-usecase.port';
 
 @Injectable()
 export class UpdateStoreConfigUseCase implements IUpdateStoreConfigUC {

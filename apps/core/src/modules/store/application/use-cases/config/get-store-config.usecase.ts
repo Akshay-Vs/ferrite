@@ -7,7 +7,7 @@ import {
 	type IStoreConfigRepository,
 	STORE_CONFIG_REPOSITORY,
 } from '../../../domain/ports/store-config.repository.port';
-import { IGetStoreConfigUC } from '../../../domain/ports/store-config-usecase.port';
+import { type IGetStoreConfigUC } from '../../../domain/ports/store-config-usecase.port';
 
 @Injectable()
 export class GetStoreConfigUseCase implements IGetStoreConfigUC {

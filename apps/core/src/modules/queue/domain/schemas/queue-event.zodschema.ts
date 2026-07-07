@@ -5,6 +5,7 @@ export const QueueParamsSchema = z
 	.object({
 		identifier: z.string(),
 		maxAttempts: z.number(),
+		jobKey: z.string(),
 	})
 	.extend(eventPayloadSchema.shape)
 	.catchall(z.unknown());

@@ -32,9 +32,9 @@ import {
 	IUpdateUser,
 	IWebhookAuth,
 } from '@modules/auth/domain/ports/auth-provider.port';
+import { USER_SYNC_QUEUE } from '@modules/platform-users/index';
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { USER_SYNC_QUEUE } from '@users/index';
 import { Webhook } from 'svix';
 
 export const CLERK_CLIENT = Symbol('CLERK_CLIENT');

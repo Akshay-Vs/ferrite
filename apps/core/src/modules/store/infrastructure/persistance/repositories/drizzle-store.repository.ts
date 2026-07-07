@@ -177,20 +177,26 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		expiresAt: Date,
 		token: string,
 		roleId: string
-	): Promise<void> {
+	): Promise<{ id: string }> {
 		return traceDbOp(
 			this.tracer,
 			'db.storeMembers.invite',
 			{ 'db.table': 'store_invitations', 'db.operation': 'insert' },
 			async () => {
-				await this.getExecutor(tx).insert(storeInvitations).values({
-					email,
-					storeId,
-					roleId,
-					invitedBy,
-					expiresAt,
-					token,
-				});
+				const [invitation] = await this.getExecutor(tx)
+					.insert(storeInvitations)
+					.values({
+						email,
+						storeId,
+						roleId,
+						invitedBy,
+						expiresAt,
+						token,
+					})
+					.returning({ id: storeInvitations.id });
+
+				if (!invitation) throw new Error('Failed to invite store member');
+				return invitation;
 			}
 		);
 	}
@@ -355,12 +361,19 @@ export class DrizzleStoreRepository implements IStoreRepository {
 		);
 	}
 
-	async findByUserId(userId: string): Promise<GetAllStores[]> {
+	async findByUserId(
+		userId: string,
+		cursor?: string,
+		limit: number = 10
+	): Promise<{ items: GetAllStores[]; nextCursor?: string }> {
 		return traceDbOp(
 			this.tracer,
 			'db.stores.findByUserId',
 			{ 'db.table': 'stores,store_members', 'db.operation': 'select' },
 			async () => {
+				const offset = cursor ? parseInt(cursor, 10) : 0;
+				const parsedLimit = limit > 0 ? limit : 10;
+
 				const rows = await this.db
 					.select({
 						store: stores,
@@ -371,9 +384,14 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					.where(
 						and(eq(storeMembers.userId, userId), sql`stores.deleted_at IS NULL`)
 					)
-					.orderBy(desc(stores.createdAt));
+					.orderBy(desc(stores.createdAt))
+					.limit(parsedLimit + 1)
+					.offset(offset);
 
-				return rows.map((r) => ({
+				const hasNext = rows.length > parsedLimit;
+				const fetchedRows = hasNext ? rows.slice(0, parsedLimit) : rows;
+
+				const items = fetchedRows.map((r) => ({
 					id: r.store.id,
 					name: r.store.name,
 					slug: r.store.slug,
@@ -383,6 +401,11 @@ export class DrizzleStoreRepository implements IStoreRepository {
 					isActive: r.store.isActive,
 					isOwner: r.isOwner,
 				}));
+
+				return {
+					items,
+					nextCursor: hasNext ? (offset + parsedLimit).toString() : undefined,
+				};
 			}
 		);
 	}

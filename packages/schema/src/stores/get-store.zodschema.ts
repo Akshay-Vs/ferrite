@@ -34,5 +34,11 @@ export const getAllStoresSchema = getStoreSchema
 		isOwner: z.boolean(),
 	});
 
+export const listOwnStoresSchema = z.object({
+	items: z.array(getAllStoresSchema),
+	nextCursor: z.string().optional(),
+});
+
 export type GetAllStores = z.infer<typeof getAllStoresSchema>;
 export type GetStore = z.infer<typeof getStoreSchema>;
+export type ListOwnStores = z.infer<typeof listOwnStoresSchema>;

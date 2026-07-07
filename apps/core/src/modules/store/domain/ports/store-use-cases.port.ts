@@ -3,8 +3,8 @@ import { IUseCase } from '@common/interfaces/use-case.interface';
 import type { Store } from '@core/database/schema/store.schema';
 import type { CreateStoreInput } from '@ferrite/schema/stores/create-store.zodschema';
 import type {
-	GetAllStores,
 	GetStore,
+	ListOwnStores,
 } from '@ferrite/schema/stores/get-store.zodschema';
 import type { UpdateStoreInput } from '@ferrite/schema/stores/update-store.zodschema';
 import type { StoreNotFoundError } from '../errors/store-not-found.error';
@@ -41,7 +41,11 @@ export type ICreateStoreUseCase = IUseCase<
 	Error
 >;
 export type IDeleteStoreUseCase = IUseCase<string, void, StoreNotFoundError>;
-export type IGetStoresUseCase = IUseCase<string, GetAllStores[], Error>;
+export type IGetStoresUseCase = IUseCase<
+	{ userId: string; cursor?: string; limit?: number },
+	ListOwnStores,
+	Error
+>;
 export type IGetPublicStoreUseCase = IUseCase<
 	string,
 	GetStore,

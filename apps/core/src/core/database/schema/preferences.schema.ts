@@ -8,6 +8,7 @@ import {
 	varchar,
 } from 'drizzle-orm/pg-core';
 import { notificationChannelEnum, notificationTypeEnum } from './enum';
+import { stores } from './store.schema';
 import { users } from './user.schema';
 
 // ─────────────────────────────────────────
@@ -47,7 +48,9 @@ export type NewUserNotificationPreference =
 	typeof userNotificationPreferences.$inferInsert;
 
 export const storePreferences = pgTable('store_preferences', {
-	storeId: uuid('store_id').primaryKey(),
+	storeId: uuid('store_id')
+		.primaryKey()
+		.references(() => stores.id, { onDelete: 'cascade' }),
 	frontendUrl: varchar('frontend_url', { length: 255 }),
 	htmlTemplate: varchar('html_template', { length: 255 }),
 	updatedAt: timestamp('updated_at', { withTimezone: true })

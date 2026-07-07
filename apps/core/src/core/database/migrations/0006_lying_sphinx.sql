@@ -1,2 +1,0 @@
-ALTER TABLE "exchange_rates" ADD CONSTRAINT "exchange_rates_from_currency_code_to_currency_code_pk" PRIMARY KEY("from_currency_code","to_currency_code");--> statement-breakpoint
-ALTER TABLE "store_members" ADD COLUMN "suspended_at" timestamp with time zone;

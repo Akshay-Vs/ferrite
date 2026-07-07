@@ -30,7 +30,7 @@ export default function RootLayout({
 			<body className="antialiased bg-background text-content">
 				<SerwistProvider
 					swUrl="/sw.js"
-					// disable={process.env.NODE_ENV === 'development'}
+					disable={process.env.NODE_ENV === 'development'}
 				>
 					<div id="bg-gradient" />
 					<ClerkProvider>

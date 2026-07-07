@@ -1,0 +1,375 @@
+import { AuthProvider } from '@auth/index';
+import type { ITransactionContext } from '@common/interfaces/unit-of-work.interface';
+import {
+	type IUnitOfWork,
+	UNIT_OF_WORK,
+} from '@common/interfaces/unit-of-work.interface';
+import { DB } from '@core/database/db.provider';
+import type { TDatabase } from '@core/database/db.type';
+import { DrizzleUnitOfWork } from '@core/database/drizzle-unit-of-work';
+import { userAuthProviders, users } from '@core/database/schema';
+import { traceDbOp } from '@core/database/utils/trace-db-op.util';
+import { type ITracer } from '@core/tracer';
+import { OTEL_TRACER } from '@core/tracer/tracer.constraint';
+import { type PlatformRole } from '@ferrite/schema/common/platform-roles.zodschema';
+import {
+	UserDeletedEvent,
+	UserUpdatedEvent,
+} from '@ferrite/schema/users/index';
+import type { UpdateProfileInput } from '@ferrite/schema/users/update-profile.zodschema';
+import { UserCreatedEvent } from '@ferrite/schema/users/user-created.zodschema';
+import type { UserProfileFull } from '@ferrite/schema/users/user-profile.zodschema';
+import type { IUserRepository } from '@modules/platform-users/domain/ports/user-repository.port';
+import {
+	ENQUEUE_GRAPHILE_EVENT_UC,
+	type IEnqueue,
+	QueueParams,
+} from '@modules/queue';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, asc, eq, isNull } from 'drizzle-orm';
+import { UserMapper } from '../mappers/user.mapper';
+
+@Injectable()
+export class DrizzleUserRepository implements IUserRepository {
+	constructor(
+		@Inject(DB) private readonly db: TDatabase, // type erasure for decorator metadata
+		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
+		@Inject(ENQUEUE_GRAPHILE_EVENT_UC) private readonly enqueue: IEnqueue,
+		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork
+	) {}
+
+	private get typedDb(): TDatabase {
+		return this.db;
+	}
+
+	private getExecutor(tx?: ITransactionContext): TDatabase {
+		if (tx) return DrizzleUnitOfWork.unwrap(tx) as unknown as TDatabase;
+		return this.typedDb;
+	}
+
+	async createWithAuth(event: UserCreatedEvent): Promise<string> {
+		return traceDbOp(
+			this.tracer,
+			'db.user.createWithAuth',
+			{ 'db.table': 'users,user_auth_providers', 'db.operation': 'insert' },
+			async () => {
+				const newUser = UserMapper.toNewUser(event);
+
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
+					//Span: insert user row
+					const [inserted] = await traceDbOp(
+						this.tracer,
+						'db.users.insert',
+						{ 'db.table': 'users', 'db.operation': 'insert' },
+						() => tx.insert(users).values(newUser).returning({ id: users.id })
+					);
+
+					//Span: insert auth-provider row
+					await traceDbOp(
+						this.tracer,
+						'db.userAuthProviders.insert',
+						{
+							'db.table': 'user_auth_providers',
+							'db.operation': 'insert',
+							'auth.provider': event.provider,
+						},
+						() =>
+							tx.insert(userAuthProviders).values({
+								userId: event.id,
+								provider: event.provider,
+								externalAuthId: event.externalAuthId,
+								oauthProvider: event.oauthProvider,
+								twoFactorEnabled: event.twoFactorEnabled,
+							})
+					);
+
+					return inserted.id;
+				});
+			}
+		);
+	}
+
+	async findAll(
+		cursor?: string,
+		limit: number = 50,
+		_filters?: Partial<UserProfileFull> | Record<string, unknown> // TODO: implement filtering
+	): Promise<{ items: UserProfileFull[]; nextCursor?: string }> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findAll',
+			{
+				'db.table': 'users',
+				'db.operation': 'select',
+			},
+			async () => {
+				const offset = cursor ? parseInt(cursor, 10) : 0;
+				const parsedLimit = limit > 0 ? limit : 50;
+
+				const rows = await this.typedDb
+					.select()
+					.from(users)
+					.where(isNull(users.deletedAt))
+					.orderBy(asc(users.createdAt))
+					.limit(parsedLimit + 1)
+					.offset(offset);
+
+				const hasNext = rows.length > parsedLimit;
+				const items = hasNext ? rows.slice(0, parsedLimit) : rows;
+
+				return {
+					items: items.map((user) => UserMapper.toUserProfile(user)),
+					nextCursor: hasNext ? (offset + parsedLimit).toString() : undefined,
+				};
+			}
+		);
+	}
+
+	async findById(id: string): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findById',
+			{
+				'db.table': 'users',
+				'db.operation': 'select',
+			},
+			async () => {
+				const [user] = await this.typedDb
+					.select()
+					.from(users)
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.limit(1);
+
+				return user ? UserMapper.toUserProfile(user) : null;
+			}
+		);
+	}
+
+	async updateProfileById(
+		id: string,
+		data: UpdateProfileInput,
+		outboxEvent: QueueParams<UserUpdatedEvent>,
+		tx?: ITransactionContext
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateProfileById',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+			},
+			async () => {
+				if (tx) {
+					// External UoW transaction
+					return this.runProfileUpdate(tx, id, data, outboxEvent);
+				}
+				// Internal transaction
+				return this.uow.execute(async (innerCtx) =>
+					this.runProfileUpdate(innerCtx, id, data, outboxEvent)
+				);
+			}
+		);
+	}
+
+	private async runProfileUpdate(
+		ctx: ITransactionContext,
+		id: string,
+		data: UpdateProfileInput,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null> {
+		const executor = DrizzleUnitOfWork.unwrap(ctx);
+		// 1. Update user
+		const result = await traceDbOp(
+			this.tracer,
+			'db.users.update',
+			{ 'db.table': 'users', 'db.operation': 'update' },
+			() =>
+				executor
+					.update(users)
+					.set({
+						...data,
+						updatedAt: new Date(),
+					})
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.returning()
+		);
+
+		if (result.length === 0) return null;
+
+		// 2. Write outbox event
+		const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
+		if (enqueueResult.isErr()) {
+			throw enqueueResult.error;
+		}
+		return UserMapper.toUserProfile(result[0]);
+	}
+
+	async updateProfileFieldsById(
+		id: string,
+		data: UpdateProfileInput,
+		tx?: ITransactionContext
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateProfileFieldsById',
+			{
+				'db.table': 'users',
+				'db.operation': 'update',
+			},
+			async () => {
+				const executor = this.getExecutor(tx);
+
+				const result = await executor
+					.update(users)
+					.set({
+						...data,
+						updatedAt: new Date(),
+					})
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.returning();
+
+				if (result.length === 0) return null;
+				return UserMapper.toUserProfile(result[0]);
+			}
+		);
+	}
+
+	async softDeleteById(
+		id: string,
+		provider: AuthProvider,
+		outboxEvent: QueueParams<UserDeletedEvent>
+	): Promise<boolean> {
+		return traceDbOp(
+			this.tracer,
+			'db.user.softDeleteByExternalAuthId',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+				'auth.provider': provider,
+			},
+			async () => {
+				const user = await this.findById(id);
+				if (!user) return false;
+
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
+					// 1. Soft delete user
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.softDelete',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									deletedAt: new Date(),
+									isActive: false,
+									updatedAt: new Date(),
+									email: `${user.email}.${id}.deleted`,
+								})
+								.where(eq(users.id, id))
+								.returning({ id: users.id })
+					);
+					if (result.length === 0) return false;
+
+					// 2. Write outbox event
+					const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
+					if (enqueueResult.isErr()) {
+						throw enqueueResult.error;
+					}
+
+					return true;
+				});
+			}
+		);
+	}
+
+	async updateRoleById(
+		id: string,
+		role: PlatformRole,
+		outboxEvent: QueueParams<UserUpdatedEvent>
+	): Promise<UserProfileFull | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.updateRoleById',
+			{
+				'db.table': 'users,outbox_events',
+				'db.operation': 'update',
+			},
+			async () => {
+				return this.uow.execute(async (ctx) => {
+					const tx = DrizzleUnitOfWork.unwrap(ctx);
+					// 1. Update platformRole
+					const result = await traceDbOp(
+						this.tracer,
+						'db.users.updateRole',
+						{ 'db.table': 'users', 'db.operation': 'update' },
+						() =>
+							tx
+								.update(users)
+								.set({
+									platformRole: role,
+									updatedAt: new Date(),
+								})
+								.where(and(eq(users.id, id), isNull(users.deletedAt)))
+								.returning()
+					);
+
+					if (result.length === 0) return null;
+
+					// 2. Write outbox event
+					const enqueueResult = await this.enqueue.execute(ctx, outboxEvent);
+
+					if (enqueueResult.isErr()) {
+						throw enqueueResult.error;
+					}
+
+					return UserMapper.toUserProfile(result[0]);
+				});
+			}
+		);
+	}
+
+	async findByIdWithProviders(id: string): Promise<{
+		user: UserProfileFull;
+		providers: { provider: AuthProvider; externalAuthId: string }[];
+	} | null> {
+		return traceDbOp(
+			this.tracer,
+			'db.users.findByIdWithProviders',
+			{
+				'db.table': 'users,user_auth_providers',
+				'db.operation': 'select',
+			},
+			async () => {
+				const rows = await this.typedDb
+					.select({
+						user: users,
+						authProvider: userAuthProviders,
+					})
+					.from(users)
+					.leftJoin(userAuthProviders, eq(users.id, userAuthProviders.userId))
+					.where(and(eq(users.id, id), isNull(users.deletedAt)))
+					.orderBy(asc(userAuthProviders.createdAt));
+
+				if (rows.length === 0) return null;
+
+				const userEntity = rows[0].user;
+				const providers = rows.flatMap((r) => {
+					if (!r.authProvider) return [];
+					return [
+						{
+							provider: r.authProvider.provider as AuthProvider,
+							externalAuthId: r.authProvider.externalAuthId,
+						},
+					];
+				});
+
+				return {
+					user: UserMapper.toUserProfile(userEntity),
+					providers,
+				};
+			}
+		);
+	}
+}

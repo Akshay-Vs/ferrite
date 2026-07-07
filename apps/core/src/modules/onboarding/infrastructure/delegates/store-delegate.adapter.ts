@@ -66,6 +66,6 @@ export class StoreDelegateAdapter implements IStoreDelegate {
 			() => this.storeRepo.findByUserId(userId),
 			{ userId }
 		);
-		return userStores.length > 0;
+		return userStores.items.length > 0;
 	}
 }

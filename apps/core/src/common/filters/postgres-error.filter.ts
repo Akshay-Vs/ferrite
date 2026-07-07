@@ -1,5 +1,5 @@
 import { AppLogger } from '@core/logger/logger.service';
-import { UserNotSyncedError } from '@modules/users/domain/errors/user-not-synced.error';
+import { UserNotSyncedError } from '@modules/platform-users/domain/errors/user-not-synced.error';
 import {
 	ArgumentsHost,
 	Catch,

@@ -22,8 +22,9 @@ export interface IStorefrontEmailVerificationRepository {
 	 * Lookup a verification record by its hashed token.
 	 * Returns null if not found or already expired.
 	 */
-	findByTokenHash(
+	findByUserId(
 		storeId: string,
+		userId: string,
 		tokenHash: string
 	): Promise<EmailVerification | null>;
 

@@ -3,12 +3,12 @@ import type { ITransactionContext } from '@common/interfaces/unit-of-work.interf
 import type { OnboardingAboutUser } from '@ferrite/schema';
 import type { OnboardingState } from '@ferrite/schema/onboarding/onboarding-session.zodschema';
 import type { IUserDelegate } from '@modules/onboarding/domain/ports/user-delegate.port';
-import { Inject, Injectable } from '@nestjs/common';
 import {
 	type IUserRepository,
 	USER_REPOSITORY,
-} from '@users/domain/ports/user-repository.port';
-import { buildUserUpdateOutboxEvent } from '@users/domain/utils/build-user-update-outbox-event.util';
+} from '@modules/platform-users/domain/ports/user-repository.port';
+import { buildUserUpdateOutboxEvent } from '@modules/platform-users/domain/utils/build-user-update-outbox-event.util';
+import { Inject, Injectable } from '@nestjs/common';
 
 /**
  * Infrastructure adapter bridging the Onboarding module's `IUserDelegate` port

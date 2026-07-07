@@ -28,9 +28,20 @@ export class RedisRateLimiterAdapter implements IRateLimiter {
 			throw new Error('Redis multi transaction failed');
 		}
 
+		for (const [err] of results) {
+			if (err) {
+				throw new Error(`Redis command failed: ${err.message || err}`);
+			}
+		}
+
 		// results is an array of [error, result] for each command
 		// zcard is the 3rd command (index 2)
-		const count = results[2][1] as number;
+		const zcardResult = results[2][1];
+
+		let count = Number(zcardResult);
+		if (!Number.isSafeInteger(count) || count < 0) {
+			count = config.maxAttempts + 1; // Defensive fallback to prevent invalid remaining calculation
+		}
 
 		return {
 			allowed: count <= config.maxAttempts,

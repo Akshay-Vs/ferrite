@@ -1,1 +1,0 @@
-ALTER TABLE "stores" RENAME COLUMN "icon_url" TO "icon";

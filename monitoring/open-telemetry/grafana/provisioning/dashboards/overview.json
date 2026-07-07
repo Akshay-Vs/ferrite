@@ -791,7 +791,7 @@
 			"pluginVersion": "12.4.1",
 			"targets": [
 				{
-					"expr": "{service_name=~\\\".+\\\"}",
+					"expr": "{service_name=~\".+\"}",
 					"refId": "A"
 				}
 			],

@@ -8,6 +8,9 @@ export const webhookEnvelopeSchema = z
 		provider: authProvidersSchema,
 		timestamp: z.number().int().nonnegative(),
 	})
-	.extend(eventPayloadSchema.shape);
+	.extend(eventPayloadSchema.shape)
+	.extend({
+		queueName: z.string().min(1),
+	});
 
 export type WebhookEnvelope = z.infer<typeof webhookEnvelopeSchema>;

@@ -7,6 +7,17 @@ datasources:
     isDefault: true
     editable: true
 
+  - name: PostgreSQL
+    type: postgres
+    uid: postgres
+    url: ferrite-postgres:5432
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      database: ${POSTGRES_DB}
+      sslmode: disable
+
   - name: Loki
     type: loki
     uid: loki

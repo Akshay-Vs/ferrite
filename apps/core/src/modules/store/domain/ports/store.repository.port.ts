@@ -62,7 +62,7 @@ export interface IStoreRepository {
 		expiresAt: Date,
 		token: string,
 		roleId: string
-	): Promise<void>;
+	): Promise<{ id: string }>;
 
 	/**
 	 * Find an invitation by ID and ensure it belongs to the given email.
@@ -113,7 +113,11 @@ export interface IStoreRepository {
 	/**
 	 * Returns all stores where the user is a member, with ownership status.
 	 */
-	findByUserId(userId: string): Promise<GetAllStores[]>;
+	findByUserId(
+		userId: string,
+		cursor?: string,
+		limit?: number
+	): Promise<{ items: GetAllStores[]; nextCursor?: string }>;
 
 	/**
 	 * Find all roles within a store.
