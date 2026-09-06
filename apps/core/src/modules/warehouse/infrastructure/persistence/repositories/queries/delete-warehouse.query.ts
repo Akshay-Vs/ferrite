@@ -2,7 +2,7 @@ import type { TDatabase } from '@core/database/db.type';
 import { warehouses } from '@core/database/schema/inventory.schema';
 import { traceDbOp } from '@core/database/utils/trace-db-op.util';
 import type { ITracer } from '@core/tracer';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 export async function executeSoftDeleteWarehouse(
 	tracer: ITracer,
@@ -23,7 +23,13 @@ export async function executeSoftDeleteWarehouse(
 					deletedAt: sql`now()`,
 					name: sql`concat(${warehouses.name}, '_deleted_', extract(epoch from now()))`,
 				})
-				.where(and(eq(warehouses.id, id), eq(warehouses.storeId, storeId)))
+				.where(
+					and(
+						eq(warehouses.id, id),
+						eq(warehouses.storeId, storeId),
+						isNull(warehouses.deletedAt)
+					)
+				)
 				.returning()
 	);
 	return !!row;
