@@ -1,5 +1,6 @@
 import { Pagination } from '@common/decorators/pagination.decorator';
 import { PublicRoute } from '@common/decorators/public-route.decorator';
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type {
 	PaginatedProductResponse,
@@ -7,6 +8,7 @@ import type {
 	ProductDetail,
 } from '@ferrite/schema';
 import {
+	BadRequestException,
 	Controller,
 	Get,
 	Inject,
@@ -68,6 +70,9 @@ export class ProductStorefrontController {
 			});
 
 			if (result.isErr()) {
+				if (result.error instanceof InvalidCursorError) {
+					throw new BadRequestException(result.error.message);
+				}
 				throw new InternalServerErrorException('Failed to list products');
 			}
 			return {

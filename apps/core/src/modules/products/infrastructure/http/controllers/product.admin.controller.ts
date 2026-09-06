@@ -1,6 +1,7 @@
 import { UseRealm } from '@auth/index';
 import { Pagination } from '@common/decorators/pagination.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import {
 	type PaginatedProductResponse,
@@ -93,6 +94,9 @@ export class ProductAdminController {
 				query: { ...pagination, search, categoryId, supplierId, status },
 			});
 			if (result.isErr()) {
+				if (result.error instanceof InvalidCursorError) {
+					throw new BadRequestException(result.error.message);
+				}
 				throw new InternalServerErrorException('Failed to list products');
 			}
 			return result.value;
