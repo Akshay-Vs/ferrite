@@ -31,13 +31,20 @@ interface CursorData {
 	sortValue: unknown;
 }
 
-const isValidCursorData = (value: unknown): value is CursorData =>
-	typeof value === 'object' &&
-	value !== null &&
-	typeof (value as CursorData).id === 'string' &&
-	(value as CursorData).id.length > 0 &&
-	(value as CursorData).sortValue !== undefined &&
-	(value as CursorData).sortValue !== null;
+const UUID_REGEX =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const isValidCursorData = (value: unknown): value is CursorData => {
+	if (typeof value !== 'object' || value === null) return false;
+	const { id, sortValue } = value as Record<string, unknown>;
+	if (typeof id !== 'string' || !UUID_REGEX.test(id)) return false;
+	if (typeof sortValue === 'string')
+		return !Number.isNaN(Date.parse(sortValue));
+	if (typeof sortValue === 'number')
+		return !Number.isNaN(new Date(sortValue).getTime());
+	if (sortValue instanceof Date) return !Number.isNaN(sortValue.getTime());
+	return false;
+};
 
 /**
  * Build cursor-pagination WHERE + ORDER + LIMIT clauses.
