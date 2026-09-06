@@ -36,15 +36,15 @@ export class CreateWarehouseUseCase implements ICreateWarehouseUseCase {
 				`Creating warehouse for store ${input.storeId} with name ${input.data.name}`
 			);
 
-			const existing = await this.warehouseRepo.findByNameAndStore(
-				input.data.name,
-				input.storeId
-			);
-			if (existing) {
-				return err(new WarehouseNameConflictError(input.data.name));
-			}
-
 			try {
+				const existing = await this.warehouseRepo.findByNameAndStore(
+					input.data.name,
+					input.storeId
+				);
+				if (existing) {
+					return err(new WarehouseNameConflictError(input.data.name));
+				}
+
 				const warehouse = await this.warehouseRepo.create(
 					input.storeId,
 					input.data

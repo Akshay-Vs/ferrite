@@ -43,33 +43,34 @@ export class UpdateWarehouseUseCase implements IUpdateWarehouseUseCase {
 				`Updating warehouse ${input.id} for store ${input.storeId}`
 			);
 
-			if (input.data.name) {
-				const existingRecords = await this.warehouseRepo.findByIdOrNameAndStore(
-					input.id,
-					input.data.name,
-					input.storeId
-				);
-				const existing = existingRecords.find((r) => r.id === input.id);
-				if (!existing) {
-					return err(new WarehouseNotFoundError(input.id));
-				}
-				const conflict = existingRecords.find(
-					(r) => r.name === input.data.name && r.id !== input.id
-				);
-				if (conflict) {
-					return err(new WarehouseNameConflictError(input.data.name));
-				}
-			} else {
-				const existing = await this.warehouseRepo.findByIdAndStore(
-					input.id,
-					input.storeId
-				);
-				if (!existing) {
-					return err(new WarehouseNotFoundError(input.id));
-				}
-			}
-
 			try {
+				if (input.data.name) {
+					const existingRecords =
+						await this.warehouseRepo.findByIdOrNameAndStore(
+							input.id,
+							input.data.name,
+							input.storeId
+						);
+					const existing = existingRecords.find((r) => r.id === input.id);
+					if (!existing) {
+						return err(new WarehouseNotFoundError(input.id));
+					}
+					const conflict = existingRecords.find(
+						(r) => r.name === input.data.name && r.id !== input.id
+					);
+					if (conflict) {
+						return err(new WarehouseNameConflictError(input.data.name));
+					}
+				} else {
+					const existing = await this.warehouseRepo.findByIdAndStore(
+						input.id,
+						input.storeId
+					);
+					if (!existing) {
+						return err(new WarehouseNotFoundError(input.id));
+					}
+				}
+
 				const updated = await this.warehouseRepo.update(
 					input.id,
 					input.storeId,
