@@ -1,3 +1,4 @@
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import { err, ok, type Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
@@ -31,7 +32,12 @@ export class ListWarehousesUseCase implements IListWarehousesUseCase {
 			storeId: string;
 			query: ListWarehousesQuery;
 		} & PaginationInput
-	): Promise<Result<PaginatedResponse<Warehouse>, UnknownWarehouseError>> {
+	): Promise<
+		Result<
+			PaginatedResponse<Warehouse>,
+			InvalidCursorError | UnknownWarehouseError
+		>
+	> {
 		return this.tracer.withSpan('use-case.warehouses.list', async () => {
 			this.logger.debug(`Listing warehouses for store ${input.storeId}`);
 
@@ -43,6 +49,9 @@ export class ListWarehousesUseCase implements IListWarehousesUseCase {
 				});
 				return ok(result);
 			} catch (error) {
+				if (error instanceof InvalidCursorError) {
+					return err(error);
+				}
 				return err(new UnknownWarehouseError(error));
 			}
 		});

@@ -1,6 +1,7 @@
 import { UseRealm } from '@auth/index';
 import { Pagination } from '@common/decorators/pagination.decorator';
 import { RequirePermission } from '@common/decorators/require-permission.decorator';
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type {
 	PaginatedResponse,
@@ -10,6 +11,7 @@ import type {
 import { ListWarehousesQuerySchema } from '@ferrite/schema';
 import { StorePermissionGuard } from '@modules/store/infrastructure/http/guards/store-permission.guard';
 import {
+	BadRequestException,
 	Body,
 	ConflictException,
 	Controller,
@@ -114,6 +116,9 @@ export class WarehouseAdminController {
 			});
 
 			if (result.isErr()) {
+				if (result.error instanceof InvalidCursorError) {
+					throw new BadRequestException(result.error.message);
+				}
 				throw new InternalServerErrorException('Failed to list warehouses');
 			}
 			return result.value;

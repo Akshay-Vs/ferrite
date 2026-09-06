@@ -1,3 +1,4 @@
+import type { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type {
 	CreateWarehouseInput,
@@ -50,5 +51,5 @@ export interface IListWarehousesUseCase
 	extends IUseCase<
 		{ storeId: string; query: ListWarehousesQuery } & PaginationInput,
 		PaginatedResponse<Warehouse>,
-		UnknownWarehouseError
+		InvalidCursorError | UnknownWarehouseError
 	> {}
