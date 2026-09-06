@@ -1,3 +1,4 @@
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import type { PaginatedResponse } from '@ferrite/schema/common/pagination.zodschema';
 import type { SQL } from 'drizzle-orm';
 import { and, asc, eq, sql } from 'drizzle-orm';
@@ -81,11 +82,11 @@ export const cursorPaginationClauses = (opts: CursorPaginationOpts) => {
 		try {
 			decoded = JSON.parse(Buffer.from(cursor, 'base64').toString('utf8'));
 		} catch {
-			throw new Error('Invalid cursor format');
+			throw new InvalidCursorError();
 		}
 
 		if (!isValidCursorData(decoded)) {
-			throw new Error('Invalid cursor format');
+			throw new InvalidCursorError();
 		}
 
 		conditions.push(
