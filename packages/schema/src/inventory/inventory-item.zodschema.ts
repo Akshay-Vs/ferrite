@@ -37,7 +37,7 @@ export const CreateInventoryItemInputSchema = z.object({
 	batchNumber: z.string().optional().nullable(),
 	restockDate: z.iso.datetime().optional().nullable(),
 	expiryDate: z.iso.datetime().optional().nullable(),
-	lowStockThreshold: z.number().int().default(0),
+	lowStockThreshold: z.number().int().min(0).default(0),
 });
 
 export type CreateInventoryItemInput = z.infer<
