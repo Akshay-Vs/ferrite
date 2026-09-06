@@ -1,4 +1,5 @@
-import { ok, type Result } from '@common/interfaces/result.interface';
+import { InvalidCursorError } from '@common/errors/invalid-cursor.error';
+import { err, ok, type Result } from '@common/interfaces/result.interface';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { GetProductsQuery, ProductDetail } from '@ferrite/schema';
@@ -25,15 +26,24 @@ export class ListProductsUseCase implements IListProductsUseCase {
 		storeId: string;
 		query: GetProductsQuery;
 		onlyActive?: boolean;
-	}): Promise<Result<PaginatedResponse<ProductDetail>, Error>> {
+	}): Promise<
+		Result<PaginatedResponse<ProductDetail>, InvalidCursorError | Error>
+	> {
 		return this.tracer.withSpan('use-case.products.list', async () => {
-			const result = await this.productRepo.findByStoreId(
-				input.storeId,
-				input.query,
-				input.onlyActive
-			);
+			try {
+				const result = await this.productRepo.findByStoreId(
+					input.storeId,
+					input.query,
+					input.onlyActive
+				);
 
-			return ok(result);
+				return ok(result);
+			} catch (error) {
+				if (error instanceof InvalidCursorError) {
+					return err(error);
+				}
+				throw error;
+			}
 		});
 	}
 }

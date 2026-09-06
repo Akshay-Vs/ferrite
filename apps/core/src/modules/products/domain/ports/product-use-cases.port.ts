@@ -1,3 +1,4 @@
+import type { InvalidCursorError } from '@common/errors/invalid-cursor.error';
 import type { IUseCase } from '@common/interfaces/use-case.interface';
 import type {
 	CreateProductInput,
@@ -67,5 +68,5 @@ export interface IListProductsUseCase
 	extends IUseCase<
 		{ storeId: string; query: GetProductsQuery; onlyActive?: boolean },
 		PaginatedResponse<ProductDetail>,
-		Error
+		InvalidCursorError | Error
 	> {}
