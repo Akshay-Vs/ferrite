@@ -2,6 +2,10 @@
 
 Ferrite is a **multi-tenant headless commerce platform** built as a Turborepo monorepo. It provides the backend infrastructure and SDKs for building storefronts with full tenant isolation, store management, and dual authentication (platform admins vs. storefront customers).
 
+## License
+
+This project is licensed under the Ferrite Source-Available Commercial License 1.0. See [LICENSE](LICENSE) for the full text.
+
 ## Architecture
 
 Ferrite follows **Hexagonal Architecture** (Ports & Adapters) throughout. All modules strictly separate domain logic from infrastructure, making the system testable and provider-agnostic.

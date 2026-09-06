@@ -1,21 +1,423 @@
-MIT License
+# Project Ferrite Source-Available Commercial License 1.0
 
-Copyright (c) 2026 Akshay Vs
+Copyright (c) 2026 Akshay V S
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 1. Acceptance
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+By downloading, accessing, installing, copying, modifying, deploying, or using the Software, You agree to the terms of this License.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+If You do not agree to these terms, You may not use, modify, deploy, or distribute the Software.
+
+## 2. Definitions
+
+**"Licensor"** means Akshay V S, the individual or legal entity that makes the Software available under this License.
+
+**"Software"** means the software, source code, object code, documentation, configuration files, and other materials distributed by the Licensor under this License.
+
+**"You"** means the individual or legal entity exercising rights under this License.
+
+**"Organization"** means any company, corporation, partnership, sole proprietorship, nonprofit organization, governmental entity, institution, or other legal or commercial organization.
+
+**"Affiliate"** means an entity that directly or indirectly controls, is controlled by, or is under common control with an Organization.
+
+**"Control"** means ownership of more than fifty percent (50%) of the voting interests of an entity, the power to direct its management or policies, or equivalent control.
+
+**"Small Organization"** means an Organization whose consolidated gross annual revenue, together with the consolidated gross annual revenue of its Affiliates, was less than **US$100,000** during its most recently completed fiscal year.
+
+**"Enterprise Organization"** means an Organization that does not qualify as a Small Organization.
+
+**"Commercial Use"** means use of the Software in connection with a business, commercial activity, revenue-generating activity, or the provision of goods or services.
+
+**"Self-Hosted Deployment"** means a deployment of the Software operated by You or by a third party on Your behalf on infrastructure that is not directly operated and controlled by the Licensor as part of a service provided by the Licensor.
+
+**"Hosted Service"** means a service in which the Software, or a modified or derivative version of the Software, is operated on behalf of one or more third parties and accessed remotely over a network, including through a web application, API, cloud service, managed service, or software-as-a-service offering.
+
+**"Competing Product"** means any product or service whose primary purpose or material functionality is substantially similar to, substitutes for, or competes with the Software or any ecommerce product or service provided by the Licensor using the Software.
+
+A Competing Product includes, without limitation, a hosted, cloud, managed, multi-tenant, white-label, or software-as-a-service ecommerce platform that provides functionality substantially similar to the Software or the Licensor's products or services.
+
+A product or service may be a Competing Product regardless of:
+
+- whether it is offered for payment or free of charge;
+- whether it is hosted on the provider's infrastructure or a third party's infrastructure;
+- whether it is modified from the Software;
+- whether it incorporates the Software directly or indirectly;
+- whether it uses a different user interface or technical architecture;
+- whether it is written in a different programming language; or
+- whether it is marketed under a different name or brand.
+
+**"Enterprise License"** means a separate written commercial license or agreement issued by the Licensor that authorizes an Enterprise Organization to use the Software.
+
+## 3. Copyright License
+
+Subject to the terms and conditions of this License, the Licensor grants You a non-exclusive, worldwide, royalty-free copyright license to:
+
+1. use the Software;
+2. reproduce the Software;
+3. modify the Software;
+4. create derivative works based on the Software; and
+5. distribute copies of the Software and permitted modifications.
+
+These rights are subject to the eligibility requirements and restrictions contained in this License.
+
+This License does not grant rights beyond those expressly stated.
+
+## 4. Individuals and Small Organizations
+
+Individuals and Small Organizations may use the Software without payment to the Licensor, subject to all other terms of this License.
+
+A qualifying user may:
+
+1. use the Software for personal purposes;
+2. use the Software for commercial purposes;
+3. deploy the Software on their own infrastructure;
+4. deploy the Software through a third-party infrastructure or hosting provider;
+5. modify the Software;
+6. create derivative works;
+7. use modified versions of the Software;
+8. operate ecommerce stores using the Software; and
+9. redistribute the Software and permitted modifications.
+
+Such use remains subject to the restrictions in Sections 6 and 7.
+
+## 5. Enterprise Organizations
+
+An Enterprise Organization may not use the Software under the free rights granted by Section 4.
+
+Before using the Software for Commercial Use, an Enterprise Organization must obtain an Enterprise License from the Licensor.
+
+An Enterprise License may establish:
+
+- license fees;
+- number of installations;
+- number of stores or tenants;
+- number of users;
+- deployment limits;
+- support and maintenance terms;
+- hosting rights;
+- service-level commitments;
+- update and upgrade rights; and
+- other commercial terms.
+
+An Enterprise License does not automatically grant the right to provide a Competing Product.
+
+Unless an Enterprise License expressly states otherwise, Section 6 continues to apply.
+
+The Licensor may offer different Enterprise tiers and pricing at its discretion.
+
+## 6. Prohibition on Competing Products and Services
+
+You may not use the Software, whether modified or unmodified, to develop, operate, provide, host, distribute, or otherwise make available a Competing Product.
+
+Without limiting the foregoing, You may not use the Software to:
+
+1. operate a competing ecommerce SaaS platform;
+2. operate a competing multi-tenant ecommerce platform;
+3. provide a service that allows unrelated third parties to create ecommerce stores using the Software;
+4. provide a white-label ecommerce platform based on the Software;
+5. provide a hosted or managed ecommerce platform substantially based on the Software;
+6. provide the Software as a cloud service to third parties;
+7. provide the Software as a managed service that competes with the Licensor;
+8. create or operate a commercial platform substantially substituting for the Licensor's ecommerce platform; or
+9. otherwise use the Software to provide an alternative ecommerce platform that competes with the Licensor's products or services.
+
+This restriction applies regardless of whether the Competing Product:
+
+- is commercial or free;
+- is open source or source available;
+- is operated directly by You or through another party;
+- uses the Software without modification or with modifications;
+- uses the Software under a different name;
+- removes or replaces the Licensor's branding; or
+- is marketed as a fork, alternative, replacement, or independent product.
+
+### 6.1 Self-Hosting for Your Own Business
+
+Operating the Software for Your own organization does not, by itself, constitute providing a Competing Product.
+
+For example, an ecommerce merchant may use the Software to operate its own online stores.
+
+However, providing the Software or its functionality to unrelated third parties as a platform, hosted service, managed service, or SaaS offering may constitute a Competing Product and is prohibited unless expressly authorized in writing by the Licensor.
+
+### 6.2 Prohibited Unlawful Marketplaces and Activities
+
+You may not use the Software, whether in its original form or in a modified or derivative form, to develop, operate, facilitate, or provide a marketplace, ecommerce platform, hosted service, or other service that is primarily intended to facilitate unlawful activities, including the sale, purchase, distribution, or exchange of illegal goods or services, or to facilitate fraud, money laundering, trafficking, or other unlawful conduct.
+
+The Software is provided as a general-purpose ecommerce technology. The Licensor does not authorize, endorse, sponsor, or participate in any unlawful use of the Software.
+
+A violation of this Section constitutes a material breach of this License.
+
+## 7. Redistribution
+
+Individuals and Small Organizations may redistribute the Software and permitted modifications, provided that:
+
+1. a copy of this License or a link to the canonical version of this License is included;
+2. all existing copyright notices are retained;
+3. notices identifying the Licensor are not removed;
+4. You clearly identify material modifications where reasonably appropriate;
+5. You do not represent modified Software as an official release of the Licensor; and
+6. the redistribution does not violate Sections 5 or 6.
+
+Recipients of redistributed Software receive rights only under the applicable license terms and remain responsible for complying with those terms.
+
+Redistribution does not grant any recipient a right to operate a Competing Product.
+
+## 8. Modifications and Derivative Works
+
+You may modify the Software and create derivative works for permitted purposes.
+
+You may distribute modified versions provided that the distribution complies with this License.
+
+You may not remove or alter copyright, license, attribution, or other notices in a manner that falsely suggests that the Licensor is no longer the original author or provider of the Software.
+
+Nothing in this License requires You to publish Your modifications unless You choose to do so.
+
+## 9. Trademarks and Branding
+
+This License does not grant You any right to use the Licensor's trademarks, service marks, logos, trade names, product names, domain names, or other branding.
+
+You may truthfully state that Your software is based on or modified from the Software.
+
+You may not use the Licensor's trademarks in a manner that:
+
+1. suggests that Your product is an official version of the Software;
+2. suggests that the Licensor sponsors, certifies, endorses, or operates Your product;
+3. creates confusion regarding the source or affiliation of Your product; or
+4. uses the Licensor's branding as the primary brand of a modified or redistributed product without written permission.
+
+The Licensor retains all rights in its trademarks and branding.
+
+## 10. Self-Hosted Deployment and Data Responsibility
+
+When You deploy or operate the Software as a Self-Hosted Deployment, You are responsible for the operation, configuration, security, and data processing of that deployment.
+
+Without limiting the foregoing, You are solely responsible for:
+
+1. infrastructure security;
+2. server and network security;
+3. authentication and authorization;
+4. access controls;
+5. encryption;
+6. secrets and credential management;
+7. backups;
+8. disaster recovery;
+9. monitoring and logging;
+10. vulnerability management;
+11. security updates and patches;
+12. configuration of third-party infrastructure;
+13. database security;
+14. protection against unauthorized access;
+15. compliance with applicable laws and regulations; and
+16. the security and lawful processing of data processed by Your deployment.
+
+The Licensor does not control, access, monitor, store, or process data contained in a Self-Hosted Deployment unless separately agreed in writing.
+
+## 11. Privacy and Personal Data
+
+You are solely responsible for determining whether Your use of the Software complies with applicable privacy and data-protection laws.
+
+You are responsible for all personal data and other information processed through Your deployment, including customer information, employee information, addresses, contact information, order information, authentication credentials, and other data.
+
+You are responsible for:
+
+1. providing required privacy notices;
+2. obtaining required consents;
+3. establishing appropriate legal bases for processing;
+4. responding to data-subject requests where applicable;
+5. implementing appropriate technical and organizational security measures;
+6. managing data retention and deletion;
+7. handling security incidents and data breaches;
+8. determining applicable cross-border transfer requirements; and
+9. complying with applicable privacy and data-protection laws.
+
+The Licensor does not warrant that use of the Software will make You compliant with any particular privacy, data-protection, security, ecommerce, consumer-protection, taxation, accessibility, or other legal requirement.
+
+Nothing in this License creates a data-processing, controller, processor, or similar relationship between You and the Licensor unless separately agreed in writing.
+
+## 12. Security and Data Incidents
+
+The Licensor does not guarantee that the Software is free from security vulnerabilities.
+
+You acknowledge that software may contain previously unknown vulnerabilities, defects, configuration weaknesses, or security issues.
+
+To the maximum extent permitted by applicable law, the Licensor is not responsible for any unauthorized access, security breach, data leak, data disclosure, data loss, corruption, alteration, destruction, ransomware event, credential compromise, or other security incident affecting a Self-Hosted Deployment.
+
+You are responsible for evaluating the Software and implementing appropriate security controls for Your environment and intended use.
+
+## 13. Responsibility for User Operations and Unlawful Use
+
+The Licensor does not control, operate, administer, or monitor any Self-Hosted Deployment operated by You and is not responsible for the activities conducted through such deployment.
+
+You are solely responsible for the products, services, listings, transactions, users, content, communications, data, and other activities conducted through Your deployment of the Software, and for ensuring that such activities comply with all applicable laws and regulations.
+
+The Licensor is not responsible or liable for any unlawful, fraudulent, abusive, harmful, or otherwise improper use of the Software by You or by any third party using Your deployment, including any illegal marketplace, transaction, listing, content, or service created or operated using the Software.
+
+Nothing in this License grants You permission to use the Software for any unlawful purpose or relieves You of Your legal or regulatory obligations.
+
+## 14. Third-Party Services
+
+The Software may integrate with or depend upon third-party services, infrastructure, libraries, APIs, payment providers, cloud providers, databases, authentication systems, or other third-party technology.
+
+The Licensor is not responsible for the availability, security, privacy practices, functionality, pricing, terms, or performance of third-party services.
+
+Your use of third-party services is subject to the applicable terms and policies of those third parties.
+
+## 15. Patent License
+
+Subject to the terms of this License, the Licensor grants You a worldwide, non-exclusive, royalty-free patent license to patent claims owned or controlled by the Licensor that are necessarily infringed by Your permitted use of the Software.
+
+This patent license does not apply to:
+
+1. modifications made by You;
+2. combinations of the Software with other products or technology where the infringement would not occur from the Software alone;
+3. uses prohibited by this License; or
+4. patent claims that the Licensor is not legally entitled to license.
+
+If You or Your Organization initiate a patent infringement claim alleging that the Software infringes a patent, the patent license granted to You terminates immediately with respect to the claimant and, where applicable, its Affiliates.
+
+## 16. No Warranty
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE.
+
+THE LICENSOR DISCLAIMS ALL WARRANTIES AND CONDITIONS, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, SECURITY, ACCURACY, RELIABILITY, AVAILABILITY, AND ERROR-FREE OPERATION.
+
+THE LICENSOR DOES NOT WARRANT THAT:
+
+1. THE SOFTWARE WILL MEET YOUR REQUIREMENTS;
+2. THE SOFTWARE WILL OPERATE WITHOUT INTERRUPTION;
+3. THE SOFTWARE WILL BE FREE FROM BUGS OR VULNERABILITIES;
+4. THE SOFTWARE WILL BE SECURE;
+5. DATA PROCESSED USING THE SOFTWARE WILL REMAIN SECURE OR AVAILABLE;
+6. THE SOFTWARE WILL BE COMPATIBLE WITH ANY PARTICULAR INFRASTRUCTURE OR THIRD-PARTY SERVICE; OR
+7. USE OF THE SOFTWARE WILL COMPLY WITH ANY PARTICULAR LAW OR REGULATION.
+
+## 17. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR AND ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, CONTRIBUTORS, AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF PROFITS, REVENUE, BUSINESS, GOODWILL, DATA, OR BUSINESS INTERRUPTION, ARISING OUT OF OR RELATING TO THE SOFTWARE OR THIS LICENSE.
+
+WITHOUT LIMITING THE FOREGOING, TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE LICENSOR WILL NOT BE LIABLE FOR DAMAGES OR CLAIMS ARISING FROM:
+
+1. unauthorized access to a Self-Hosted Deployment;
+2. security breaches;
+3. data leaks or unauthorized disclosure;
+4. loss or corruption of data;
+5. privacy or data-protection violations arising from Your deployment or use;
+6. compromised credentials;
+7. failure to configure or secure the Software properly;
+8. vulnerabilities or security defects;
+9. failures of hosting providers or third-party services;
+10. incompatibility with Your infrastructure;
+11. interruption or unavailability of Your deployment; or
+12. Your failure to comply with applicable laws or regulations.
+
+Nothing in this License excludes or limits liability that cannot lawfully be excluded or limited under applicable law.
+
+## 18. Indemnification
+
+To the maximum extent permitted by applicable law, You agree to defend, indemnify, and hold harmless the Licensor and its Affiliates, officers, directors, employees, and agents from claims, damages, liabilities, costs, and expenses arising from:
+
+1. Your unlawful use of the Software;
+2. Your violation of this License;
+3. Your operation of a Self-Hosted Deployment;
+4. Your processing of personal data or other information;
+5. Your violation of applicable law;
+6. Your operation of a Competing Product; or
+7. claims arising from products or services You provide using the Software.
+
+This Section does not apply to the extent that the relevant claim is caused by the Licensor's own willful misconduct or cannot lawfully be subject to indemnification.
+
+## 19. Compliance and Termination
+
+If You violate this License, the Licensor may provide written notice describing the violation.
+
+Your rights under this License will terminate if You fail to fully remedy the violation within thirty (30) days after receiving written notice.
+
+The Licensor may immediately terminate Your rights if You intentionally use the Software to operate a Competing Product after receiving written notice that such use violates Section 6.
+
+Upon termination, You must stop using, reproducing, modifying, and distributing the Software, except to the extent that applicable law requires otherwise.
+
+Termination does not invalidate rights that were lawfully granted to recipients before termination.
+
+## 20. No Sublicensing
+
+Except for the redistribution rights expressly granted by this License, You may not sublicense, assign, or transfer rights under this License.
+
+## 21. Reservation of Rights
+
+All rights not expressly granted under this License are reserved by the Licensor.
+
+The Licensor may separately license the Software under different terms, including commercial, Enterprise, OEM, hosting, or other agreements.
+
+The Licensor may charge fees for services, support, hosting, Enterprise licenses, commercial licenses, or other offerings.
+
+## 22. Future Versions
+
+The Licensor may publish new versions of this License for future releases of the Software.
+
+Software distributed under a particular version of this License remains governed by that version unless the applicable distribution expressly states otherwise.
+
+## 23. Severability
+
+If any provision of this License is held to be invalid or unenforceable, that provision will be enforced to the maximum extent permitted by law and the remaining provisions will remain in effect.
+
+## 24. No Waiver
+
+Failure by the Licensor to enforce any provision of this License does not constitute a waiver of that provision or the right to enforce it later.
+
+## 25. Entire Agreement
+
+This License constitutes the complete agreement governing Your use of the Software under these terms, except for separate written agreements between You and the Licensor.
+
+## 26. Governing Law
+
+This License is governed by the laws of **India**, without regard to conflict-of-laws principles.
+
+Any dispute arising under this License shall be subject to the exclusive jurisdiction of the courts located in **India**, subject to applicable law.
+
+---
+
+## License Summary
+
+For convenience only, the following summarizes the principal terms. This summary is not part of the License and does not modify its legal terms.
+
+### Individuals and Small Organizations
+
+You may:
+
+- self-host the Software;
+- run ecommerce stores;
+- commercially use the Software;
+- modify it;
+- create derivative works;
+- redistribute it; and
+- operate your own business using it.
+
+You may **not** use it to create or operate a competing ecommerce SaaS/platform.
+
+### Enterprise Organizations
+
+Organizations with **US$100,000 or more in consolidated annual revenue** must obtain an Enterprise License before commercial use.
+
+Enterprise licensing does **not** automatically permit operation of a competing platform.
+
+### Everyone
+
+No one may use the Software to create or operate a Competing Product unless the Licensor expressly grants that right in a separate written agreement.
+
+Self-hosted users are responsible for their own:
+
+- infrastructure;
+- security;
+- backups;
+- data;
+- privacy compliance;
+- legal compliance; and
+- deployment configuration.
+
+The Software is provided without warranty to the maximum extent permitted by law.
+
+---
+
+**Project:** Project Ferrite  
+**Copyright:** © 2026 Akshay V S  
+**License:** Project Ferrite Source-Available Commercial License 1.0
