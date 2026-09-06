@@ -33,17 +33,23 @@ import { cursorPaginationClauses, buildPaginatedResponse } from '@core/database/
 
 // 1. Generate Clauses
 const { where, orderBy, queryLimit } = cursorPaginationClauses({
-    table: myTable, 
     idColumn: myTable.id, 
     sortColumn: myTable.createdAt,
     cursor: query.cursor, 
     limit: query.limit ?? 20, 
-    filters
+    filters,
+    tenantColumn: myTable.storeId,
+    tenantId: storeId,
 });
 
 // 2. Fetch limit + 1
 const rows = await db.select().from(myTable).where(where).orderBy(...orderBy).limit(queryLimit);
 
 // 3. Format Response
-return buildPaginatedResponse(rows, query.limit ?? 20, ItemMapper.toDomain, (row) => row.id);
+return buildPaginatedResponse(
+    rows, 
+    query.limit ?? 20, 
+    ItemMapper.toDomain, 
+    (row) => ({ id: row.id, sortValue: row.createdAt })
+);
 ```
