@@ -128,12 +128,13 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
 			{ 'db.table': 'categories', 'db.operation': 'select' },
 			async () => {
 				const { where, orderBy, queryLimit } = cursorPaginationClauses({
-					table: categories,
 					idColumn: categories.id,
 					sortColumn: categories.createdAt,
 					cursor,
 					limit,
 					filters: [eq(categories.storeId, storeId)],
+					tenantColumn: categories.storeId,
+					tenantId: storeId,
 				});
 
 				const rows = await this.db
@@ -147,7 +148,7 @@ export class DrizzleCategoryRepository implements ICategoryRepository {
 					rows,
 					limit,
 					CategoryMapper.toDomain,
-					(row) => row.id
+					(row) => ({ id: row.id, sortValue: row.createdAt })
 				);
 			}
 		);
