@@ -24,14 +24,14 @@ export type CreateWarehouseInput = z.infer<typeof CreateWarehouseInputSchema>;
 export const UpdateWarehouseInputSchema = z.object({
 	name: z.string().max(255).min(1).optional(),
 	address: z.string().optional(),
-	isActive: z.boolean().optional(),
+	isActive: z.boolean().nullable().optional(),
 });
 
 export type UpdateWarehouseInput = z.infer<typeof UpdateWarehouseInputSchema>;
 
 export const ListWarehousesQuerySchema = PaginationInputSchema.extend({
 	isActive: z
-		.string()
+		.enum(['true', 'false'])
 		.transform((val) => val === 'true')
 		.optional(),
 	search: z.string().optional(),
