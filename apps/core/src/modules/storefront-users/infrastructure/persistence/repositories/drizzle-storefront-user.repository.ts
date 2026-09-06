@@ -62,7 +62,6 @@ export class DrizzleStorefrontUserRepository
 			{ 'db.table': 'storefront_users', 'db.operation': 'select' },
 			async () => {
 				const { where, orderBy, queryLimit } = cursorPaginationClauses({
-					table: storefrontUsers,
 					idColumn: storefrontUsers.id,
 					sortColumn: storefrontUsers.createdAt,
 					cursor,
@@ -71,6 +70,8 @@ export class DrizzleStorefrontUserRepository
 						eq(storefrontUsers.storeId, storeId),
 						isNull(storefrontUsers.deletedAt),
 					],
+					tenantColumn: storefrontUsers.storeId,
+					tenantId: storeId,
 				});
 
 				const rows = await this.db
@@ -84,7 +85,7 @@ export class DrizzleStorefrontUserRepository
 					rows,
 					limit,
 					StorefrontUserMapper.toDomain,
-					(row) => row.id
+					(row) => ({ id: row.id, sortValue: row.createdAt })
 				);
 			}
 		);
