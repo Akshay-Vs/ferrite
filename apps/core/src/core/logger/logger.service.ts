@@ -1,3 +1,5 @@
+import { Writable } from 'node:stream';
+import { loadConfig } from '@common/utils/load-config';
 import { requestContext } from '@core/request-context/request-context';
 import {
 	Injectable,
@@ -158,43 +160,57 @@ export class AppLogger implements LoggerService, OnModuleDestroy {
 	private context?: string;
 
 	constructor(private readonly config: ConfigService) {
+		const cfg = loadConfig(this.config);
+		const lokiEnabled = cfg?.observability?.logger?.loki ?? true;
+		const ttyEnabled = cfg?.observability?.logger?.tty ?? true;
+
 		const lokiUrl = this.config.get<string>('LOKI_URL');
 		const appName = this.config.get<string>('APP_NAME') ?? 'app';
 		const appVersion = this.config.get<string>('APP_VERSION');
 		const nodeEnv = this.config.get<string>('NODE_ENV') ?? 'development';
 
-		// ── TTY stream (colorised, human-readable) ──────────────────────────
-		const ttyStream = pretty({
-			colorize: true,
-			sync: true,
-			translateTime: '❯ HH:MM:ss ❯❯❯ ',
-			ignore:
-				'pid,hostname,context,env,version,requestId,userId,traceId,spanId',
-			messageFormat: (log, messageKey) => {
-				const context = log.context ? `\x1b[33m [${log.context}] \x1b[0m` : '';
-				const requestId = log.requestId
-					? `\x1b[90m(req:${log.requestId})\x1b[0m`
-					: '';
-				const traceId = log.traceId
-					? `\x1b[36m(trace:${String(log.traceId).slice(-8)})\x1b[0m`
-					: '';
-				const msg = log[messageKey];
-				return [context, msg, requestId, traceId].filter(Boolean).join('  ');
-			},
-			customPrettifiers: {
-				time: (timestamp) => `\x1b[90m${timestamp}\x1b[0m`,
-			},
-		});
+		// ── TTY stream (colorised, human-readable) or silent devnull ────────
+		const outputStream: Writable = ttyEnabled
+			? pretty({
+					colorize: true,
+					sync: true,
+					translateTime: '❯ HH:MM:ss ❯❯❯ ',
+					ignore:
+						'pid,hostname,context,env,version,requestId,userId,traceId,spanId',
+					messageFormat: (log, messageKey) => {
+						const context = log.context
+							? `\x1b[33m [${log.context}] \x1b[0m`
+							: '';
+						const requestId = log.requestId
+							? `\x1b[90m(req:${log.requestId})\x1b[0m`
+							: '';
+						const traceId = log.traceId
+							? `\x1b[36m(trace:${String(log.traceId).slice(-8)})\x1b[0m`
+							: '';
+						const msg = log[messageKey];
+						return [context, msg, requestId, traceId]
+							.filter(Boolean)
+							.join('  ');
+					},
+					customPrettifiers: {
+						time: (timestamp) => `\x1b[90m${timestamp}\x1b[0m`,
+					},
+				})
+			: new Writable({
+					write(_chunk, _encoding, cb) {
+						cb();
+					},
+				});
 
 		// ── Loki transport (direct HTTP, no pino-loki) ──────────────────────
-		if (lokiUrl) {
+		if (lokiEnabled && lokiUrl) {
 			this.lokiTransport = new LokiTransport(lokiUrl, {
 				app: appName,
 				env: nodeEnv,
 			});
 		}
 
-		// ── Pino writes to TTY only; Loki is handled by LokiTransport ───────
+		// ── Pino writes to output stream; Loki is handled by LokiTransport ─
 		this.logger = pino(
 			{
 				level: config.get<string>('LOG_LEVEL') ?? 'info',
@@ -219,7 +235,7 @@ export class AppLogger implements LoggerService, OnModuleDestroy {
 					censor: '[REDACTED]',
 				},
 			},
-			ttyStream
+			outputStream
 		);
 	}
 

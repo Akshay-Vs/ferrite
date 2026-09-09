@@ -3,7 +3,7 @@ import {
 	type Request,
 	type StorefrontAuthenticatedRequest,
 } from '@common/types/request';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { extractCookie } from '@libs/http/extractCookie';
@@ -41,10 +41,10 @@ export class StorefrontRealmAdapter implements IRealmAuthAdapter {
 		private readonly validateAccountStatus: IValidateAccountStatus,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(StorefrontRealmAdapter.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.cookieName = ferriteConfig.storefrontAuth.session.cookieName;
 	}
 

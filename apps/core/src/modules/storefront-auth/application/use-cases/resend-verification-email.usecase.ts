@@ -1,5 +1,5 @@
 import { err, type Result } from '@common/interfaces/result.interface';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { Inject, Injectable } from '@nestjs/common';
@@ -38,10 +38,10 @@ export class ResendVerificationEmailUseCase
 		@Inject(RATE_LIMITER) private readonly rateLimiter: IRateLimiter,
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		private readonly logger: AppLogger,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(this.constructor.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.resendCooldownMs =
 			ferriteConfig.storefrontAuth.rateLimiting.resendCooldownMs;
 		this.redisRateLimitConfig = {

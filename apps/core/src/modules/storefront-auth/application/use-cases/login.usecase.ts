@@ -1,5 +1,5 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { InvalidLoginMethodError } from '@modules/storefront-auth/domain/errors/invalid-login-method.error';
@@ -48,10 +48,10 @@ export class LoginUseCase implements IStorefrontLoginUser {
 		@Inject(STOREFRONT_CREATE_SESSION_UC)
 		private readonly createSession: ICreateSession,
 		@Inject(RATE_LIMITER) private readonly rateLimiter: IRateLimiter,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(this.constructor.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.lockoutThreshold =
 			ferriteConfig.storefrontAuth.security.lockoutThreshold;
 		this.lockoutDurationMs =

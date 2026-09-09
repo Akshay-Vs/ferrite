@@ -4,7 +4,7 @@ import {
 	type IUnitOfWork,
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { EmailAlreadyVerifiedError } from '@modules/storefront-auth/domain/errors/email-alraedy-vefiried';
@@ -42,10 +42,10 @@ export class VerifyEmailUseCase implements IVerifyEmail {
 		@Inject(OTEL_TRACER) private readonly tracer: ITracer,
 		@Inject(UNIT_OF_WORK) private readonly uow: IUnitOfWork,
 		private readonly logger: AppLogger,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(this.constructor.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.rateLimitConfig = {
 			key: '', //? set dynamically
 			...ferriteConfig.storefrontAuth.rateLimiting.verifyEmail,

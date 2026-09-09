@@ -13,37 +13,74 @@ import {
 	ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
 
-const traceExporter = new OTLPTraceExporter({
-	url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-		? `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`
-		: 'http://localhost:4318/v1/traces',
-});
+/**
+ * Reads OBSERVABILITY_INSTRUMENTATION from env.
+ * Must use process.env directly — this file runs before NestJS bootstrap.
+ */
+function isInstrumentationEnabled(): boolean {
+	const raw =
+		process.env.OBSERVABILITY_INSTRUMENTATION ??
+		process.env.FERRITE_OBSERVABILITY_INSTRUMENTATION;
+	if (raw === undefined) return true; // enabled by default
+	return raw.toLowerCase() !== 'false' && raw !== '0';
+}
 
-const metricExporter = new OTLPMetricExporter({
-	url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-		? `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`
-		: 'http://localhost:4318/v1/metrics',
-});
-export const otelSDK = new NodeSDK({
-	resource: resourceFromAttributes({
-		[ATTR_SERVICE_NAME]: process.env.SERVICE_NAME ?? 'ferrite-core',
-		[ATTR_SERVICE_VERSION]: process.env.SERVICE_VERSION ?? '1.0.0',
-		'deployment.environment': process.env.NODE_ENV ?? 'development',
-	}),
-	spanProcessor: new BatchSpanProcessor(traceExporter, {
-		maxQueueSize: 2048,
-		maxExportBatchSize: 512,
-		scheduledDelayMillis: 5000,
-	}),
-	metricReader: new PeriodicExportingMetricReader({
-		exporter: metricExporter,
-		exportIntervalMillis: 60_000,
-	}),
-	instrumentations: [
-		new NestInstrumentation(), // NestJS-specific spans (controllers, guards, pipes)
-		getNodeAutoInstrumentations({
-			'@opentelemetry/instrumentation-fs': { enabled: false }, // too noisy
-			'@opentelemetry/instrumentation-http': { enabled: true },
+interface OtelHandle {
+	start(): void;
+	shutdown(): Promise<void>;
+}
+
+function createNoopOtel(): OtelHandle {
+	return {
+		start() {
+			// Instrumentation disabled — no-op
+		},
+		async shutdown() {
+			// Nothing to shut down
+		},
+	};
+}
+
+function createOtelSDK(): OtelHandle {
+	const traceExporter = new OTLPTraceExporter({
+		url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+			? `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`
+			: 'http://localhost:4318/v1/traces',
+	});
+
+	const metricExporter = new OTLPMetricExporter({
+		url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+			? `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`
+			: 'http://localhost:4318/v1/metrics',
+	});
+
+	const sdk = new NodeSDK({
+		resource: resourceFromAttributes({
+			[ATTR_SERVICE_NAME]: process.env.SERVICE_NAME ?? 'ferrite-core',
+			[ATTR_SERVICE_VERSION]: process.env.SERVICE_VERSION ?? '1.0.0',
+			'deployment.environment': process.env.NODE_ENV ?? 'development',
 		}),
-	],
-});
+		spanProcessor: new BatchSpanProcessor(traceExporter, {
+			maxQueueSize: 2048,
+			maxExportBatchSize: 512,
+			scheduledDelayMillis: 5000,
+		}),
+		metricReader: new PeriodicExportingMetricReader({
+			exporter: metricExporter,
+			exportIntervalMillis: 60_000,
+		}),
+		instrumentations: [
+			new NestInstrumentation(), // NestJS-specific spans (controllers, guards, pipes)
+			getNodeAutoInstrumentations({
+				'@opentelemetry/instrumentation-fs': { enabled: false }, // too noisy
+				'@opentelemetry/instrumentation-http': { enabled: true },
+			}),
+		],
+	});
+
+	return sdk;
+}
+
+export const otelSDK: OtelHandle = isInstrumentationEnabled()
+	? createOtelSDK()
+	: createNoopOtel();
