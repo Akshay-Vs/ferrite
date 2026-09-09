@@ -1,14 +1,15 @@
+import { zodBoolean } from '@common/utils/zod-boolean';
 import { storefrontAuth } from '@modules/storefront-auth/domain/schemas/storefront-auth.config.zodschema';
 import { z } from 'zod';
 
 const observabilityLoggerSchema = z.object({
-	loki: z.coerce.boolean().default(true),
-	tty: z.coerce.boolean().default(true),
+	loki: zodBoolean.default(true),
+	tty: zodBoolean.default(true),
 });
 
 const observabilitySchema = z.object({
-	instrumentation: z.coerce.boolean().default(true),
-	tracer: z.coerce.boolean().default(true),
+	instrumentation: zodBoolean.default(true),
+	tracer: zodBoolean.default(true),
 	logger: observabilityLoggerSchema.default(() =>
 		observabilityLoggerSchema.parse({})
 	),
