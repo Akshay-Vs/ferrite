@@ -40,9 +40,9 @@ async function bootstrap() {
 	const PORT = ferriteVars.port;
 	const ORIGIN = ferriteVars.origin;
 
-	NestLogger.debug(
-		`Using Env Vars: ${JSON.stringify({ port: PORT, version: VERSION, origin: ORIGIN }, null, 2)}`,
-		'GLOBAL'
+	NestLogger.log(
+		`Using Config: ${JSON.stringify(ferriteVars, null, 2)}`,
+		'Main'
 	);
 
 	registerShutdownHook(app);
