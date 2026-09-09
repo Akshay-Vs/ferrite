@@ -1,37 +1,7 @@
-services:
-  ferrite-postgres:
-    image: postgres:18-alpine
-    container_name: ferrite-postgres
-    ports:
-      - "127.0.0.1:5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    command:
-      - "postgres"
-      - "-c"
-      - "wal_level=logical"
-      - "-c"
-      - "wal_compression=on"
-      - "-c"
-      - "max_replication_slots=10"
-      - "-c"
-      - "max_wal_senders=10"
-      - "-c"
-      - "synchronous_commit=${POSTGRES_SYNCHRONOUS_COMMIT:-local}"
-      - "-c"
-      - "wal_sender_timeout=60s"
-    networks:
-      - observability
+include:
+  - docker-compose.base.yaml
 
+services:
   ferrite-postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     container_name: ferrite-postgres-exporter
@@ -43,30 +13,7 @@ services:
       ferrite-postgres:
         condition: service_healthy
     networks:
-      - observability
-
-  ferrite-redis-cache:
-    image: redis:8-alpine
-    container_name: ferrite-redis-cache
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
-    command: redis-server --requirepass "${REDIS_PASSWORD}"
-    volumes:
-      - redis_data:/data
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'redis-cli --no-auth-warning -a "$${REDIS_PASSWORD}" ping | grep -qx PONG',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - observability
+      - ferrite_network
 
   ferrite-redis-exporter:
     image: oliver006/redis_exporter:alpine
@@ -81,35 +28,7 @@ services:
       ferrite-redis-cache:
         condition: service_healthy
     networks:
-      - observability
-
-  ferrite-redis-sessions:
-    image: redis:8-alpine
-    container_name: ferrite-redis-sessions
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:${REDIS_SESSIONS_PORT:-6380}:6379"
-    command: >
-      redis-server
-      --requirepass "${REDIS_SESSIONS_PASSWORD}"
-      --maxmemory-policy noeviction
-      --appendonly yes
-      --appendfsync everysec
-    volumes:
-      - redis_sessions_data:/data
-    environment:
-      - REDIS_PASSWORD=${REDIS_SESSIONS_PASSWORD}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'redis-cli --no-auth-warning -a "$${REDIS_PASSWORD}" ping | grep -qx PONG',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - observability
+      - ferrite_network
 
   ferrite-redis-sessions-exporter:
     image: oliver006/redis_exporter:alpine
@@ -124,7 +43,7 @@ services:
       ferrite-redis-sessions:
         condition: service_healthy
     networks:
-      - observability
+      - ferrite_network
 
   ferrite-otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -141,7 +60,7 @@ services:
       - ferrite-prometheus
       - ferrite-loki
     networks:
-      - observability
+      - ferrite_network
 
   ferrite-jaeger:
     image: jaegertracing/all-in-one:latest
@@ -151,7 +70,7 @@ services:
     ports:
       - "127.0.0.1:16686:16686"
     networks:
-      - observability
+      - ferrite_network
 
   ferrite-prometheus:
     image: prom/prometheus:latest
@@ -165,7 +84,7 @@ services:
     ports:
       - "127.0.0.1:9090:9090"
     networks:
-      - observability
+      - ferrite_network
 
   ferrite-loki:
     image: grafana/loki:3.3.2
@@ -178,7 +97,7 @@ services:
     ports:
       - "127.0.0.1:3100:3100"
     networks:
-      - observability
+      - ferrite_network
 
   ferrite-grafana:
     image: grafana/grafana:latest
@@ -201,16 +120,9 @@ services:
       - ferrite-jaeger
       - ferrite-postgres
     networks:
-      - observability
+      - ferrite_network
 
 volumes:
   prometheus-data:
   loki-data:
   grafana-data:
-  postgres_data:
-  redis_data:
-  redis_sessions_data:
-
-networks:
-  observability:
-    driver: bridge
