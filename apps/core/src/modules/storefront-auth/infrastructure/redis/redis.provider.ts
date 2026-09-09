@@ -1,4 +1,4 @@
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { Logger, Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
@@ -9,7 +9,7 @@ export const StorefrontRedisProvider: Provider = {
 	provide: STOREFRONT_REDIS,
 	inject: [ConfigService],
 	useFactory: (config: ConfigService) => {
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(config);
 
 		const redisPassword = config.getOrThrow('REDIS_SESSIONS_PASSWORD');
 		const redisHost = config.getOrThrow('REDIS_SESSIONS_HOST');
