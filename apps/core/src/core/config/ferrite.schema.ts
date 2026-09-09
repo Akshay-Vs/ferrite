@@ -31,3 +31,9 @@ export const ferriteConfigSchema = z.object({
 });
 
 export type FerriteConfig = z.infer<typeof ferriteConfigSchema>;
+
+export type DeepPartial<T> = T extends object
+	? {
+			[P in keyof T]?: DeepPartial<T[P]>;
+		}
+	: T;

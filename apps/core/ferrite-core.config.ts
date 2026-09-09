@@ -1,9 +1,12 @@
-import type { FerriteConfig } from './src/core/config/ferrite.schema';
+import type {
+	DeepPartial,
+	FerriteConfig,
+} from './src/core/config/ferrite.schema';
 
 // Default application configuration.
 // Note: Environment variables (.env or process.env) take priority and will override values set here.
 
-const config: Partial<FerriteConfig> = {
+const config: DeepPartial<FerriteConfig> = {
 	version: 'v1',
 	port: 4000,
 	origin: ['http://localhost:3000'],
