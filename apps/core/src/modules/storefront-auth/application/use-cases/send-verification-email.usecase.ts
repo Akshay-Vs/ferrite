@@ -5,7 +5,7 @@ import {
 	type IUnitOfWork,
 	UNIT_OF_WORK,
 } from '@common/interfaces/unit-of-work.interface';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import { EmailTemplate } from '@ferrite/schema/notification/email.zodschema';
@@ -61,10 +61,10 @@ export class SendVerificationEmailUseCase implements ISendVerificationEmail {
 		private readonly userRepo: IStorefrontUserRepository,
 		@Inject(RATE_LIMITER) private readonly rateLimiter: IRateLimiter,
 		private readonly logger: AppLogger,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(this.constructor.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.sendRateLimitConfig = {
 			key: '', // set dynamically per request
 			...ferriteConfig.storefrontAuth.rateLimiting.verifyEmail,

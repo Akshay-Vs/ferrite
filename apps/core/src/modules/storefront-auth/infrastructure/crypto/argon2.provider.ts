@@ -1,4 +1,4 @@
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import type { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { hash, type Options, verify } from '@node-rs/argon2';
@@ -22,7 +22,7 @@ export const Argon2OptionsProvider: Provider<Options> = {
 	provide: ARGON2_OPTIONS,
 	inject: [ConfigService],
 	useFactory: (config: ConfigService): Options => {
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(config);
 		const argon2Config = ferriteConfig.storefrontAuth.argon2;
 
 		const options: Options = {

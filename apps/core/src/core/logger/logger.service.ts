@@ -1,6 +1,5 @@
 import { Writable } from 'node:stream';
-import { ferriteConfig } from '@core/config/ferrite.config';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { requestContext } from '@core/request-context/request-context';
 import {
 	Injectable,
@@ -161,7 +160,7 @@ export class AppLogger implements LoggerService, OnModuleDestroy {
 	private context?: string;
 
 	constructor(private readonly config: ConfigService) {
-		const cfg = this.config.get<FerriteConfig>(ferriteConfig.KEY);
+		const cfg = loadConfig(this.config);
 		const lokiEnabled = cfg?.observability?.logger?.loki ?? true;
 		const ttyEnabled = cfg?.observability?.logger?.tty ?? true;
 

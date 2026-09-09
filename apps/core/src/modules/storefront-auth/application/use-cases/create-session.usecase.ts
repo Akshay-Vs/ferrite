@@ -1,5 +1,5 @@
 import { err, ok, type Result } from '@common/interfaces/result.interface';
-import type { FerriteConfig } from '@core/config/ferrite.schema';
+import { loadConfig } from '@common/utils/load-config';
 import { AppLogger } from '@core/logger/logger.service';
 import { type ITracer, OTEL_TRACER } from '@core/tracer';
 import type { StorefrontSession } from '@ferrite/schema/storefront-auth/session.zodschema';
@@ -24,10 +24,10 @@ export class CreateSessionUseCase implements ICreateSession {
 		@Inject(STOREFRONT_SESSION_REPOSITORY)
 		private readonly sessionRepo: IStorefrontSessionRepository,
 		private readonly logger: AppLogger,
-		config: ConfigService
+		private readonly config: ConfigService
 	) {
 		this.logger.setContext(this.constructor.name);
-		const ferriteConfig = config.getOrThrow<FerriteConfig>('ferrite');
+		const ferriteConfig = loadConfig(this.config);
 		this.sessionLimit = ferriteConfig.storefrontAuth.session.sessionLimit;
 	}
 
